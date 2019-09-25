@@ -1,0 +1,46 @@
+{% from "_macros.html" import form_field %}
+{% extends "dashboard.html" %}
+{% block title %}选择APP{% endblock %}
+{% block main %}
+
+<form class="form-horizontal" method='post'>
+	{{ form.csrf_token }}
+    <div class="panel panel-primary">
+
+      <div class="panel-heading">
+        <h3 class="panel-title"><b>选择APP</b></h3>
+      </div>
+
+      <div class="panel-body">
+		  
+		  <div class="form-group">
+	        {{ form.project.label(class="col-sm-2 control-label") }}
+	        <div class="col-sm-10">
+	          {{ form_field(form.project,class="form-control") }}
+	        </div>
+	      </div>
+
+	      <div class="form-group">
+	        {{ form.subsystem.label(class="col-sm-2 control-label") }}
+	        <div class="col-sm-10">
+	          {{ form_field(form.subsystem,class="form-control") }}
+	        </div>
+	      </div>
+
+	      <div class="form-group">
+						{{ form.env.label(class="col-sm-2 control-label") }}
+						<div class="col-sm-10">
+							{{ form_field(form.env,class="form-control") }}
+						</div>
+					</div>
+
+	     <div class="form-group">
+	     	<div class="col-sm-offset-2 col-sm-10">
+	        {{ form_field(form.submit,class="btn btn-primary") }}
+	      	</div>
+	      </div>
+     
+    	</div>
+    </div>
+  </form>
+{% endblock %}

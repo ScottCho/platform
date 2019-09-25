@@ -1,0 +1,106 @@
+{% extends "dashboard.html" %}
+{% block title %}更新基线{% endblock %}
+{% block main %}
+ 
+  <form class="form-horizontal" method='post' onsubmit="return validate_form(this);">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title"><b>{{ project }}基线更新</b></h3>
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+        <label class="col-sm-2 control-label">允许更新: </label>
+        <div class="col-sm-10">
+          {% if p_switch  %}
+            <input type="text" class="form-control"  value='允许' readonly>
+          {% else %}
+            <input type="text" class="form-control"  value='不允许' readonly>
+          {% endif %}
+        </div>
+      </div>
+    
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Java序号 </label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control"  placeholder="01,02,03(英文逗号隔开）" name="javano">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">程序合并版本号 </label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control"  placeholder="01,02,03(英文逗号隔开）" name="versionno">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">SQL序号 </label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control"  placeholder="01,02,03(英文逗号隔开）"  name="sqlno">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">PCK序号 </label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control"  placeholder="01,02,03(英文逗号隔开）" name="pckno">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">rollback序号 </label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control"  placeholder="01,02,03(英文逗号隔开）" name="rollbackno">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">mantis编号 </label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control"  placeholder="01,02,03(英文逗号隔开）" name="mantisno">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">更新点<font color="red">*</font> </label>
+        <div class="col-sm-10">
+          <textarea class="form-control" rows="4" name="content" required></textarea>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">备注 </label>
+        <div class="col-sm-10">
+          <textarea class="form-control" rows="4" name="mark" required></textarea>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <input class="btn btn-primary" type="submit" value="提交">
+        </div>
+      </div>
+      </div>
+    </div>
+  </form>
+{% endblock %}      
+
+<script type="text/javascript">
+  
+  function validate_nu(field,alerttxt){
+    var re = /^\d{1,10}\,*\d{0,10}$/;
+    with (field){
+
+      if ((value!=null||value!="")&&re.test(value)===flase)
+        {alert(alerttxt);return false}
+      else {return true}
+    }
+  }
+
+
+
+  function validate_form(thisform){
+    with (thisform){
+      if (validate_nu(javano,"java格式为序号加英文逗号分割")==false)
+        {javano.focus();return false}
+      if (validate_nu(sqlno,"sql格式为序号加英文逗号分割")==false)
+        {sqlno.focus();return false}
+      if (validate_nu(pckno,"pck格式为序号加英文逗号分割")==false)
+        {pckno.focus();return false}
+      if (validate_nu(rollbackno,"pck格式为序号加英文逗号分割")==false)
+        {rollbackno.focus();return false}
+    }
+  }
+</script>

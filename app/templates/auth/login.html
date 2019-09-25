@@ -1,0 +1,28 @@
+{% from "_macros.html" import static_file as static_file%}
+{% from "_macros.html" import form_field %}
+{% extends "base.html" %}
+{% block head %}
+  {{ super() }}
+  {{ static_file('css', 'css/auth.css') }}
+{% endblock %}
+{% block title %}登录{% endblock %}
+{% block content%}
+  <div class="container">
+    <div class="jumbotron">
+      <form class="form-signin" method="post">
+        {{ form.csrf_token }}
+        {{ form.email.label }}
+        {{ form_field(form.email,class="form-control",placeholder="Email address",autofocus=True) }}
+        {{ form.password.label }}
+        {{ form_field(form.password,class="form-control", placeholder="Password") }}
+        {{ form_field(form.remember_me,value="True") }} 记住我
+        {{ form_field(form.submit,class="btn btn-lg btn-primary btn-block") }}
+        <span ><a href="{{ url_for('auth.password_reset_request') }}">重置密码</a> 如果你忘记密码.</span>
+      </form>
+    </div>
+  </div> <!-- /container -->
+{% endblock %}
+
+
+
+

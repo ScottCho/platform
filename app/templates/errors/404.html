@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}404{% endblock %}
+{% block body %}
+<div class="king-exception-box king-500-page">
+    <img src="https://magicbox.bk.tencent.com/static_api/v3/components/exception_500/images/expre_500.png">           
+    <h1>404 Not Found</h1>
+    <p>请确认输入的地址是否正确</p>
+    <a href="{{ url_for('index') }}" class="king-btn king-info king-noborder">返回首页</a>
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "dashboard.html" %}
+{% import "_macros.html" as macros %}
+{% from 'bootstrap/nav.html' import render_nav_item %}
+{% block title %}管理基线{% endblock %}
+
+
+{% block main %}
+
+<ul class="nav nav-tabs">
+  
+  <li {% if request.args.get('filter','me') == 'me' %}class="active"{% endif %} role="presentation">
+    <a  href="{{ url_for('version.manage_baseline', filter='me') }}"><b>我的</b></a>
+  </li>
+
+  <li {% if request.args.get('filter') == 'all' %}class="active"{% endif %} role="presentation">
+    <a  href="{{ url_for('version.manage_baseline', filter='all') }}"><b>所有</b></a>
+  </li>
+
+  <li {% if request.args.get('filter') == 'SIT' %}class="active"{% endif %} role="presentation">
+    <a  href="{{ url_for('version.manage_baseline', filter='SIT') }}"><b>SIT提测</b></a>
+  </li>
+
+   <li {% if request.args.get('filter') == 'PUAT' %}class="active"{% endif %} role="presentation">
+    <a  href="{{ url_for('version.manage_baseline', filter='PUAT') }}"><b>预UAT提测</b></a>
+  </li>
+
+   <li {% if request.args.get('filter') == 'release' %}class="active"{% endif %} role="presentation">
+    <a  href="{{ url_for('version.manage_baseline', filter='release') }}"><b>已发布客户</b></a>
+  </li>
+
+  <li {% if request.args.get('filter') == 'fail' %}class="active"{% endif %} role="presentation">
+    <a  href="{{ url_for('version.manage_baseline', filter='fail') }}"><b>测试失败</b></a>
+  </li>
+
+  <li {% if request.args.get('filter') == 'unrelease' %}class="active"{% endif %} role="presentation">
+    <a  href="{{ url_for('version.manage_baseline', filter='unrelease') }}"><b>未发布客户</b></a>
+  </li>
+
+</ul>
+
+   <table class="table table-hover " id="issuelist">
+      <thead>
+        <tr class="active">
+          <th width="5%">序号</th>
+          <th width="10%">开发者</th>
+          <th width="5%">#mantis</th>
+          <th width="40%">摘要</th>
+          <th width="10%">提交时间</th>
+          <th width="8%">状态</th>
+          <th width="8%">项目</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+    {% for baseline in baselines %}
+      <tbody>
+        <tr>
+          <th scope="row" width="5%">{{ baseline.id }}</th>
+          <td width="10%">{{ baseline.developer }}</td>
+          <td width="5%">{{ baseline.mantisno }}</td>
+          <td width="40%">{{ baseline.content|striptags|truncate(100,False, '...', 0) }}</td>
+          <td width="10%">{{ moment(baseline.created).format('YY-MM-DD') }}</td>
+          <td width="10%">
+            <a href="{{ url_for('version.edit_blstatus',id=baseline.id,next=request.full_path) }}">{{ baseline.status }}</a>
+          </td>
+          <td>{{ baseline.app.project.name }}</td>
+          <td>
+            <a href="{{ url_for('version.baseline_details',id=baseline.id, next=request.full_path) }}">
+              <ins>详情</ins>
+            </a>
+           
+            <a  href="{{ url_for('version.edit_baseline',id=baseline.id, next=request.full_path) }}"><ins>重更</ins></a>
+
+            <a href="{{ url_for('version.delete_baseline',id=baseline.id, next=request.full_path) }}" onclick="return confirm('确认删除?')";><ins>删除</ins></a>
+          </td>
+        </tr>
+
+      </tbody>
+    {% endfor %}
+    </table>
+
+ {% if pagination %}
+    <div class="nav navbar-nav navbar-right">
+        {{ macros.pagination_widget(pagination, request.endpoint) }}
+    </div>
+    {% endif %}
+{% endblock %}
+

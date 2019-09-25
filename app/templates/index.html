@@ -1,0 +1,55 @@
+{% extends "dashboard.html" %}
+{% block main%}
+<h1 class="page-header">Dashboard</h1>
+<div class="container-fluid">
+<table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th style="width: 10px">#</th>
+                            <th style="width:20%;">任务</th>
+                            <th>进度</th>
+                            <th>开发者</th>
+                            <th>结束时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1.</td>
+                            <td>版本更新</td>
+                            <td>
+                                完成
+                            </td>
+                            <td>赵勇</td>
+                            <td>2018-09-20</td>
+                        </tr>
+                        <tr>
+                            <td>2.</td>
+                            <td>数据备份</td>
+                            <td>
+                                70%
+                            </td>
+                            <td>赵勇</td>
+                            <td>2018-09-20</td>
+                        </tr>
+                        <tr>
+                            <td>3.</td>
+                            <td>定时任务</td>
+                            <td>
+                                未开始
+                            </td>
+                            <td>赵勇</td>
+                            <td>2018-09-20</td>
+                        </tr>
+                        <tr>
+                            <td>4.</td>
+                            <td>修复bug</td>
+                            <td>
+                                已结束
+                            </td>
+                            <td>赵勇</td>
+                            <td>2018-09-20</td>
+                        </tr>
+                    </tbody>
+                </table>
+</div>
+{% endblock %}

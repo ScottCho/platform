@@ -1,0 +1,42 @@
+{% extends "dashboard.html" %}
+{% import "_macros.html" as macros %}
+{% block title %}编辑项目{% endblock %}
+{% block main %}
+  <div class="row">
+    <!-- 更新用户信息 -->
+    <h3>编辑项目</h3>
+    <form class="form-horizontal" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <div class="form-group">
+          <label   class="col-sm-2 control-label">项目名</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" name="name" value="{{ project.name }}">
+          </div>
+        </div>
+            
+        <div class="form-group">
+          <label class="col-sm-2 control-label">项目中文名</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="zh_name" value="{{ project.zh_name }}">
+            </div>
+        </div>
+             
+        <div class="form-group">
+          <label class="col-sm-2 control-label">开关</label>
+          <div class="col-sm-10">
+            <select class="form-control" name='switch' >
+              <option value = 0> 不允许更新 </option>
+              <option value = 1> 允许更新 </option>
+            </select>
+          </div>
+        </div>
+                
+        <div >
+          <button type="submit" class="btn btn-info ">更新信息</button>
+        </div>
+    </form>  
+    <!-- 更新用户信息 END-->
+  </div>
+{% endblock main%}
+
+

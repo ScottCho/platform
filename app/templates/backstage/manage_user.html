@@ -1,0 +1,73 @@
+{% import "_macros.html" as macros %}
+{% extends "dashboard.html" %}
+{% block title %}用户管理{% endblock %}
+{% block main %}
+	<div class="container-fluid">
+     <table class="table table-hover datatable">
+      <thead>
+        <tr class="active"><th>编号</th><th>用户名</th><th>邮箱</th><th>角色</th>
+        	<th>已确认</th><th>创建日期</th><th>最近一次登录</th><th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+    	{% for user in users %}
+        <tr>
+          <td>{{ user.id }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.role.name }}</td>
+          <td>{{ user.confirmed }}</td>
+          <td>{{ user.created.strftime("%Y-%m-%d") }}</td>
+          <td>{{ user.last_seen.strftime("%Y-%m-%d") }}</td>
+          <td>
+            <a class="btn btn-info btn-sm" href="{{ url_for('backstage.edit_user',user_id=user.id,next=request.full_path) }}">编辑</a>
+            {% if user.role.name not in ['Administrator', 'Moderator'] %}
+              {% if user.active %}
+                  <a class="btn btn-warning btn-sm" onclick="return confirm('Are you sure?');" 
+                    href="{{ url_for('backstage.block_user',user_id=user.id) }}">禁用
+                  </a>
+              {% else %}
+                <a class="btn btn-success btn-sm" onclick="return confirm('Are you sure?');" 
+                    href="{{ url_for('backstage.unblock_user',user_id=user.id) }}">解禁
+                </a>
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
+    	{% endfor %}
+    	</tbody>
+     </table>
+{% endblock main %}
+{% block scripts %}
+     {{ super() }}
+     <script type="text/javascript">
+      $(document).ready(function() {
+        $('.datatable').DataTable({
+          language: {
+          "sProcessing": "处理中...",
+          "sLengthMenu": "显示 _MENU_ 项结果",
+          "sZeroRecords": "没有匹配结果",
+          "sInfo": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+          "sInfoEmpty": "显示第 0 至 0 项结果，共 0 项",
+          "sInfoFiltered": "(由 _MAX_ 项结果过滤)",
+          "sInfoPostFix": "",
+          "sSearch": "搜索:",
+          "sUrl": "",
+          "sEmptyTable": "表中数据为空",
+          "sLoadingRecords": "载入中...",
+          "sInfoThousands": ",",
+          "oPaginate": {
+              "sFirst": "首页",
+              "sPrevious": "上页",
+              "sNext": "下页",
+              "sLast": "末页"
+          },
+          "oAria": {
+              "sSortAscending": ": 以升序排列此列",
+              "sSortDescending": ": 以降序排列此列"
+            }
+          }
+        });
+    });
+     </script>
+{% endblock %}

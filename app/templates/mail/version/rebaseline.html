@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+　<head>
+　　<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+　　<title></title>
+　　<meta name='viewport' content='width=device-width, initial-scale=1.0'/>
+　</head>
+
+  <body style='background-color: #e5e5e5;'>
+  　<table border='0' cellpadding='0' cellspacing='0' width='100%' style='font-size: 13px; color: #333; line-height: 20px; font-family: "Helvetica Neue",Helvetica,"Microsoft Yahei","Hiragino Sans GB","WenQuanYi Micro Hei",Tahoma,Arial,sans-serif;'>
+      <tr>
+        <td>
+          <table align='center' border='0' cellpadding='0' cellspacing='0' width='600' style='border: none; border-collapse: collapse;'>
+            <tr>
+              <td style='padding: 10px 0; border: none; vertical-align: middle;'><strong style='font-size: 16px'><a href='http://192.168.0.80:5001' >发布平台</a></strong></td>
+            </tr>
+            <td style='padding: 10px 0; border: none; vertical-align: middle;'><strong style='font-size: 16px'>基线重更第{{ baseline.updateno }}次，请测试</strong></td>
+          </table>
+          <table align='center' border='0' cellpadding='0' cellspacing='0' width='600' style='border-collapse: collapse; background-color: #fff; border: 1px solid #cfcfcf; box-shadow: 0 0px 6px rgba(0, 0, 0, 0.1); margin-bottom: 20px; font-size:13px;'>
+            <tr>
+              <td>
+                <table cellpadding='0' cellspacing='0' style='width: 100%; border: none; border-collapse: collapse;'>
+                  <tr>
+                    <td style='padding: 10px; background-color: #F8FAFE; border: none; font-size: 14px; font-weight: 500; border-bottom: 1px solid #e5e5e5;'>中科软科技</td>
+                    <td style='width: 40px; text-align: right; background-color: #F8FAFE; border: none; vertical-align: top; padding: 10px; border-bottom: 1px solid #e5e5e5;'><a href=''  target='target="_blank"'></a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style='padding: 10px; border: none;'>
+                <h5 style='margin: 8px 0; font-size: 14px;'>变更内容：</h5>
+                <table cellpadding='0' cellspacing='0' style='width: 100%; border: 1px solid #e5e5e5; margin-bottom: 15px; border-collapse: collapse; font-size: 13px;'>
+                  <tr>
+                    <th style='width: 50px; border: 1px solid #e5e5e5; background-color: #f5f5f5; padding: 5px;'>模块</th>
+                    <th style='border: 1px solid #e5e5e5; background-color: #f5f5f5; padding: 5px;'>序号</th>
+                  </tr>
+                  <tr>
+                      <td style='padding: 5px; text-align: center; border: 1px solid #e5e5e5;'>mantis</td>
+                      <td style='padding: 5px; border: 1px solid #e5e5e5;'>
+                        {{ baseline.mantisno }}
+                      </td>
+                    </tr>
+                   <tr>
+                      <td style='padding: 5px; text-align: center; border: 1px solid #e5e5e5;'>java</td>
+                      <td style='padding: 5px; border: 1px solid #e5e5e5;'>
+                        {{ baseline.javano }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style='padding: 5px; text-align: center; border: 1px solid #e5e5e5;'>版本号</td>
+                      <td style='padding: 5px; border: 1px solid #e5e5e5;'>
+                        {{ baseline.versionno }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style='padding: 5px; text-align: center; border: 1px solid #e5e5e5;'>sql</td>
+                      <td style='padding: 5px; border: 1px solid #e5e5e5;'>
+                        {{ baseline.sqlno }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style='padding: 5px; text-align: center; border: 1px solid #e5e5e5;'>pck</td>
+                      <td style='padding: 5px; border: 1px solid #e5e5e5;'>
+                        {{ baseline.pckno }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style='padding: 5px; text-align: center; border: 1px solid #e5e5e5;'>rollback</td>
+                      <td style='padding: 5px; border: 1px solid #e5e5e5;'>
+                        {{ baseline.rollbackno }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style='padding: 5px; text-align: center; border: 1px solid #e5e5e5;'>开发者</td>
+                      <td style='padding: 5px; border: 1px solid #e5e5e5;'>
+                        <pre>{{ baseline.developer }}</pre>
+                      </td>
+                  </tr>
+                    <tr>
+                      <td style='padding: 5px; text-align: center; border: 1px solid #e5e5e5;'>更新点</td>
+                      <td style='padding: 5px; border: 1px solid #e5e5e5;'>
+                        <pre>{{ baseline.content }}</pre>
+                      </td>
+                  </tr>
+                  </table>
+                </td>
+              </tr>
+          </table>
+        </td>
+      </tr>
+  　</table>
+  </body>
+</html>

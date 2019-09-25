@@ -1,0 +1,22 @@
+{% from "_macros.html" import static_file as static_file%}
+{% from "_macros.html" import form_field %}
+{% extends "base.html" %}
+{% block head %}
+  {{ super() }}
+  <link href="{{ url_for('static',filename='css/auth.css') }}" rel="stylesheet">
+{% endblock %}
+{% block title %}更改邮箱{% endblock %}
+{% block content%}
+  <div class="container">
+      <div class="jumbotron">
+        <form class="form-signin" method="post">
+          {{ form.csrf_token }}
+          {{ form.email.label }}
+          {{ form_field(form.email) }}
+          {{ form.password.label }}
+          {{ form_field(form.password) }}
+          {{ form_field(form.submit) }}
+        </form> 
+      </div>
+  </div>
+{% endblock %}

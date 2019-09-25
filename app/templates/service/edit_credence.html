@@ -1,0 +1,59 @@
+{% extends "dashboard.html" %}
+{% import "_macros.html" as macros %}
+{% block title %}修改凭证{% endblock %}
+{% block main %}
+<form class="form-horizontal" method='post'">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">编辑凭证</h3>
+      </div>
+      <div class="panel-body">
+        
+    
+      <div class="form-group">
+        <label class="col-sm-2 control-label">凭证名称 </label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control"  placeholder="凭证名称" name="name", value="{{ credence.name }}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">协议: </label>
+        <div class="col-sm-10">
+          <select class="form-control" name='agreement_id' required>
+            {% for a in agreements %}
+            <option value = {{ a.id }}> {{ a.name }} </option> 
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">端口 </label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control"  placeholder="22"  name="port" value="{{ credence.port }}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">用户名 </label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control"  placeholder="用户名" name="username" value="{{ credence.username }}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">密码 </label>
+        <div class="col-sm-10">
+          <input type="password" class="form-control"  placeholder="密码" name="password" value="{{ credence.password }}">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <input class="btn btn-primary" type="submit" value="提交">
+            <a href="{{ url_for('service.manage_credence') }}"><button type="button" class="btn btn-primary" >返回</button></a>
+        </div>
+      </div>
+      </div>
+    </div>
+  </form>
+
+     
+  
+{% endblock %} 

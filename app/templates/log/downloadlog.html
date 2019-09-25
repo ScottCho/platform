@@ -1,0 +1,16 @@
+{% extends "dashboard.html" %}
+{% block title %}查看日志{% endblock %}
+{% block main %}
+
+<div class="alert alert-danger alert-dismissible" role="alert">
+  
+  <strong>注意!</strong>所下载的日志为服务器最新的日志
+</div>
+<ul>
+	<li><a href="http://192.168.0.31:10000/logs/">WellLink日志查看</a></li>
+	<li><a href="http://192.168.0.43:10000/logs/">PICCHK日志查看</a></li>
+	<li><a href="http://192.168.0.23:10000/logs/">WingLung日志查看</a></li>
+	<li><a href="http://192.168.0.88:10000/logs/">CPICHK日志查看</a></li>
+	<li><a href="http://192.168.0.88:10000/logs/">Wing Lung B2B日志查看</a></li>
+</ul>
+{% endblock %}

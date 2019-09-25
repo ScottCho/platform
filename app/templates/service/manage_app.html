@@ -1,0 +1,60 @@
+{% extends "dashboard.html" %}
+{% import "_macros.html" as macros %}
+{% from 'bootstrap/nav.html' import render_nav_item %}
+{% block title %}管理应用{% endblock %}
+
+
+{% block main %}
+
+<ul class="nav nav-tabs">
+  
+  <li {% if request.args.get('filter', 'all') == 'all' %}class="active"{% endif %} role="presentation">
+    <a  href="{{ url_for('service.manage_app', filter='all') }}"><b>所有</b></a>
+  </li>
+
+  {% for project in projects %}
+  <li {% if request.args.get('filter') == project.id|string %}class="active"{% endif %} role="presentation">
+    <a  href="{{ url_for('service.manage_app', filter=project.id) }}"><b>{{ project.name }}</b></a>
+  </li>
+  {% endfor %}
+
+</ul>
+
+   <table class="table table-hover " id="issuelist">
+      <thead>
+        <tr class="active">
+          <th>序号</th>
+          <th>项目</th>
+          <th>子系统</th>
+          <th>环境</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+    {% for app in apps %}
+      <tbody>
+        <tr>
+          <th scope="row" >{{ app.id }}</th>
+          <td>{{ app.project.name }}</td>
+          <td>{{ app.subsystem.zh_name }}</td>
+          <td>{{ app.env.name }}</td>
+         
+          <td>
+            <a href="{{ url_for('service.ctl_app', id=app.id, action='stop') }}">
+              <ins>关闭</ins>
+            </a>
+           
+            <a href="{{ url_for('service.ctl_app', id=app.id, action='start') }}" onclick="return confirm('确认重启?')";><ins>重启</ins></a>
+          </td>
+        </tr>
+
+      </tbody>
+    {% endfor %}
+    </table>
+
+ {% if pagination %}
+    <div class="nav navbar-nav navbar-right">
+        {{ macros.pagination_widget(pagination, request.endpoint) }}
+    </div>
+    {% endif %}
+{% endblock %}
+

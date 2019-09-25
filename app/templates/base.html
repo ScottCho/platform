@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="paltform">
+  <meta name="author" content="zhaoyong">
+  <link rel="icon" href="{{ url_for('static',filename = 'images/favicon.ico') }}">
+  {% block head %}
+  <title> {% block title %} {% endblock %} - 运维平台</title>
+  <!-- Bootstrap core CSS -->
+  <link href="{{ url_for('static',filename = 'css/bootstrap-3.3.7.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static',filename = 'css/bootstrap-switch-3.3.7.min.css') }}" rel="stylesheet">
+   <link href="{{ url_for('static',filename = 'css/bootstrap-theme-3.3.7.min.css') }}" rel="stylesheet">
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <link href="{{ url_for('static',filename = 'css/ie10-viewport-bug-workaround.css') }}" rel="stylesheet">
+  <!-- Custom styles for this template -->
+  <link href="{{ url_for('static',filename = 'css/dashboard.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static',filename = 'css/platform.css') }}" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static',filename = 'css/bootstrap-datepicker.min.css') }}">
+    <!-- dataTtable -->
+  <link rel="stylesheet" href="{{ url_for('static',filename = 'css/dataTables.bootstrap.min.css') }}">
+  {% endblock %}
+</head>
+
+<body>
+  <div>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="{{ url_for('index') }}">
+            <span class="glyphicon glyphicon-leaf" aria-hidden="true"></span>运维平台
+          </a>
+        </div>
+
+        <div id="navbar" class="navbar-collapse collapse">
+            {% if current_user.is_authenticated %}
+                <ul class="nav nav-pills nav navbar-nav navbar-right">
+                  <li role="presentation" class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                       <span class="glyphicon glyphicon-user" aria-hidden="true"></span>{{ current_user.username }} <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                      <li><a href="{{ url_for('auth.join_project') }}">加入项目</a></li>
+                      <li><a href="{{ url_for('auth.change_password') }}">修改密码</a></li>
+                      <li><a href="{{ url_for('auth.change_email_request') }}">修改邮箱</a></li>
+                      <li><a href="{{ url_for('auth.exit_project') }}">退出项目</a></li>
+                      <li><a href="{{ url_for('auth.user',email=current_user.email) }}">我的资料</a></li>
+                    </ul>
+                  </li>
+                  <li><a href="{{ url_for('auth.logout',netx=request.full_path) }}">| 注销</a></li>
+                </ul>
+                
+
+            {% else %}
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="{{ url_for('auth.login',next=request.full_path) }}">登录</a></li>
+                    <li><a href="{{ url_for('auth.register') }}">| 注册</a></li>  
+                </ul>
+            {% endif %}        
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="搜索...">
+          </form>
+        </div>
+      </div>
+    </nav>
+    <!--导航栏 END-->
+
+    <!-- flash信息 -->
+    <!--消息提醒，并开启消息分类(success、danger、warning、info）-->
+    <div class="container">
+      {% for message in get_flashed_messages(with_categories=True) %}
+            <div class="alert alert-{{ message[0] }}  col-sm-6 col-sm-offset-3 col-md-9 col-md-offset-2 main" >
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message[1] }}
+            </div>
+        {% endfor %}
+    </div>
+    <!-- flash信息  END-->
+    
+    {% block content %}{% endblock %}
+  </div>
+
+  {% block scripts %}
+    <script src="{{ url_for('static',filename = 'js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static',filename = 'js/bootstrap-3.3.7.min.js') }}"></script>
+    <script src="{{ url_for('static',filename = 'js/bootstrap-switch-3.3.7.js') }}"></script>
+    <script src="{{ url_for('static',filename = 'js/ie10-viewport-bug-workaround.js') }}"></script>
+    <script src="{{ url_for('static',filename = 'js/ie-emulation-modes-warning.js') }} "></script>
+    <script src="{{ url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dataTables.bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static',filename = 'js/bootstrap-datepicker.min.js') }}"></script>
+    <!-- 时间处理 -->
+    {{ moment.include_moment() }}
+    <script type="text/javascript">
+      $(document).ready(function() {
+        //Date picker
+        $('.datepicker').datepicker({
+          language: "zh-CN",
+          autoclose: true,
+          todayBtn: 'linked',
+          clearBtn: true,
+          format: "yyyymmdd"
+        })
+      }
+    )
+    </script>
+  {% endblock %}
+</body>
+</html>
