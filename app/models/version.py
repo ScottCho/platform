@@ -77,6 +77,7 @@ class Baseline(db.Model):
         db_username = self.app.schema.username
         db_password = self.app.schema.password
         db_host = self.app.schema.instance.host
+        db_port = self.app.schema.instance.port
         db_instance = self.app.schema.instance.instance
         source_dbdir = self.app.project.source_dir
         source_sqldir = os.path.join(source_dbdir,'01-sql/')
@@ -155,7 +156,7 @@ class Baseline(db.Model):
             wf.write(start_content+content)
         with open(DB_SCRIPT, 'a') as wf:
             wf.write(end_content)
-        cmd='sqlplus {}/{}@{}/{}'.format(db_username,db_password,db_host,db_instance)
+        cmd='sqlplus {}/{}@{}:{}/{}'.format(db_username,db_password,db_host,db_port,db_instance)
         current_app.logger.info(cmd)
         update_content='@'+DB_SCRIPT
         current_app.logger.info('开始更新'+DB_SCRIPT)
