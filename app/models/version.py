@@ -184,12 +184,14 @@ class Package(db.Model):
     name = db.Column(db.String(80),nullable=False)
     rlsdate = db.Column(db.DateTime(),default=datetime.utcnow)
     blineno = db.Column(db.String(500),nullable=False)
+    merge_blineno =db.Column(db.String(128))
     project_id = db.Column(db.Integer,db.ForeignKey('projects.id'))
     env_id = db.Column(db.Integer,db.ForeignKey('envs.id'))
     remark = db.Column(db.String(500))
     baselines = db.relationship('Baseline',back_populates='package')
     project = db.relationship('Project',back_populates='packages')
     env = db.relationship('Env',back_populates='packages')
+     
 
     def release_package(self):
         target_dir = self.project.target_dir
@@ -207,7 +209,7 @@ class Package(db.Model):
             db_scripts = glob.glob(db_dir+'/*sql')
             shutil.copytree(db_dir,package_dir+'/DB')
         #package=shutil.make_archive('/update/WLINK/'+pname,'zip',root_dir='/update/WLINK/',base_dir=pname)
-        returncode, output = execute_cmd.execute_cmd('sh '+target_dir+'/pacakge_7z.sh '+self.name)
+        returncode, output = execute_cmd.execute_cmd('sh '+target_dir+'/relase_package.sh '+self.name)
         package_path=glob.glob(target_dir+'/*zip')[0]
 
         #更新包接受者       

@@ -5,7 +5,8 @@ from flask_login import login_required,current_user
 from flask import render_template,request,flash,url_for,redirect, current_app
 
 from app.version import version_bp
-from app.version.forms import BaselineForm,SelectAppForm,MergeRelaseForm,SelectEnvForm,PackageForm
+from app.version.forms import BaselineForm,SelectAppForm, \
+    SelectEnvForm,PackageForm,MergeBaselineForm
 from .. import db
 from app.models.service import Subsystem, App, Env
 from app.models.auth import Project, User, Permission
@@ -16,6 +17,26 @@ from app.utils import fnmatch_file
 from app.decorators import admin_required, permission_required
 from app.utils.redirect_back import redirect_back
 
+
+#根据选择的项目判断是否允许更新
+@version_bp.route('/select/app',methods=('GET', 'POST'))
+@login_required
+def select_app():
+    form = SelectAppForm()
+    form.project.choices = [(0,'请选择')]+[(g.id,g.name) for g in Project.query.all()]
+    form.subsystem.choices = [(0,'请选择')]+[(g.id,g.zh_name) for g in Subsystem.query.all()]
+    form.env.choices = [(0,'请选择')]+[(g.id,g.name) for g in Env.query.all()]
+    if form.validate_on_submit():
+        project_id = form.project.data
+        subsystem_id = form.subsystem.data
+        env_id = form.env.data
+        project = Project.query.get_or_404(project_id)
+        if project.switch is False:
+            flash('正在测试不允许更新','danger')
+            return redirect(url_for('index'))
+        return redirect(url_for('version.update_baseline',project_id=project_id,
+            subsystem_id=subsystem_id,env_id=env_id))
+    return render_template('version/select_app.html',form=form)
 
 #发布SIT基线
 @version_bp.route('/update/baseline/<int:project_id>/<int:subsystem_id>/<int:env_id>',methods=('GET', 'POST'))
@@ -91,27 +112,6 @@ def update_baseline(project_id,subsystem_id,env_id):
         flash('更新完毕，请查收邮件','warning')
         return render_template('version/update_result.html', msg=msg)
     return render_template('version/update_baseline.html',form=form,project_name=project_name)
-
-
-#根据选择的项目判断是否允许更新
-@version_bp.route('/select/app',methods=('GET', 'POST'))
-@login_required
-def select_app():
-    form = SelectAppForm()
-    form.project.choices = [(0,'请选择')]+[(g.id,g.name) for g in Project.query.all()]
-    form.subsystem.choices = [(0,'请选择')]+[(g.id,g.zh_name) for g in Subsystem.query.all()]
-    form.env.choices = [(0,'请选择')]+[(g.id,g.name) for g in Env.query.all()]
-    if form.validate_on_submit():
-        project_id = form.project.data
-        subsystem_id = form.subsystem.data
-        env_id = form.env.data
-        project = Project.query.get_or_404(project_id)
-        if project.switch is False:
-            flash('正在测试不允许更新','danger')
-            return redirect(url_for('index'))
-        return redirect(url_for('version.update_baseline',project_id=project_id,
-            subsystem_id=subsystem_id,env_id=env_id))
-    return render_template('version/select_app.html',form=form)
 
 
 # 管理基线
@@ -259,61 +259,40 @@ def edit_baseline(id):
         form=form,status=Blstatus.query.all()
         )
 
-#选择要合并发的环境
+
+# 选择要合并的环境
 @version_bp.route('/select/env',methods=('GET', 'POST'))
 @login_required
 def select_env():
     form = SelectEnvForm()
-    form.project.choices = [(0,'请选择')]+[(g.id,g.name) for g in Project.query.all()]
     form.env.choices = [(0,'请选择')]+[(g.id,g.name) for g in Env.query.all()]
     if form.validate_on_submit():
-        project_id = form.project.data
         env_id = form.env.data
-        return redirect(url_for('version.merge_relase',project_id=project_id,
-            env_id=env_id))
+        return redirect(url_for('version.merge_baseline',env_id=env_id))
     return render_template('version/select_env.html',form=form)
 
-'''
-合并发布
-'''
-@version_bp.route('/merge/relase/<int:project_id>/<int:env_id>', methods=['GET', 'POST'])
+
+# 合并基线内容，展示不同应用对应的版本号
+@version_bp.route('/merge/baseline/<int:env_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.backend_manage)
-def merge_relase(project_id,env_id):
-    form = MergeRelaseForm()
-    project = Project.query.get_or_404(project_id)
+def merge_baseline(env_id):
+    form = MergeBaselineForm()
     if form.validate_on_submit():
-        msg=""
         baselineno = form.baselineno.data
-        # 基线日期,如果没有写读取当前日期
+        # 今日发包次数
+        packageno = form.packageno.data
+        if not packageno:
+            packageno = '01'
+        # 合并基线（更新包）日期,如果没有写读取当前日期
         bdate = form.date.data
         if bdate:
             bdate = datetime.strptime(bdate, "%Y%m%d")
         else:
             bdate = datetime.now()
-
-        # 今日发包次数
-        packageno = form.packageno.data
-        if len(packageno) == 0 or packageno is None:
-            packageno = '01'
-
-        # 录入package表
-        pname = "{}_{}_{}".format(project.name, bdate.strftime("%Y%m%d"),packageno)
-        package = Package(name=pname,
-                          rlsdate=datetime.now(),
-                          blineno=baselineno,
-                          project_id=project.id,
-                          env_id=env_id
-                          )
-        db.session.add(package)
-        db.session.commit()
-
-        #合并发布之前重建APP和DB目录
-        project.rebuild_relase_directory()
-
-        #将基线按app分组
-        #{<App 1>: [<Baseline 1>,  <Baseline 2>],<App 2>: [<Baseline 3>]}
+        #将基线按app分组 {<App 1>: [<Baseline 1>,  <Baseline 2>],<App 2>: [<Baseline 3>]}
         app_dict={}
+        merge_list=[]
         for bid in baselineno.split(','):
             baseline = Baseline.query.filter_by(id=int(bid)).first()
             app = baseline.app
@@ -323,63 +302,96 @@ def merge_relase(project_id,env_id):
                 app_dict[app].append(baseline)
 
         #将相同的app合并成一条基线
-        for app_key in app_dict.keys():
-            baseline_list = app_dict[app_key]
+        for app_key, baseline_list in app_dict.items():
             versionnos = '' 
             sqlnos = ''
             pcknos = ''
             rollbacknos = ''
             for baseline in baseline_list:
-                bsqlno = baseline.sqlno
-                bversionno = baseline.versionno
-                bpckno = baseline.pckno
-                brollbackno = baseline.rollbackno
-                baseline.status = '预UAT提测'
-                baseline.package_id = package.id
-                db.session.add(baseline)
-                db.session.commit()
-                # 拼接基线
-                if bsqlno:
-                    sqlnos = (str(bsqlno) + ',' + sqlnos).strip(',')
-                if bversionno:
-                    versionnos = (str(bversionno) + ',' + versionnos).strip(',')
-                if bpckno:
-                    pcknos = (str(bpckno) + ',' + pcknos).strip(',')
-                if brollbackno:
-                    rollbacknos = (str(brollbackno) + ',' + rollbacknos).strip(',')
-
+                if baseline.sqlno:
+                    sqlnos = '{},{}'.format(sqlnos,baseline.sqlno)
+                if baseline.versionno:
+                    versionnos = '{},{}'.format(versionnos,baseline.versionno)
+                if baseline.pckno:
+                    pcknos = '{},{}'.format(pcknos,baseline.pckno)
+                if baseline.rollbackno:
+                    rollbacknos = '{},{}'.format(rollbacknos,baseline.rollbackno)
+               
             # 将多条基线合并到同一条
             subsystem_id = app_key.subsystem_id
+            project_id = app_key.project_id
             merge_app = App.query.filter_by(project_id=project_id,subsystem_id=subsystem_id,env_id=env_id).first()
             job_name = os.path.basename(merge_app.jenkins_job_dir)
             job = get_jenkins_job(job_name)
             merge_baseline = Baseline(
-                sqlno=sqlnos,
-                versionno=versionnos,
-                pckno=pcknos,
-                rollbackno=rollbacknos,
+                sqlno=sqlnos.strip(','),
+                versionno=versionnos.strip(','),
+                pckno=pcknos.strip(','),
+                rollbackno=rollbacknos.strip(','),
                 created=bdate,
                 app_id=merge_app.id,
-                content='合并发布',
+                content='合并基线',
                 developer=current_user.username,
                 updateno=1,
-                status='已发布UAT',
+                status='SIT提测',
                 jenkins_last_build = job.get_last_build().is_good(),
                 jenkins_build_number = job.get_next_build_number()
             )
             db.session.add(merge_baseline)    
             db.session.commit()
+            merge_list.append(merge_baseline)
 
-            #更新数据库
-            if pcknos or sqlnos:
-                msg+=merge_baseline.build_db_job(flag=1)
-            
-            #构建Jenkins的Job
-            if merge_baseline.versionno:
-                msg+=merge_baseline.build_app_job(flag=1)
-        flash('已合并发布','warning')   
-        return render_template('version/update_result.html', msg=msg)
-    return render_template('version/merge_relase.html',form=form) 
+        # 录入package表
+        project = merge_list[0].app.project
+        pname = "{}_{}_{}".format(project.name, bdate.strftime("%Y%m%d"),packageno)
+        merge_blineno = ','.join(str(bline.id) for bline in merge_list)
+        print(merge_blineno)
+        package = Package(name=pname,
+                          rlsdate=datetime.now(),
+                          blineno=baselineno,
+                          project_id=project.id,
+                          env_id=env_id,
+                          merge_blineno = merge_blineno
+                          )
+        db.session.add(package)
+        db.session.commit()
+
+        #将基线加入package中
+        for bid in baselineno.split(','):
+            baseline = Baseline.query.filter_by(id=int(bid)).first()
+            baseline.package_id = package.id
+            db.session.add(baseline)
+            db.session.commit()
+
+        flash('本次要合并的内容如下：','warning')   
+        return render_template('version/merge_details.html',merge_list=merge_list)
+    return render_template('version/merge_baseline.html',form=form) 
+
+
+
+'''
+合并发布
+'''
+@version_bp.route('/merge/update/<int:id>')
+@login_required
+@permission_required(Permission.backend_manage)
+def merge_update(id):
+    package = Package.query.get_or_404(id)
+    project = package.project
+    msg="" 
+    #合并发布之前重建APP和DB目录
+    project.rebuild_relase_directory()
+    baselineno = package.merge_blineno.split(',')
+    for nu in baselineno:
+        merge_baseline = Baseline.query.get_or_404(nu)
+        #更新数据库
+        if merge_baseline.pckno or merge_baseline.sqlno:
+            msg+=merge_baseline.build_db_job(flag=1)
+        #构建Jenkins的Job
+        if merge_baseline.versionno:
+            msg+=merge_baseline.build_app_job(flag=1)
+    flash('已合并发布','warning')   
+    return render_template('version/update_result.html', msg=msg) 
 
 '''
 管理更新包
@@ -416,21 +428,19 @@ def edit_package(id):
     env_id=package.env_id
     original_blineno = package.blineno.split(',')
     if form.validate_on_submit():
+        merge_list = []
         msg=""
         name = form.name.data
         blineno = form.blineno.data
         change_blineno = blineno.split(',')
-        rlsdate = form.rlsdate.data
+        rlsdate = datetime.now()
         remark = form.remark.data
-
-        #重建更新包中的APP和DB目录
-        project.rebuild_relase_directory()
 
         #增加的基线状态修改
         add_blineno = set(change_blineno) - set(original_blineno)
         for no in add_blineno:
             baseline = Baseline.query.get_or_404(no)
-            baseline.status = '预UAT提测'
+            baseline.status = 'SIT提测'
             baseline.package_id = package.id
             db.session.add(baseline)
             db.session.commit()
@@ -490,31 +500,26 @@ def edit_package(id):
                                   )
             db.session.add(merge_baseline)    
             db.session.commit()
-
-            #构建Jenkins的Job
-            if versionnos:
-                msg+=merge_baseline.build_app_job(flag=1)
-            #更新数据库
-            if sqlnos or pcknos:
-                msg+=merge_baseline.build_db_job(flag=1)
+            merge_list.append(merge_baseline)
 
         # 录入package表
+        merge_blineno = ','.join(str(bline.id) for bline in merge_list)
         package.blineno = blineno
+        package.merge_blineno = merge_blineno
         package.remark = remark
         db.session.add(package)
         db.session.commit()
         flash('已重新合并发布','warning')
-        return render_template('version/update_result.html', msg=msg)
+        return render_template('version/merge_details.html',merge_list=merge_list)
         
     form.name.data = package.name
-    form.rlsdate.data = package.rlsdate.strftime("%Y%m%d")
     form.blineno.data = package.blineno
     form.remark.data = package.remark
     return render_template('version/edit_package.html', form=form)
 
 
 '''
-打包
+打包,并且删除合并的基线
 '''
 @version_bp.route('/release/package/<int:id>')
 @login_required
@@ -522,11 +527,55 @@ def edit_package(id):
 def release_package(id):
     package = Package.query.get_or_404(id)
     baselines = package.baselines
+    merge_blineno = package.merge_blineno.split(',')
     for baseline in baselines:
         baseline.status = '已发布UAT'
         db.session.add(baseline)
+        db.session.commit()
+    
+    for nu in merge_blineno:
+        merge_baseline = Baseline.query.get_or_404(nu)
+        db.session.delete(merge_baseline)
         db.session.commit()
     package.release_package()
     flash('已发布更新包','warning')
     return redirect_back()
     
+
+'''
+合并版本库的版本
+'''
+@version_bp.route('/merge/version/<int:id>')
+@login_required
+@permission_required(Permission.backend_manage)
+def merge_version(id):
+    package = Package.query.get_or_404(id)
+    merge_blineno = package.merge_blineno
+    for blineno in merge_blineno.split(','):
+        baseline = Baseline.query.get_or_404(blineno)
+        app = baseline.app
+        version_list = sorted(baseline.versionno.split(','))
+        source_dir = app.source_dir
+        workspace = app.jenkins_job_dir
+        for version in version_list:
+            #更新SVN中的Jenkins中的源码目录
+            l = svn.local.LocalClient(workspace)
+            l.update()
+            #合并
+            source_log = l.run_command('log',[app.source_dir,'-c',version])[3]
+            message = '{} \n Merged revision {} from {}'.format(source_log,version,source_dir)
+            try:
+                merge_result = l.run_command('merge',
+                    [app.source_dir,'-c',version])
+                if len(merge_result) > 2 and 'conflicts' in merge_result[3]:
+                    l.run_command('revert',['-R',workspace])
+                else:
+                    #提交
+                    l.commit(message)
+            except:
+                l.run_command('revert',['-R',workspace])
+
+
+
+
+            

@@ -48,24 +48,23 @@ class SelectAppForm(FlaskForm):
 
 
 class SelectEnvForm(FlaskForm):
-	project = SelectField('项目',coerce=int)
 	env = SelectField('环境',coerce=int)
-	submit = SubmitField('提交')
+	submit = SubmitField('下一步')
 
-class MergeRelaseForm(FlaskForm):
-	date = StringField('发布日期')
+class MergeBaselineForm(FlaskForm):
+	date = StringField('更新包日期')
 	baselineno = StringField('基线序号',validators=[DataRequired()])
 	packageno  = StringField('今日发包次数')
 	submit = SubmitField('下一步')
 
-	def validate_baselineno(form,field):
+	def validate_blineno(form,field):
 		field = field.data
 		if field!="" and not field.replace(',','').isdigit():
 			raise ValidationError('请输入数字并以英文逗号分割.')
 
+
 class PackageForm(FlaskForm):
 	name = StringField('名称')
-	rlsdate = StringField('发布日期')
 	blineno = StringField('基线序号',validators=[DataRequired()])
 	remark  = StringField('备注')
 	project = StringField('项目')
