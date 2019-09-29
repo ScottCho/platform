@@ -3,10 +3,11 @@ import requests
 from datetime import datetime
 from flask_login import login_required,current_user
 from flask import render_template,request,flash,url_for,redirect, current_app
+import svn.remote,svn.local
 
 from app.version import version_bp
 from app.version.forms import BaselineForm,SelectAppForm, \
-    SelectEnvForm,PackageForm,MergeBaselineForm
+    PackageForm,MergeBaselineForm
 from .. import db
 from app.models.service import Subsystem, App, Env
 from app.models.auth import Project, User, Permission
@@ -259,27 +260,16 @@ def edit_baseline(id):
         form=form,status=Blstatus.query.all()
         )
 
-
-# 选择要合并的环境
-@version_bp.route('/select/env',methods=('GET', 'POST'))
-@login_required
-def select_env():
-    form = SelectEnvForm()
-    form.env.choices = [(0,'请选择')]+[(g.id,g.name) for g in Env.query.all()]
-    if form.validate_on_submit():
-        env_id = form.env.data
-        return redirect(url_for('version.merge_baseline',env_id=env_id))
-    return render_template('version/select_env.html',form=form)
-
-
-# 合并基线内容，展示不同应用对应的版本号
-@version_bp.route('/merge/baseline/<int:env_id>', methods=['GET', 'POST'])
+# 录入需要合并的基线，展示不同应用对应的版本号
+@version_bp.route('/merge/baseline', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.backend_manage)
-def merge_baseline(env_id):
+def merge_baseline():
     form = MergeBaselineForm()
+    form.env.choices = [(0,'请选择')]+[(g.id,g.name) for g in Env.query.all()]
     if form.validate_on_submit():
         baselineno = form.baselineno.data
+        env_id = form.env.data
         # 今日发包次数
         packageno = form.packageno.data
         if not packageno:
@@ -345,7 +335,6 @@ def merge_baseline(env_id):
         project = merge_list[0].app.project
         pname = "{}_{}_{}".format(project.name, bdate.strftime("%Y%m%d"),packageno)
         merge_blineno = ','.join(str(bline.id) for bline in merge_list)
-        print(merge_blineno)
         package = Package(name=pname,
                           rlsdate=datetime.now(),
                           blineno=baselineno,
@@ -370,7 +359,7 @@ def merge_baseline(env_id):
 
 
 '''
-合并发布
+发布合并的基线
 '''
 @version_bp.route('/merge/update/<int:id>')
 @login_required
@@ -443,6 +432,12 @@ def edit_package(id):
             baseline.status = 'SIT提测'
             baseline.package_id = package.id
             db.session.add(baseline)
+            db.session.commit()
+
+        #删除原始的合并的基线
+        for no in original_blineno:
+            baseline = Baseline.query.get_or_404(no)
+            db.session.delete(baseline)
             db.session.commit()
 
         #将相同的app合并成一条基线
@@ -551,6 +546,7 @@ def release_package(id):
 def merge_version(id):
     package = Package.query.get_or_404(id)
     merge_blineno = package.merge_blineno
+    merge_msg = ''
     for blineno in merge_blineno.split(','):
         baseline = Baseline.query.get_or_404(blineno)
         app = baseline.app
@@ -564,16 +560,23 @@ def merge_version(id):
             #合并
             source_log = l.run_command('log',[app.source_dir,'-c',version])[3]
             message = '{} \n Merged revision {} from {}'.format(source_log,version,source_dir)
+            current_app.logger.info(message)
+            merge_msg += message
             try:
                 merge_result = l.run_command('merge',
-                    [app.source_dir,'-c',version])
+                    [app.source_dir,workspace,'-c',version])
                 if len(merge_result) > 2 and 'conflicts' in merge_result[3]:
+                    merge_msg = '合并'+version+'出现冲突'
+                    current_app.logger.error(merge_msg)
                     l.run_command('revert',['-R',workspace])
                 else:
                     #提交
                     l.commit(message)
             except:
+                merge_msg = '合并'+version+'出现错误，请检查'
+                current_app.logger.error(merge_msg)
                 l.run_command('revert',['-R',workspace])
+    return(merge_msg)
 
 
 

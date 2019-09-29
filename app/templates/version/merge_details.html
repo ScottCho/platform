@@ -28,11 +28,9 @@
       <td width="20%">{{ baseline.pckno }}</td>
       <td width="10%">{{ baseline.rollbackno }}</td>
       <td>
-          <a  href="{{ url_for('version.edit_baseline',id=baseline.id, next=request.full_path) }}"><ins>合并</ins></a>
         <a href="{{ url_for('version.baseline_details',id=baseline.id, next=request.full_path) }}">
           <ins>详情</ins>
         </a>
-        <a href="{{ url_for('version.delete_baseline',id=baseline.id, next=request.full_path) }}" onclick="return confirm('确认删除?')";><ins>删除</ins></a>
       </td>
     </tr>
 

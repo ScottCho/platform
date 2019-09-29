@@ -47,13 +47,10 @@ class SelectAppForm(FlaskForm):
 	submit = SubmitField('提交')
 
 
-class SelectEnvForm(FlaskForm):
-	env = SelectField('环境',coerce=int)
-	submit = SubmitField('下一步')
-
 class MergeBaselineForm(FlaskForm):
 	date = StringField('更新包日期')
 	baselineno = StringField('基线序号',validators=[DataRequired()])
+	env = SelectField('合并环境',coerce=int)
 	packageno  = StringField('今日发包次数')
 	submit = SubmitField('下一步')
 

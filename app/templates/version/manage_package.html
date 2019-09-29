@@ -5,17 +5,18 @@
 	<div class="container-fluid">
      <table class="table table-hover datatable">
       <thead><br/>
-        <tr class="active"><th>编号</th><th>名字</th><th>发布日期</th><th>基线序号</th><th>操作</th></tr>
+        <tr class="active"><th>编号</th><th>名字</th><th>基线序号</th><th>备注</th><th>操作</th></tr>
       </thead>
       <tbody>
     	{% for package in packages %}
         <tr>
           <td>{{ package.id }}</td>
           <td>{{ package.name }}</td>
-          <td>{{ package.rlsdate }}</td>
           <td>{{ package.blineno }}</td>
+          <td>{{ package.remark }}</td>
           <td>
             <a class="btn btn-primary btn-sm" href="{{ url_for('version.edit_package',id=package.id,next=request.full_path) }}">编辑</a>
+            <a class="btn btn-primary btn-sm" href="{{ url_for('version.merge_version',id=package.id,next=request.full_path) }}">合并</a>
             <a class="btn btn-primary btn-sm" href="{{ url_for('version.merge_update',id=package.id,next=request.full_path) }}">发布</a>
             <a class="btn btn-primary btn-sm" href="{{ url_for('version.release_package',id=package.id,next=request.full_path) }}">发包</a>
             <a class="btn btn-danger btn-sm" href="{{ url_for('version.delete_package',id=package.id) }}">删除</a>
