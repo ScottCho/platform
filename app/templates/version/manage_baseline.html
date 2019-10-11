@@ -80,7 +80,7 @@
 
  {% if pagination %}
     <div class="nav navbar-nav navbar-right">
-        {{ macros.pagination_widget(pagination, request.endpoint) }}
+        {{ macros.pagination_widget(pagination, request.endpoint, filter = request.args.get('filter')) }}
     </div>
     {% endif %}
 {% endblock %}
