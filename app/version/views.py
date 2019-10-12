@@ -8,12 +8,12 @@ import svn.remote,svn.local
 from app.version import version_bp
 from app.version.forms import BaselineForm,SelectAppForm, \
     PackageForm,MergeBaselineForm
-from .. import db
+from app import db
 from app.models.service import Subsystem, App, Env
 from app.models.auth import Project, User, Permission
 from app.models.version import Baseline, Blstatus,Package
 from app.utils.jenkins import get_jenkins_job
-from ..localemail import send_email
+from app.localemail import send_email
 from app.utils import fnmatch_file
 from app.decorators import admin_required, permission_required
 from app.utils.redirect_back import redirect_back
@@ -577,8 +577,3 @@ def merge_version(id):
                 current_app.logger.error(merge_msg)
                 l.run_command('revert',['-R',workspace])
     return(merge_msg)
-
-
-
-
-            

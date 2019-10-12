@@ -8,6 +8,7 @@
   <div class="container">
       <div class="jumbotron">
         <form class="form-signin" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
           <h2 class="form-signin-heading">选择要退出的项目</h2>
           <select  class="form-control" name='proj_name'>
             <option>--请选择--</option>
