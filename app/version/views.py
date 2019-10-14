@@ -7,7 +7,7 @@ import svn.remote,svn.local
 
 from app.version import version_bp
 from app.version.forms import BaselineForm,SelectAppForm, \
-    PackageForm,MergeBaselineForm
+    PackageForm,MergeBaselineForm,SelectProjectForm
 from app import db
 from app.models.service import Subsystem, App, Env
 from app.models.auth import Project, User, Permission
@@ -115,33 +115,55 @@ def update_baseline(project_id,subsystem_id,env_id):
     return render_template('version/update_baseline.html',form=form,project_name=project_name)
 
 
-# 管理基线
-@version_bp.route('/manage/baseline',methods=('GET', 'POST'))
+@version_bp.route('/select/project',methods=('GET', 'POST'))
 @login_required
-def manage_baseline():
+def select_project():
+    '''
+    选择项目进行项目管理，不选为所有项目
+    '''
+    form = SelectProjectForm()
+    form.project.choices = [(0,'所有项目')]+[(g.id,g.name) for g in Project.query.all()]
+    if form.validate_on_submit():
+        project_id = form.project.data
+        return redirect(url_for('version.manage_baseline',project_id=project_id))
+    return render_template('version/select_project.html',form=form)
+
+
+# 管理基线
+@version_bp.route('/manage/baseline/<int:project_id>',methods=('GET', 'POST'))
+@login_required
+def manage_baseline(project_id):
     page = request.args.get('page', 1, type=int)
     per_page=current_app.config['FLASKY_BASELINES_PER_PAGE']
     filter_rule = request.args.get('filter', 'me')
-    if filter_rule == 'all':
-        filtered_baselines = Baseline.query
-    elif filter_rule == 'SIT':
-        filtered_baselines = Baseline.query.filter_by(status='SIT提测')
-    elif filter_rule == 'PUAT':
-        filtered_baselines = Baseline.query.filter_by(status='预UAT提测')
-    elif filter_rule == 'fail':
-        filtered_baselines = Baseline.query.filter(Baseline.status.in_(['SIT不通过','预UAT失败','UAT不通过','生产不通过']))
-    elif filter_rule == 'unrelease':
-        filtered_baselines = Baseline.query.filter(~Baseline.status.in_(['已发布UAT','UAT通过','UAT不通过','作废']))
-    elif filter_rule == 'release':
-        filtered_baselines = Baseline.query.filter(Baseline.status.in_(['已发布UAT','UAT提测','UAT通过','已上生产']))
+    if project_id == 0:
+        apps = App.query.all()
     else:
-        filtered_baselines = Baseline.query.filter_by(developer=current_user.username)
+        apps = App.query.filter_by(project_id=project_id)
+    app_ids = []
+    for app in apps:
+        app_ids.append(app.id)
+    if filter_rule == 'all':
+        filtered_baselines = Baseline.query.filter(Baseline.app_id.in_(app_ids))
+    elif filter_rule == 'SIT':
+        filtered_baselines = Baseline.query.filter(Baseline.status=='SIT提测',Baseline.app_id.in_(app_ids))
+    elif filter_rule == 'PUAT':
+        filtered_baselines = Baseline.query.filter(Baseline.status=='预UAT提测',Baseline.app_id.in_(app_ids))
+    elif filter_rule == 'fail':
+        filtered_baselines = Baseline.query.filter(Baseline.status.in_(['SIT不通过','预UAT失败','UAT不通过','生产不通过']),Baseline.app_id.in_(app_ids))
+    elif filter_rule == 'unrelease':
+        filtered_baselines = Baseline.query.filter(~Baseline.status.in_(['已发布UAT','UAT通过','UAT不通过','作废']),Baseline.app_id.in_(app_ids))
+    elif filter_rule == 'release':
+        filtered_baselines = Baseline.query.filter(Baseline.status.in_(['已发布UAT','UAT提测','UAT通过','已上生产']),Baseline.app_id.in_(app_ids))
+    else:
+        filtered_baselines = Baseline.query.filter(Baseline.developer==current_user.username,Baseline.app_id.in_(app_ids))
     pagination = filtered_baselines.order_by(Baseline.id.desc()).paginate(
         page, per_page,
         error_out=False)
     baselines = pagination.items
+    projects = Project.query.all()
     return render_template('version/manage_baseline.html', baselines=baselines,
-                           pagination=pagination)   
+                           project_id=project_id,pagination=pagination)   
 
 '''
 修改基线状态

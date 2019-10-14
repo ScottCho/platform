@@ -44,7 +44,12 @@ class SelectAppForm(FlaskForm):
 	project = SelectField('项目',coerce=int)
 	subsystem = SelectField('子系统',coerce=int)
 	env = SelectField('环境',coerce=int)
-	submit = SubmitField('提交')
+	submit = SubmitField('下一步')
+
+
+class SelectProjectForm(FlaskForm):
+	project = SelectField('项目',coerce=int)
+	submit = SubmitField('下一步')
 
 
 class MergeBaselineForm(FlaskForm):
