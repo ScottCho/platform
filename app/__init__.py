@@ -103,31 +103,31 @@ def make_shell_context():
 
 
 # 错误处理
-@app.errorhandler(400)
+@flask_app.errorhandler(400)
 def bad_request(e):
     return render_template('errors/400.html'), 400
 
 
-@app.errorhandler(403)
+@flask_app.errorhandler(403)
 def forbidden(e):
     return render_template('errors/403.html'), 403
 
 
-@app.errorhandler(404)
+@flask_app.errorhandler(404)
 def page_not_found(e):
     return render_template('errors/404.html'), 404
 
 
-@app.errorhandler(413)
+@flask_app.errorhandler(413)
 def request_entity_too_large(e):
     return render_template('errors/413.html'), 413
 
 
-@app.errorhandler(500)
+@flask_app.errorhandler(500)
 def internal_server_error(e):
     return render_template('errors/500.html'), 500
 
 
-@app.errorhandler(CSRFError)
+@flask_app.errorhandler(CSRFError)
 def handle_csrf_error(e):
     return render_template('errors/400.html', description=e.description), 400

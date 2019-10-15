@@ -1,8 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'dashboard.html' %}
 
 {% block title %}500 Error{% endblock %}
 
-{% block content %}
+{% block main %}
      <div class="error-page">
         <h2 class="headline text-red">500</h2>
 
@@ -10,21 +10,9 @@
           <h3><i class="fa fa-warning text-red"></i> 哎呀！有些不对劲。</h3>
 
           <p>
-            哎呀！有些不对劲。
+            哎呀！有些不对劲。检查数据库的表是否被锁
             我们将立即努力解决这个问题。同时，您可以<a href="{{ url_for('index') }}">返回仪表板</a>或尝试使用搜索表单。
           </p>
-
-          <form class="search-form">
-            <div class="input-group">
-              <input type="text" name="search" class="form-control" placeholder="Search">
-
-              <div class="input-group-btn">
-                <button type="submit" name="submit" class="btn btn-danger btn-flat"><i class="fa fa-search"></i>
-                </button>
-              </div>
-            </div>
-            <!-- /.input-group -->
-          </form>
         </div>
       </div>
 {% endblock %}

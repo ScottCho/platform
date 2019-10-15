@@ -1,8 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'dashboard.html' %}
 
 {% block title %}400 Error{% endblock %}
 
-{% block content %}
+{% block main %}
      <div class="error-page">
         <h2 class="headline text-yellow"> 400</h2>
 
@@ -15,16 +15,5 @@
               您访问的页面域名不存在或者请求错误。同时，您可以<a href="{{ url_for('index') }}">返回仪表板</a>或尝试使用搜索表单。
             </p>
           {% endif %}
-          <form class="search-form">
-            <div class="input-group">
-              <input type="text" name="search" class="form-control" placeholder="Search">
-
-              <div class="input-group-btn">
-                <button type="submit" name="submit" class="btn btn-warning btn-flat"><i class="fa fa-search"></i>
-                </button>
-              </div>
-            </div>
-            <!-- /.input-group -->
-          </form>
         </div>
 {% endblock %}
