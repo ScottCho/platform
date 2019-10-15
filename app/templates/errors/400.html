@@ -1,18 +1,20 @@
 {% extends 'base.html' %}
 
-{% block title %}404 Error{% endblock %}
+{% block title %}400 Error{% endblock %}
 
 {% block content %}
-    <div class="error-page">
-        <h2 class="headline text-yellow"> 404</h2>
+     <div class="error-page">
+        <h2 class="headline text-yellow"> 400</h2>
 
         <div class="error-content">
-          <h3><i class="fa fa-warning text-yellow"></i> 哎呀！网页未找到</h3>
-
-          <p>
-            我们找不到您要查找的页面。同时，您可以<a href="{{ url_for('index') }}">返回仪表板</a>或尝试使用搜索表单。
-          </p>
-
+          <h3><i class="fa fa-warning text-yellow"></i> 哎呀！网页访问出现问题</h3>
+          {% if description %}
+            <strontg><p>{{ description }}</p></strontg>
+          {% else %}
+            <p>
+              您访问的页面域名不存在或者请求错误。同时，您可以<a href="{{ url_for('index') }}">返回仪表板</a>或尝试使用搜索表单。
+            </p>
+          {% endif %}
           <form class="search-form">
             <div class="input-group">
               <input type="text" name="search" class="form-control" placeholder="Search">
