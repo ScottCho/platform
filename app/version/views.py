@@ -121,16 +121,12 @@ def select_project():
     '''
     选择项目进行项目管理，不选为所有项目
     '''
-    form = SelectProjectForm()
-    form.project.choices = [(0,'所有项目')]+[(g.id,g.name) for g in Project.query.all()]
-    if form.validate_on_submit():
-        project_id = form.project.data
-        return redirect(url_for('version.manage_baseline',project_id=project_id))
-    return render_template('version/select_project.html',form=form)
+    projects = Project.query.all()
+    return render_template('version/select_project.html',projects=projects)
 
 
 # 管理基线
-@version_bp.route('/manage/baseline/<int:project_id>',methods=('GET', 'POST'))
+@version_bp.route('/manage/baseline/<int:project_id>')
 @login_required
 def manage_baseline(project_id):
     page = request.args.get('page', 1, type=int)
