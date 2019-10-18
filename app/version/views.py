@@ -434,26 +434,36 @@ def edit_package(id):
     project = package.project
     env_id=package.env_id
     original_blineno = package.blineno.split(',')
+    original_merge_bline_list = package.merge_blineno.split(',')
     if form.validate_on_submit():
         merge_list = []
         msg=""
         name = form.name.data
         blineno = form.blineno.data
-        change_blineno = blineno.split(',')
+        change_blineno_list = blineno.split(',')
         rlsdate = datetime.now()
         remark = form.remark.data
 
-        #增加的基线状态修改
-        add_blineno = set(change_blineno) - set(original_blineno)
-        for no in add_blineno:
+        #增加的基线状态修改,并将基线加入更新包中
+        add_blineno_set = set(change_blineno_list) - set(original_blineno)
+        for no in add_blineno_set:
             baseline = Baseline.query.get_or_404(no)
             baseline.status = 'SIT提测'
             baseline.package_id = package.id
             db.session.add(baseline)
             db.session.commit()
 
+        #减少的基线剔除更新包
+        reduce_blineno_set = set(original_blineno) - set(change_blineno_list)
+        for no in reduce_blineno_set:
+            baseline = Baseline.query.get_or_404(no)
+            baseline.package_id = ''
+            db.session.add(baseline)
+            db.session.commit()
+
+
         #删除原始的合并的基线
-        for no in original_blineno:
+        for no in original_merge_bline_list:
             baseline = Baseline.query.get_or_404(no)
             db.session.delete(baseline)
             db.session.commit()
@@ -461,7 +471,7 @@ def edit_package(id):
         #将相同的app合并成一条基线
         #{<App 1>: [<Baseline 1>,  <Baseline 2>],<App 2>: [<Baseline 3>]}
         app_dict={}
-        for no in  change_blineno:
+        for no in  change_blineno_list:
             baseline = Baseline.query.get_or_404(no)
             app = baseline.app
             if app not in app_dict.keys():
@@ -522,7 +532,7 @@ def edit_package(id):
         package.remark = remark
         db.session.add(package)
         db.session.commit()
-        flash('已重新合并发布','warning')
+        flash('已更新包信息','warning')
         return render_template('version/merge_details.html',merge_list=merge_list)
         
     form.name.data = package.name
