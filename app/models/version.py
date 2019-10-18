@@ -211,12 +211,12 @@ class Package(db.Model):
         #package=shutil.make_archive('/update/WLINK/'+pname,'zip',root_dir='/update/WLINK/',base_dir=pname)
         returncode, output = execute_cmd.execute_cmd('sh '+target_dir+'/relase_package.sh '+self.name)
         package_path = ''
-        package_zip = glob.glob(target_dir+'/*zip')[0]
-        package_7z=glob.glob(target_dir+'/*7z')[0]
+        package_zip = glob.glob(target_dir+'/*zip')
+        package_7z=glob.glob(target_dir+'/*7z')
         if package_zip:
-            package_path = package_zip
+            package_path = package_zip[0]
         else:
-            package_path = package_7z
+            package_path = package_7z[0]
 
         #更新包接受者       
         recipients = []
