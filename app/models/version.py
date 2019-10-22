@@ -203,12 +203,10 @@ class Package(db.Model):
         if os.path.exists(package_dir):
             shutil.rmtree(package_dir)
         os.mkdir(package_dir)
-        if os.path.exists(app_dir):
+        if os.path.exists(app_dir) and os.path.listdir(app_dir):
             shutil.copytree(app_dir,package_dir+'/APP')
-        if os.path.exists(db_dir):
-            db_scripts = glob.glob(db_dir+'/*sql')
+        if os.path.exists(db_dir) and os.path.listdir(db_dir):
             shutil.copytree(db_dir,package_dir+'/DB')
-        #package=shutil.make_archive('/update/WLINK/'+pname,'zip',root_dir='/update/WLINK/',base_dir=pname)
         returncode, output = execute_cmd.execute_cmd('sh '+target_dir+'/relase_package.sh '+self.name)
         package_path = ''
         package_zip = glob.glob(target_dir+'/*zip')
