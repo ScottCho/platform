@@ -203,9 +203,9 @@ class Package(db.Model):
         if os.path.exists(package_dir):
             shutil.rmtree(package_dir)
         os.mkdir(package_dir)
-        if os.path.exists(app_dir) and os.path.listdir(app_dir):
+        if os.path.exists(app_dir) and os.listdir(app_dir):
             shutil.copytree(app_dir,package_dir+'/APP')
-        if os.path.exists(db_dir) and os.path.listdir(db_dir):
+        if os.path.exists(db_dir) and os.listdir(db_dir):
             shutil.copytree(db_dir,package_dir+'/DB')
         returncode, output = execute_cmd.execute_cmd('sh '+target_dir+'/relase_package.sh '+self.name)
         package_path = ''
