@@ -464,7 +464,7 @@ def edit_package(id):
 
         #删除原始的合并的基线
         for no in original_merge_bline_list:
-            baseline = Baseline.query..filter_by(id=no).first()
+            baseline = Baseline.query.filter_by(id=no).first()
             if baseline:
                 db.session.delete(baseline)
                 db.session.commit()
