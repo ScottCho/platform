@@ -464,9 +464,10 @@ def edit_package(id):
 
         #删除原始的合并的基线
         for no in original_merge_bline_list:
-            baseline = Baseline.query.get_or_404(no)
-            db.session.delete(baseline)
-            db.session.commit()
+            baseline = Baseline.query..filter_by(id=no).first()
+            if baseline:
+                db.session.delete(baseline)
+                db.session.commit()
 
         #将相同的app合并成一条基线
         #{<App 1>: [<Baseline 1>,  <Baseline 2>],<App 2>: [<Baseline 3>]}
