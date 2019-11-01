@@ -575,7 +575,7 @@ def release_package(id):
 def merge_version(id):
     package = Package.query.get_or_404(id)
     merge_blineno = package.merge_blineno
-    merge_msg = ''
+    merge_msg = 'Start merging baselines....\n'
     for blineno in merge_blineno.split(','):
         baseline = Baseline.query.get_or_404(blineno)
         app = baseline.app
@@ -601,8 +601,9 @@ def merge_version(id):
                 else:
                     #提交
                     l.commit(message)
+                    merge_msg += 'Good,Merge Success.'
             except:
                 merge_msg = '合并'+version+'出现错误，请检查'
                 current_app.logger.error(merge_msg)
                 l.run_command('revert',['-R',workspace])
-    return(merge_msg)
+    return render_template('version/merge_result.html',msg=merge_msg)

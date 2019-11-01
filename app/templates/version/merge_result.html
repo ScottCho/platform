@@ -1,0 +1,7 @@
+{% extends "dashboard.html" %}
+{% block title %}基线合并结果{% endblock %}
+{% block main %}
+基线合并结果如下，请确认是否合并成功，如果失败请手工合并：
+<p class="bg-primary">{{ msg }}</p>
+<a href="{{ url_for('verson.manage_package') }}" class="btn btn-primary  active" role="button">返回</a>
+{% endblock %}      
