@@ -8,10 +8,8 @@ from flask_migrate import Migrate
 from flask_moment import Moment
 from flask_mail import Mail
 from flask_login import LoginManager,current_user,logout_user
-from flask_bootstrap import Bootstrap
 from flask_wtf.csrf import CSRFError
 from flask_wtf.csrf import CSRFProtect
-
 from celery import Celery,platforms
 from config import config
 
@@ -19,7 +17,6 @@ from config import config
 db = SQLAlchemy()
 mail = Mail()
 moment = Moment()
-bootstrap = Bootstrap()
 migrate = Migrate()
 csrf = CSRFProtect()
 login_manager = LoginManager()
@@ -63,7 +60,6 @@ db.init_app(flask_app)
 migrate.init_app(flask_app, db)
 mail.init_app(flask_app)
 login_manager.init_app(flask_app)
-bootstrap.init_app(flask_app)
 csrf.init_app(flask_app)
 
 #注册用户认证蓝图
