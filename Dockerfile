@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.6-alpine
+FROM python:3.6-slim
 
 LABEL maintainer="scottcho@qq.com"
 
@@ -19,7 +19,7 @@ RUN pip --no-cache-dir install -i http://mirrors.aliyun.com/pypi/simple --truste
 EXPOSE 80
 
 # Define environment variable
-ENV NAME World
+ENV FLASK_RUN_HOST 0.0.0.0
 
 # Run app.py when the container launches
-CMD ["gunicorn", "app:flask_app", "-b", "0.0.0.0:80", "-D", "-p", "/tmp/app.pid", "--log-file", "/tmp/app.log"]
+CMD ["gunicorn", "app:flask_app", "-b", "0.0.0.0:80"]
