@@ -4,17 +4,51 @@ services:
   app:
     build: .
     ports:
-      - 80:80
+      - "80:80"
+    volumes:
+      - .:/app
+    env_file: .env
+    links:
+      - mysql
+      - redis
+      - rabbitmq 
+      - jenkins
+    depends_on:
+      - mysql
   
-  db:
-    image: "mysql"
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
+  mysql:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password 
     environment:
       MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_USER: scott
+      MYSQL_PASSWORD: tiger
+      MYSQL_DATABASE: platform
+    volumes:
+      - mysql_data:/var/lib/mysql
 
   redis:
-    image: "redis:alpine"
+    image: "redis"
+    volumes:
+      - redis_data:/var/lib/redis
 
   rabbitmq:
-    image: "rabbitmq:3.8-rc-alpine"
+    image: "rabbitmq"
+
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+
+  jenkins:
+    image: "jenkins"
+    ports:
+      - "8090:8080"
+    volumes:
+      - jenkins_data:/var/jenkins_home 
+
+
+volumes:
+  redis_data:
+  mysql_data:
+  jenkins_data:

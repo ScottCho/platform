@@ -22,8 +22,8 @@ class Config:
     FLASKY_BASELINES_PER_PAGE = 20
 
     # 设置Celery
-    CELERY_BROKER_URL = 'redis://192.168.0.80:6379',
-    CELERY_RESULT_BACKEND = 'redis://192.168.0.80:6379'
+    CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
+    CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND')
 
    
     @staticmethod
