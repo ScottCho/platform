@@ -5,39 +5,38 @@
         git clone git@github.com:ScottCho/platform.git
 
         2. 安装虚拟环境
-        python3 -m venv venv
+        pip3 install pipenv
+        pipenv install
 
-        3. 激活虚拟环境
-        windows： venv\Scripts\activate
-        Linux: . venv/bin/activate
-
-        4. 安装依赖文件
-        pip freeze > requirements.txt
-        pip install -r requirements.txt
-
-        5. 初始化数据库
+        3. 初始化数据库
         mysql> create database platform character set 'utf8' collate 'utf8_bin';
-        mysql> create user 'platformadmin'@'%' identified by 'platform';
-        python manage.py db migrate
-        python manage.py db upgrade
+        mysql> create user 'scott'@'%' identified by 'tiger';
+        flask db init
+        flask db migrate
+        flask db upgrade
+        Role.insert_roles()
 
-        6. 设置环境变量
-        export MAIL_USERNAME = 'xxx@xxx'
-        export MAIL_PASSWORD = 'youpassword'
-        export FLASK_CONFIG = 'production'
-        export DATABASE_URL = 'you db url'
+        4. 设置环境变量文件.env
+        MAIL_PASSWORD='Scott@qq123'
+        MAIL_USERNAME=xxx@xxx.com.cn'
+        FLASK_CONFIG='production'
+        MAIL_SERVER='smtp.exmail.qq.com'
+        MAIL_DEFAULT_SENDER='xxx@xxx.com.cn'
+        ADMIN_EMAIL=xxxx@xxx.com.cn
+        DATABASE_URL='mysql+pymysql://scott:tiger@xxxx:3306/platform?charset=utf8mb4'
+        JENKINS_URL='http://xxx:8080/jenkins'
+        JENKINS_TOKEN='xxx'
+        JENKINS_USERNAME='admin'
+        JENKINS_PASSWORD='xxx'
+        CELERY_BROKER_URL=pyamqp://guest:guest@rabbitmq:5672//
+        CELERY_RESULT_BACKEND = 'redis://xxxx:6379'
 
-        7. 启动实例
-        gunicorn app:flask_app -b 0.0.0.0:5001 -w 3 -D -p /tmp/app.pid --log-file /tmp/app.log
+        5. 启动实例
+        gunicorn app:flask_app -b 0.0.0.0:5000 -w 3 -D -p /tmp/app5000.pid --log-file /tmp/app5000.log
 
-        8. 启动celery
+        6. 启动celery
         调试： celery -A app.celery worker -l info
         后台启动：
         celery multi start w1 -A app.celery  -l info --pidfile=/var/run/celery/%n.pid --logfile=/var/log/celery/%n%I.log
         重启：
-        celery multi restart w1 -A app.celery  -l info --pidfile=/var/run/celery/%n.pid --logfile=/var/log/celery/%n%I.log
-
-        9. 插入角色
-        Role.insert_roles()
-
-
+        celery multi restart w1 -A app.celery  -l info --pidfile=/var/run/celery/%n.pid --logfile=/var/log/celery/%n%I.log 
