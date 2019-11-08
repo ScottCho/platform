@@ -115,11 +115,11 @@ class Baseline(db.Model):
         if self.sqlno:
             for sql in self.sqlno.split(','):
                 #找出匹配的SQL路径，/SVN/../423_HZJ_JSUSER_20180326.sql
-                sqlfile=glob.glob(source_sqldir+sql+'_*')
+                sqlfile=glob.glob(source_sqldir+'/'+sql+'_*')
                 #判断匹配的SQL是否唯一
                 if len(sqlfile) == 0:
                     current_app.logger.error(sql + '号sql文件不存在')
-                    return sql+'号sql文件不存在'
+                    return sql+'号sql文件不存在\n'
                 elif len(sqlfile) == 1:
                     sqlfile = sqlfile[0]
                     shutil.copy(sqlfile,target_sqldir)
@@ -132,7 +132,7 @@ class Baseline(db.Model):
         #将pck文件复制到base_dir,并将路径加到ALL.sql
         if self.pckno:
             for pck in self.pckno.split(','):
-                pckfile=glob.glob(source_pckdir+pck+'_*')
+                pckfile=glob.glob(source_pckdir+'/'+pck+'_*')
                 if len(pckfile) == 0:
                     current_app.logger.error(pck + '号pck文件不存在')
                     return pck+'号pck文件不存在'
@@ -148,7 +148,7 @@ class Baseline(db.Model):
         #将rollback文件复制到base_dir,并将路径加到ALL.sql
         if self.rollbackno:
             for nu in self.rollbackno.split(','):
-                rollbackfile=glob.glob(source_rollbackdir+nu+'_*')
+                rollbackfile=glob.glob(source_rollbackdir+'/'+nu+'_*')
                 if len(rpllbackfile) == 0:
                     current_app.logger.error(nu + '号rollback文件不存在')
                     return nu+'号rollback文件不存在'

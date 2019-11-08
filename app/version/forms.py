@@ -71,7 +71,7 @@ class PackageForm(FlaskForm):
 	remark  = StringField('备注')
 	project = StringField('项目')
 	env = StringField('环境')
-	submit = SubmitField('重新发布')
+	submit = SubmitField('提交')
 
 	def validate_blineno(form,field):
 		field = field.data
