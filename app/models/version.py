@@ -82,7 +82,7 @@ class Baseline(db.Model):
         source_dbdir = self.app.project.source_dir
         source_sqldir = os.path.join(source_dbdir,'01-sql')
         source_pckdir = os.path.join(source_dbdir,'02-pck')
-        source_rollbackdir = os.path.join(source_dbdir,'03-rollback')
+        source_rollbackdir = os.path.join(source_dbdir,'03-rollbackup')
         target_dir = self.app.project.target_dir
         if flag == 1:
             base_dir=os.path.join(target_dir,'DB')
