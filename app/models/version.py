@@ -110,7 +110,7 @@ class Baseline(db.Model):
         r.update()
         #$base_DIR/HXUSER_20180409_01_ALL.sql
         DB_SCRIPT=os.path.join(base_dir,db_username.upper()+'_'+self.created.strftime("%Y%m%d")+'_'+'01_ALL.sql')
-        ROLLBACK_SCRIPT=os.path.join(target_rollbackdir,db_username.upper()+'_'+self.created.strftime("%Y%m%d")+'_'+'01_ROLLBACK.sql')
+        ROLLBACK_SCRIPT=os.path.join(target_rollbackdir,db_username.upper()+'_'+self.created.strftime("%Y%m%d")+'_'+'ROLLBACK_01.sql')
         #将sql文件复制到base_dir，,并将路径加到ALL.sql
         if self.sqlno:
             for sql in self.sqlno.split(','):
