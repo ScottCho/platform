@@ -124,8 +124,8 @@ class Baseline(db.Model):
                     sqlfile = sqlfile[0]
                     shutil.copy(sqlfile,target_sqldir)
                     with open(DB_SCRIPT,'a') as sqlf:
-                        sqlf.write('prompt '+target_sqldir + os.path.basename(sqlfile)+'\n')
-                        sqlf.write('@' + target_sqldir + os.path.basename(sqlfile)+'\n')
+                        sqlf.write('prompt '+os.path.join(target_sqldir,os.path.basename(sqlfile))+'\n')
+                        sqlf.write('@' + os.path.join(target_sqldir,os.path.basename(sqlfile))+'\n')
                 else:
                     current_app.logger.error('存在多个相同的sql文件')
                     return  '更新DB失败，可能存在多个'+sql+'号文件'
@@ -139,8 +139,8 @@ class Baseline(db.Model):
                 elif len(pckfile) == 1:
                     shutil.copy(pckfile[0],target_pckdir)
                     with open(DB_SCRIPT,'a') as pckf:
-                        pckf.write('prompt ' + target_pckdir + os.path.basename(pckfile[0]) + '\n')
-                        pckf.write('@'+target_pckdir+os.path.basename(pckfile[0])+'\n')
+                        pckf.write('prompt ' + os.path.join(target_pckdir,os.path.basename(pckfile[0])) + '\n')
+                        pckf.write('@'+os.path.join(target_pckdir,os.path.basename(pckfile[0]))+'\n')
                 else:
                     current_app.logger.error(pck + '号pck文件不存在')
                     return '更新DB失败，可能存在多个'+pck+'号文件'
@@ -155,8 +155,8 @@ class Baseline(db.Model):
                 elif len(rollbackfile) == 1:
                     shutil.copy(rollbackfile[0],target_rollbackdir)
                     with open(ROLLBACK_SCRIPT,'a') as rollbackf:
-                        rollbackf.write('prompt ' + target_rollbackdir + os.path.basename(rollbackfile[0]) + '\n')
-                        rollbackf.write('@'+target_rollbackdir+os.path.basename(rollbackfile[0])+'\n')
+                        rollbackf.write('prompt ' + os.path.join(target_rollbackdir,os.path.basename(rollbackfile[0])) + '\n')
+                        rollbackf.write('@'+os.path.join(target_rollbackdir,os.path.basename(rollbackfile[0]))+'\n')
                 else:
                     current_app.logger.error(nu + '号rollback文件不存在')
                     return '更新DB失败，可能存在多个'+nu+'号文件'
