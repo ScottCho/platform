@@ -46,7 +46,7 @@ class Baseline(db.Model):
             compile_file_list+=[trans_java(self.app.subsystem.en_name,self.app.source_dir,f) for f in source_files]
 
         #2. 将compile_file_list中的文件写入到jenkins_job_home中的txt中（B2B_WEB_12.txt)
-        compile_file_path = os.path.join(self.app.jenkins_job_dir,'workspace',self.app.subsystem.en_name+'_'+datetime.utcnow().strftime("%Y%m%d")_str(self.id)+'.txt')
+        compile_file_path = os.path.join(self.app.jenkins_job_dir,'workspace',self.app.subsystem.en_name+'_'+datetime.utcnow().strftime("%Y%m%d")+'_'+str(self.id)+'.txt')
         #compile_file_path = self.app.jenkins_job_dir+'/'+self.app.subsystem.en_name+'_'+datetime.utcnow().strftime("%Y%m%d")+'_'+str(self.id)+'.txt'
         print(compile_file_path)
         [os.remove(item) for item in glob.glob(self.app.jenkins_job_dir+'/' + '*txt')]
