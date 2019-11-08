@@ -238,8 +238,8 @@ def edit_baseline(id):
         msg=''
         #构建Jenkins的Job
         if versionno:
-            baseline.build_app_job()
-            msg += 'Jenkins构建日志请查： '+job.url+str(jenkins_build_number)+'/console'
+            msg+=baseline.build_app_job()
+
         #更新数据库
         if sqlno or pckno:
             msg+=baseline.build_db_job()
