@@ -149,7 +149,7 @@ class Baseline(db.Model):
         if self.rollbackno:
             for nu in self.rollbackno.split(','):
                 rollbackfile=glob.glob(source_rollbackdir+'/'+nu+'_*')
-                if len(rpllbackfile) == 0:
+                if len(rollbackfile) == 0:
                     current_app.logger.error(nu + '号rollback文件不存在')
                     return nu+'号rollback文件不存在'
                 elif len(rollbackfile) == 1:
