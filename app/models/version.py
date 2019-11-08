@@ -100,6 +100,7 @@ class Baseline(db.Model):
                     shutil.rmtree(base_dir)
                 os.makedirs(target_sqldir)
                 os.mkdir(target_pckdir)
+                os.mkdir(target_rollbackdir)
                 if os.path.exists(log_dir):
                     shutil.rmtree(log_dir)
                 os.mkdir(log_dir)
