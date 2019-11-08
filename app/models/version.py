@@ -80,8 +80,9 @@ class Baseline(db.Model):
         db_port = self.app.schema.instance.port
         db_instance = self.app.schema.instance.instance
         source_dbdir = self.app.project.source_dir
-        source_sqldir = os.path.join(source_dbdir,'01-sql/')
-        source_pckdir = os.path.join(source_dbdir,'02-pck/')
+        source_sqldir = os.path.join(source_dbdir,'01-sql')
+        source_pckdir = os.path.join(source_dbdir,'02-pck')
+        source_rollbackdir = os.path.join(source_dbdir,'03-rollback')
         target_dir = self.app.project.target_dir
         if flag == 1:
             base_dir=os.path.join(target_dir,'DB')
@@ -89,8 +90,9 @@ class Baseline(db.Model):
         else:
             base_dir=os.path.join(target_dir,'DB'+'_'+str(self.id))
             log_dir=os.path.join(target_dir,'LOG'+'_'+str(self.id))
-        target_sqldir = os.path.join(base_dir, '01-SQL/')
-        target_pckdir = os.path.join(base_dir, '02-PCK/')
+        target_sqldir = os.path.join(base_dir, 'SQL')
+        target_pckdir = os.path.join(base_dir, 'PCK')
+        target_rollbackdir = os.path.join(base_dir, 'ROLLBACK')
         #重建更新包的DB和日志的目录,flag==1时在view重建
         if flag == 0:
             try:
@@ -108,6 +110,7 @@ class Baseline(db.Model):
         r.update()
         #$base_DIR/HXUSER_20180409_01_ALL.sql
         DB_SCRIPT=os.path.join(base_dir,db_username.upper()+'_'+self.created.strftime("%Y%m%d")+'_'+'01_ALL.sql')
+        ROLLBACK_SCRIPT=os.path.join(base_dir,db_username.upper()+'_'+self.created.strftime("%Y%m%d")+'_'+'01_ROLLBACK.sql')
         #将sql文件复制到base_dir，,并将路径加到ALL.sql
         if self.sqlno:
             for sql in self.sqlno.split(','):
@@ -141,6 +144,22 @@ class Baseline(db.Model):
                 else:
                     current_app.logger.error(pck + '号pck文件不存在')
                     return '更新DB失败，可能存在多个'+pck+'号文件'
+
+        #将rollback文件复制到base_dir,并将路径加到ALL.sql
+        if self.rollbackno:
+            for nu in self.rollbackno.split(','):
+                rollbackfile=glob.glob(source_rollbackdir+nu+'_*')
+                if len(rpllbackfile) == 0:
+                    current_app.logger.error(nu + '号rollback文件不存在')
+                    return nu+'号rollback文件不存在'
+                elif len(rollbackfile) == 1:
+                    shutil.copy(rollbackfile[0],target_rollbackdir)
+                    with open(ROLLBACK_SCRIPT,'a') as rollbackf:
+                        rollbackf.write('prompt ' + target_rollbackdir + os.path.basename(rollbackfile[0]) + '\n')
+                        rollbackf.write('@'+target_rollbackdir+os.path.basename(rollbackfile[0])+'\n')
+                else:
+                    current_app.logger.error(nu + '号rollback文件不存在')
+                    return '更新DB失败，可能存在多个'+nu+'号文件'
 
         #将base_dir中的文件统一为utf-8
         if switch_char.switch_char(fnmatch_file.find_specific_files(base_dir)) is False:
@@ -204,9 +223,9 @@ class Package(db.Model):
             shutil.rmtree(package_dir)
         os.mkdir(package_dir)
         if os.path.exists(app_dir) and os.listdir(app_dir):
-            shutil.copytree(app_dir,package_dir+'/APP')
+            shutil.copytree(app_dir, os.path.join(package_dir,'APP'))
         if os.path.exists(db_dir) and os.listdir(db_dir):
-            shutil.copytree(db_dir,package_dir+'/DB')
+            shutil.copytree(db_dir,os.path.join(package_dir,'DB'))
         returncode, output = execute_cmd.execute_cmd('sh '+target_dir+'/relase_package.sh '+self.name)
         package_path = ''
         package_zip = glob.glob(target_dir+'/*zip')

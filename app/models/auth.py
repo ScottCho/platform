@@ -223,13 +223,15 @@ class Project(db.Model):
         APP_dir=os.path.join(target_dir,'APP')
         DB_dir=os.path.join(target_dir,'DB')
         log_dir=os.path.join(target_dir,'LOG')
-        target_sqldir = os.path.join(DB_dir, '01-SQL/')
-        target_pckdir = os.path.join(DB_dir, '02-PCK/')
+        target_sqldir = os.path.join(DB_dir, 'SQL')
+        target_pckdir = os.path.join(DB_dir, 'PCK')
+        target_rollbackdir = os.path.join(DB_dir, 'ROLLBACK')
         try:
             if os.path.exists(DB_dir):
                 shutil.rmtree(DB_dir)
             os.makedirs(target_sqldir)
             os.mkdir(target_pckdir)
+            os.mkdir(target_rollbackdir)
             if os.path.exists(log_dir):
                 shutil.rmtree(log_dir)
             os.mkdir(log_dir)
