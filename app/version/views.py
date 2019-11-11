@@ -513,7 +513,7 @@ def edit_package(id):
                                   versionno=versionnos,
                                   pckno=pcknos,
                                   rollbackno=rollbacknos,
-                                  created=datetime.utcnow(),
+                                  created=package.rlsdate,
                                   app_id=merge_app.id,
                                   content='合并发布',
                                   developer=current_user.username,
