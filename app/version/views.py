@@ -441,7 +441,6 @@ def edit_package(id):
         name = form.name.data
         blineno = form.blineno.data
         change_blineno_list = blineno.split(',')
-        rlsdate = datetime.now()
         remark = form.remark.data
 
         #增加的基线状态修改,并将基线加入更新包中
