@@ -58,7 +58,7 @@ class Baseline(db.Model):
         job = get_jenkins_job(job_name)
         jenkins_last_build = job.get_last_build().is_good()
 
-        msg='开始构建程序.....\n'
+        msg='开始构建程序.....'+job_name+'\n'
         if jenkins_last_build:
             msg += '该系统上一次构建结果： 成功\n'
         else:
@@ -66,6 +66,7 @@ class Baseline(db.Model):
         jenkins_build_number = job.get_next_build_number() 
         msg += 'jenkins构建日志请查： '+job.url+str(jenkins_build_number)+'/console'+'\n'
         current_app.logger.info(msg)
+        print(msg)
 
         # 3. 使用request触发Jenkins构建
         job_name = os.path.basename(self.app.jenkins_job_dir)

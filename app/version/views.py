@@ -456,7 +456,7 @@ def edit_package(id):
         reduce_blineno_set = set(original_blineno) - set(change_blineno_list)
         for no in reduce_blineno_set:
             baseline = Baseline.query.get_or_404(no)
-            baseline.package_id = ''
+            baseline.package_id = None
             db.session.add(baseline)
             db.session.commit()
 
