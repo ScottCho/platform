@@ -574,7 +574,7 @@ def release_package(id):
 def merge_version(id):
     package = Package.query.get_or_404(id)
     merge_blineno = package.merge_blineno
-    merge_msg = 'Start merging baselines....\n'
+    merge_msg = '开始合并基线....</br>'
     for blineno in merge_blineno.split(','):
         baseline = Baseline.query.get_or_404(blineno)
         app = baseline.app
@@ -587,22 +587,22 @@ def merge_version(id):
             l.update()
             #合并
             source_log = l.run_command('log',[app.source_dir,'-c',version])[3]
-            message = '{} \n Merged revision {} from {}'.format(source_log,version,source_dir)
+            message = 'Merged revision {} from {}'.format(version,source_dir)
             current_app.logger.info(message)
             merge_msg += message
             try:
                 merge_result = l.run_command('merge',
                     [app.source_dir,workspace,'-c',version])
                 if len(merge_result) > 2 and 'conflicts' in merge_result[3]:
-                    merge_msg = '合并'+version+'出现冲突\n'
+                    merge_msg += '合并'+version+'出现冲突\n'
                     current_app.logger.error(merge_msg)
                     l.run_command('revert',['-R',workspace])
                 else:
                     #提交
                     l.commit(message)
-                    merge_msg += version+'合并成功.\n'
+                    merge_msg += '合并成功.</br>'
             except:
-                merge_msg += '合并'+version+'出现错误，请检查\n'
+                merge_msg += '合并出现错误，请检查</br>'
                 current_app.logger.error(merge_msg)
                 l.run_command('revert',['-R',workspace])
     return render_template('version/merge_result.html',msg=merge_msg)
