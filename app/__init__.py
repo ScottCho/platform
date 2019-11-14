@@ -47,6 +47,7 @@ ENV = os.getenv('FLASK_CONFIG') or 'default'
 flask_app = Flask(__name__,instance_relative_config=True)
 flask_app.config.from_object(config[ENV])
 config[ENV].init_app(flask_app)
+flask_app.logger.setLevel(logging.INFO)
 
 
 #初始化celery

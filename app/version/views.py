@@ -580,7 +580,7 @@ def merge_version(id):
         app = baseline.app
         version_list = sorted(baseline.versionno.split(','))
         source_dir = app.source_dir
-        workspace = app.jenkins_job_dir+'/workspace'
+        workspace = os.path.join(app.jenkins_job_dir,'workspace')
         for version in version_list:
             #更新SVN中的Jenkins中的源码目录
             l = svn.local.LocalClient(workspace)
