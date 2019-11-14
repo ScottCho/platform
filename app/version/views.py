@@ -594,15 +594,15 @@ def merge_version(id):
                 merge_result = l.run_command('merge',
                     [app.source_dir,workspace,'-c',version])
                 if len(merge_result) > 2 and 'conflicts' in merge_result[3]:
-                    merge_msg = '合并'+version+'出现冲突'
+                    merge_msg = '合并'+version+'出现冲突\n'
                     current_app.logger.error(merge_msg)
                     l.run_command('revert',['-R',workspace])
                 else:
                     #提交
                     l.commit(message)
-                    merge_msg += 'Good,Merge Success.'
+                    merge_msg += version+'合并成功.\n'
             except:
-                merge_msg = '合并'+version+'出现错误，请检查'
+                merge_msg += '合并'+version+'出现错误，请检查\n'
                 current_app.logger.error(merge_msg)
                 l.run_command('revert',['-R',workspace])
     return render_template('version/merge_result.html',msg=merge_msg)
