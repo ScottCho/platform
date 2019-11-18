@@ -8,11 +8,12 @@
 
         <div class="error-content">
           <h3><i class="fa fa-warning text-red"></i> 哎呀！有些不对劲。</h3>
-
-          <p>
-            请检查数据库的表是否被锁,表单内容是否存在<br>
-            我们将立即努力解决这个问题。同时，您可以<a href="{{ url_for('index') }}">返回仪表板</a>或尝试使用搜索表单。
-          </p>
+          <ul>
+            <li>请检查数据库的表是否被锁</li>
+            <li>表单内容是否存在(SVN版本号)</li>
+            <li>是否选错应用</li>
+          </ul>
+          我们将立即努力解决这个问题。同时，您可以<a href="{{ url_for('index') }}">返回仪表板</a>或尝试使用搜索表单。
         </div>
       </div>
 {% endblock %}
