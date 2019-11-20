@@ -7,8 +7,10 @@ from ansible.inventory.manager import InventoryManager
 from ansible.playbook.play import Play
 from ansible.executor.task_queue_manager import TaskQueueManager
 from ansible.plugins.callback import CallbackBase
+from ansible.executor.playbook_executor import PlaybookExecutor
 from ansible import context
 import ansible.constants as C
+
 
 class ResultCallback(CallbackBase):
     """A sample callback plugin used for performing an action as results come in
@@ -25,51 +27,65 @@ class ResultCallback(CallbackBase):
         host = result._host
         print(json.dumps({host.name: result._result}, indent=4))
 
+
+    def v2_runner_on_failed(self, result, ignore_errors=False):
+        host = result._host.get_name()
+        print(json.dumps({host.name: result._result}, indent=4))
+
+    def v2_runner_on_unreachable(self, result, ignore_errors=False):
+        host = result._host.get_name()
+        print(json.dumps({host.name: result._result}, indent=4))
+
+    
+
+
+
 # since the API is constructed for CLI it expects certain options to always be set in the context object
-context.CLIARGS = ImmutableDict(connection='local', module_path=['/to/mymodules'], forks=10, become=None,
-                                become_method=None, become_user=None, check=False, diff=False)
+context.CLIARGS = ImmutableDict(connection='paramiko_ssh', module_path=['/to/mymodules'], forks=10, become=None,
+                                become_method=None, become_user=None, check=False, diff=False, syntax=False,start_at_task=None)
 
-
+ 
 class AnsibleTask:
-    # initialize needed objects
-    def __init__(self):
-    # Takes care of finding and reading yaml, json and ini files
-        self.loader = DataLoader() 
+    def __init__(self, sources):
+        #source为以逗号分割的IP或者host配置文件路径
+        self.sources = sources
+        # Takes care of finding and reading yaml, json and ini files
+        self.loader = DataLoader()
         self.passwords = dict(vault_pass='secret')
         # Instantiate our ResultCallback for handling results as they come in. Ansible expects this to be one of its main display outlets
-        self.results_callback = ResultCallback()
+        self.results_callback = None
         # create inventory, use path to host config file as source or hosts in a comma separated string
-        self.inventory = InventoryManager(loader=self.loader, sources='/etc/ansible/hosts')
+        self.inventory = InventoryManager(loader=self.loader, sources=self.sources)
         # variable manager takes care of merging all the different sources to give you a unified view of variables available in each context
         self.variable_manager = VariableManager(loader=self.loader, inventory=self.inventory)
 
-
-    def exec_shell(self, command):
+    def exec_shell(self, hosts, module_name, module_args):
+        self.results_callback = ResultCallback()
     # create data structure that represents our play, including tasks, this is basically what our YAML loader does internally.
-        play_source =  dict(
-            name = "Ansible Play",
-            hosts = 'all',
-            gather_facts = 'no',
-            tasks = [
-                dict(action=dict(module='shell', args=command), register='shell_out'),
+        play_source = dict(
+            name="Ansible Play",
+            hosts=hosts,
+            gather_facts='no',
+            tasks=[
+                dict(action=dict(module=module_name, args=module_args), register='shell_out'),
                 dict(action=dict(module='debug', args=dict(msg='{{shell_out.stdout}}')))
-             ]
+            ]
         )
         # Create play object, playbook objects use .load instead of init or new methods,
         # this will also automatically create the task objects from the info provided in play_source
         play = Play().load(play_source, variable_manager=self.variable_manager, loader=self.loader)
-        
+
         # Run it - instantiate task queue manager, which takes care of forking and setting up all objects to iterate over host list and tasks
         tqm = None
         try:
             tqm = TaskQueueManager(
-                      inventory=self.inventory,
-                      variable_manager=self.variable_manager,
-                      loader=self.loader,
-                      passwords=self.passwords,
-                      stdout_callback=self.results_callback,  # Use our custom callback instead of the ``default`` callback plugin, which prints to stdout
-                  )
-            result = tqm.run(play) # most interesting data for a play is actually sent to the callback's methods
+                inventory=self.inventory,
+                variable_manager=self.variable_manager,
+                loader=self.loader,
+                passwords=self.passwords,
+                stdout_callback=self.results_callback,  # Use our custom callback instead of the ``default`` callback plugin, which prints to stdout
+            )
+            result = tqm.run(play)  # most interesting data for a play is actually sent to the callback's methods
         finally:
             # we always need to cleanup child procs and the structures we use to communicate with them
             if tqm is not None:
@@ -78,6 +94,28 @@ class AnsibleTask:
             # Remove ansible tmpdir
             shutil.rmtree(C.DEFAULT_LOCAL_TMP, True)
 
+    def ansible_playbook(self,playbook_path,extra_vars=None):
+        self.results_callback = ResultCallback()
+        executor = PlaybookExecutor(
+            playbooks = [playbook_path],
+            inventory=self.inventory,
+            variable_manager=self.variable_manager,
+            loader=self.loader,
+            passwords=self.passwords
+            )
+
+        executor._tqm._stdout_callback = self.resultes_callback
+        constants.HOTS_KEY_CHECKING = False
+        result = executor.run()
+        print(result)
+        return(result)
+        
+
+
+
+
 if __name__ == '__main__':
-    tasks = AnsibleTask()
-    tasks.exec_shell('whoami')
+    tasks = AnsibleTask('192.168.0.12,192.168.0.31')
+    # tasks = AnsibleTask('/etc/ansible/hosts')
+    tasks.exec_shell('192.168.0.31', 'shell', 'ifconfig')
+    tasks.ansible_playbook('/etc/ansible/roles/centos7/init.yml')

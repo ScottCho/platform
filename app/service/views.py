@@ -1,17 +1,21 @@
-from flask import render_template,flash,redirect,url_for,request,current_app
-from flask_login import login_required
 import logging
 import subprocess
 import threading
 
-from . import service_bp
-from app.tasks import remote_shell
+from flask import (current_app, flash, redirect, render_template, request,
+                   url_for)
+from flask_login import login_required
+
 from app.decorators import admin_required, permission_required
-from ..models.auth import Permission, Project
-from ..models.service import App, Database
-from ..models.machine import Machine, Credence, Agreement
-from .. import db
+from app.tasks import remote_shell
 from app.utils.redirect_back import redirect_back
+
+from .. import db
+from ..models.auth import Permission, Project
+from ..models.machine import Agreement, Credence, Machine
+from ..models.service import App, Database
+from . import service_bp
+
 
 #管理应用
 @service_bp.route('/manage/app')

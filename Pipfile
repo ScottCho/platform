@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 watchdog = "*"
+autopep8 = "*"
 
 [packages]
 flask = "*"
@@ -25,6 +26,7 @@ jenkinsapi = "*"
 openpyxl = "*"
 paramiko = "*"
 requests = "*"
+ansible = "*"
 
 [requires]
 python_version = "3.6"
