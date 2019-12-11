@@ -10,15 +10,19 @@ from ansible.plugins.callback import CallbackBase
 from ansible.executor.playbook_executor import PlaybookExecutor
 from ansible import context
 import ansible.constants as C
+import redis
 
+redis_cli = redis.StrictRedis(host="192.168.0.12", port=6379, db=0)
+
+
+# since the API is constructed for CLI it expects certain options to always be set in the context object
+context.CLIARGS = ImmutableDict(connection='paramiko_ssh', module_path=[], forks=10, become=None,
+                                become_method=None, become_user=None, check=False, diff=False, syntax=False,start_at_task=None)
 
 class ResultCallback(CallbackBase):
-    """A sample callback plugin used for performing an action as results come in
-
-    If you want to collect all results into a single object for processing at
-    the end of the execution, look into utilizing the ``json`` callback plugin
-    or writing your own custom callback plugin
-    """
+    def __init__(self, *args, **kwargs):
+        super(ResultCallback, self).__init__(*args, **kwargs)
+   
     def v2_runner_on_ok(self, result, **kwargs):
         """Print a json representation of the result
 
@@ -37,12 +41,57 @@ class ResultCallback(CallbackBase):
         print(json.dumps({host.name: result._result}, indent=4))
 
     
+class PlayBookResultCallback(CallbackBase):
+
+    def __init__(self, redis_key_prefix,  task_id, *args, **kwargs):
+        super(PlayBookResultCallback, self).__init__(*args, **kwargs)
+        self.task_name = ''
+        self.key = "{}::{}".format(redis_key_prefix,task_id)
+
+   
+    def v2_runner_on_ok(self, result, *args, **kwargs):
+         
+        if not self.task_name:
+            self.task_name = result._task_fields['name']
+            redis_cli.append(self.key, "Task [{0}]{1}\n".format(result._task_fields['name'],'*' * 80))
+
+        if self.task_name != result._task_fields['name']:
+            self.task_name = result._task_fields['name']
+            redis_cli.append(self.key, "\nTask [{0}]{1}\n".format(result._task_fields['name'],'*' * 80))
+        
+        state = 'changed' if result._result.get('changed') else 'ok'
+        redis_cli.append(self.key, "{0}: [{1}]\n".format(state, result._host.get_name()))
+
+
+    def v2_runner_on_failed(self, result, *args, **kwargs):
+        if not self.task_name or self.task_name != result._task_fields['name']:
+            self.task_name = result._task_fields['name']
+            redis_cli.append(self.key, "Task [{0}]{1}\n".format(result._task_fields['name'],'*' * 80))
+        redis_cli.append(self.key, "fatal: [{0}]: FAILED! => {1}\n\n  ".format(result._host.get_name(),result._result))
+
+    def v2_runner_on_unreachable(self, result):
+        if not self.task_name or self.task_name != result._task_fields['name']:
+            self.task_name = result._task_fields['name']
+            redis_cli.append(self.key, "Task [{0}]\n".format(result._task_fields['name']))
+        redis_cli.append(self.key, "unreachable: [{0}]".format(result._host.get_name()))
+
+    def v2_runner_on_skipped(self, result):
+        if not self.task_name or self.task_name != result._task_fields['name']:
+            self.task_name = result._task_fields['name']
+            redis_cli.append(self.key, "Task [{0}]\n".format(result._task_fields['name']))
+        redis_cli.append(self.key, "skipped: [{0}]".format(result._host.get_name()))
+
+
+    def v2_playbook_on_stats(self, stats):
+        redis_cli.append(self.key, '\nPLAY RECAP{}\n'.format('*' * 80))
+        hosts = sorted(stats.processed.keys())
+        for h in hosts:
+            t = stats.summarize(h)
+            redis_cli.append(self.key, '{:20s}: {}\n'.format(h ,t))
 
 
 
-# since the API is constructed for CLI it expects certain options to always be set in the context object
-context.CLIARGS = ImmutableDict(connection='paramiko_ssh', module_path=['/to/mymodules'], forks=10, become=None,
-                                become_method=None, become_user=None, check=False, diff=False, syntax=False,start_at_task=None)
+
 
  
 class AnsibleTask:
@@ -94,8 +143,8 @@ class AnsibleTask:
             # Remove ansible tmpdir
             shutil.rmtree(C.DEFAULT_LOCAL_TMP, True)
 
-    def ansible_playbook(self,playbook_path,extra_vars=None):
-        self.results_callback = ResultCallback()
+    def ansible_playbook(self,redis_key_prefix, task_id, playbook_path,extra_vars=None):
+        self.results_callback = PlayBookResultCallback(redis_key_prefix, task_id)
         executor = PlaybookExecutor(
             playbooks = [playbook_path],
             inventory=self.inventory,
@@ -104,10 +153,9 @@ class AnsibleTask:
             passwords=self.passwords
             )
 
-        executor._tqm._stdout_callback = self.resultes_callback
-        constants.HOTS_KEY_CHECKING = False
+        executor._tqm._stdout_callback = self.results_callback
+        C.HOTS_KEY_CHECKING = False
         result = executor.run()
-        print(result)
         return(result)
         
 
@@ -117,5 +165,6 @@ class AnsibleTask:
 if __name__ == '__main__':
     tasks = AnsibleTask('192.168.0.12,192.168.0.31')
     # tasks = AnsibleTask('/etc/ansible/hosts')
-    tasks.exec_shell('192.168.0.31', 'shell', 'ifconfig')
-    tasks.ansible_playbook('/etc/ansible/roles/centos7/init.yml')
+    tasks.exec_shell('192.168.0.31', 'shell', 'ls')
+    tasks.ansible_playbook('ansible',8,'/etc/ansible/roles/centos7/init.yml')
+

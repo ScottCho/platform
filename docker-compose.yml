@@ -45,7 +45,7 @@ services:
     ports:
       - "8090:8080"
     volumes:
-      - jenkins_data:/var/jenkins_home 
+      - jenkins_data:/var/lib/jenkins
 
 
 volumes:
