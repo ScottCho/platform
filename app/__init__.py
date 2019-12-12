@@ -1,4 +1,4 @@
-#!/usr/bin/python
+ #!/usr/bin/python
 #-*- coding: UTF-8 -*-
 import os
 import logging
@@ -91,12 +91,12 @@ def index():
     return render_template('index.html')
 
 from app.models.service import Database, Schema,App,Subsystem,Env
-from app.models.auth import Project
+from app.models.auth import Project, Role
 from app.models.version import Baseline
 @flask_app.shell_context_processor
 def make_shell_context():
     return dict(db=db, Project=Project, Database=Database, App=App, Baseline=Baseline,
-        Subsystem=Subsystem,Env=Env)
+        Subsystem=Subsystem,Env=Env,Role=Role)
 
 
 # 错误处理

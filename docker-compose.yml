@@ -6,7 +6,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - .:/app
+      - .:/code
     env_file: .env
     links:
       - mysql
@@ -38,12 +38,12 @@ services:
   adminer:
     image: adminer
     ports:
-      - "8080:8080"
+      - "8090:8080"
 
   jenkins:
     image: "jenkins"
     ports:
-      - "8090:8080"
+      - "8080:8080"
     volumes:
       - jenkins_data:/var/lib/jenkins
 
