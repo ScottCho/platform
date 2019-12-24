@@ -384,6 +384,7 @@ def merge_baseline():
 @permission_required(Permission.backend_manage)
 def merge_update(id):
     package = Package.query.get_or_404(id)
+    *_,package_num = package.split('_')
     project = package.project
     msg="" 
     #合并发布之前重建APP和DB目录
@@ -393,7 +394,7 @@ def merge_update(id):
         merge_baseline = Baseline.query.get_or_404(nu)
         #更新数据库
         if merge_baseline.pckno or merge_baseline.sqlno:
-            msg+=merge_baseline.build_db_job(flag=1)
+            msg+=merge_baseline.build_db_job(flag=1,num=package_num)
         #构建Jenkins的Job
         if merge_baseline.versionno:
             msg+=merge_baseline.build_app_job(flag=1)

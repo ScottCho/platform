@@ -86,8 +86,8 @@ class Baseline(db.Model):
         request_result = build_by_token(job_name)
         return msg
 
-    # 发布DB,flag=0,发布SIT，flag=1发，发布预UAT
-    def build_db_job(self, flag=0):
+    # 发布DB,flag=0,发布SIT，flag=1发，基线合并发布,num为更新包次数
+    def build_db_job(self, flag=0, num=01):
         # DB的用户名实例密码
         db_username = self.app.schema.username
         db_password = self.app.schema.password
@@ -126,9 +126,9 @@ class Baseline(db.Model):
         r.update()
         # $base_DIR/HXUSER_20180409_01_ALL.sql
         DB_SCRIPT = os.path.join(base_dir, db_username.upper(
-        )+'_'+self.created.strftime("%Y%m%d")+'_'+'01_ALL.sql')
+        )+'_'+self.created.strftime("%Y%m%d")+'_'+num+'_ALL.sql')
         ROLLBACK_SCRIPT = os.path.join(target_rollbackdir, db_username.upper(
-        )+'_'+self.created.strftime("%Y%m%d")+'_'+'ALL_ROLLBACK_01.sql')
+        )+'_'+self.created.strftime("%Y%m%d")+'_'+'ALL_ROLLBACK_'+num+'.sql')
         # 将sql文件复制到base_dir，,并将路径加到ALL.sql
         if self.sqlno:
             for sql in self.sqlno.split(','):

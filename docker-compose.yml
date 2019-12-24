@@ -15,6 +15,7 @@ services:
       - jenkins
     depends_on:
       - mysql
+    command: 
   
   mysql:
     image: mysql
