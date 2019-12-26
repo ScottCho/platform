@@ -12,7 +12,7 @@
         <tr>
           <td>{{ package.id }}</td>
           <td>{{ package.name }}</td>
-          <td>{{ package.blineno }}</td>
+          <td width="40%">{{ package.blineno }}</td>
           <td>{{ package.remark }}</td>
           <td>
             <a class="btn btn-primary btn-sm" href="{{ url_for('version.edit_package',id=package.id,next=request.full_path) }}">编辑</a>

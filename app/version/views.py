@@ -265,7 +265,7 @@ def edit_baseline(id):
         send_email(recipients, mailtheme,
                'mail/version/baseline.html', attachments, baseline=baseline
                 )
-        flash('基线已经重新更，请查收邮件','warning')
+        flash('基线已经重更，请查收邮件','warning')
         return render_template('version/update_result.html', msg=msg)
     form.versionno.data = baseline.versionno
     form.sqlno.data = baseline.sqlno
