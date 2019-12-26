@@ -44,4 +44,6 @@ mv "${WORKSPACE}"/"${PACKAGE_MD5}" "${PACKAGE_DIR}"
 echo ssh ${REMOTE_HOST} "sh ${DEPLOY_DIR}/update.sh"
 ssh ${REMOTE_HOST} "sh ${DEPLOY_DIR}/update.sh"
 
+rm -rf $APP_LIST
+
 exit

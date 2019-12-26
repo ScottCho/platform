@@ -384,7 +384,7 @@ def merge_baseline():
 @permission_required(Permission.backend_manage)
 def merge_update(id):
     package = Package.query.get_or_404(id)
-    *_,package_num = package.split('_')
+    *_,package_num = package.name.split('_')
     project = package.project
     msg="" 
     #合并发布之前重建APP和DB目录
