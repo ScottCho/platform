@@ -85,7 +85,7 @@ class Baseline(db.Model):
         return msg
 
     # 发布DB,flag=0,发布SIT，flag=1发，基线合并发布,num为更新包次数
-    def build_db_job(self, flag=0, num=01):
+    def build_db_job(self, flag=0, num='01'):
         # DB的用户名实例密码
         db_username = self.app.schema.username
         db_password = self.app.schema.password
