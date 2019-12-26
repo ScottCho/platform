@@ -26,11 +26,9 @@ def build_by_token(job_name):
     return r.ok
 
 #request触发Jenkins远程参数构建
-def build_with_parameters(job_name,db_username,db_password,db_host,db_instance,db_script):
-    datas = {'username':username, 'password':password, 'token':token,
-    'db_username':db_username,'db_password':db_password,'db_host':db_host,
-    'db_instance':db_instance,'db_script':db_script
-    }
+def build_with_parameters(job_name,**kw):
+    global url,username,password,token
+    kw.update({'token':token})
     build_url =  url+'/job/'+job_name+'/buildWithParameters'
-    r = requests.post(build_url,data=datas)
+    r = requests.post(build_url,data=kw)
     return r.ok

@@ -42,12 +42,13 @@ services:
       - "8090:8080"
 
   jenkins:
-    image: "jenkins"
+    image: "jenkinsci/blueocean"
     ports:
       - "8080:8080"
     volumes:
       - jenkins_data:/var/lib/jenkins
-
+      - /var/run/docker.sock:/var/run/docker.sock
+       -v "$HOME":/home
 
 volumes:
   redis_data:

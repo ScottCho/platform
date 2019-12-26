@@ -60,8 +60,6 @@ class Baseline(db.Model):
                                          '_'+datetime.utcnow().strftime("%Y%m%d")+'_'+str(self.id)+'.txt')
         #compile_file_path = self.app.jenkins_job_dir+'/'+self.app.subsystem.en_name+'_'+datetime.utcnow().strftime("%Y%m%d")+'_'+str(self.id)+'.txt'
         print(compile_file_path)
-        [os.remove(item) for item in glob.glob(
-            self.app.jenkins_job_dir+'/workspace/' + '*txt')]
         with open(compile_file_path, 'w') as fw:
             for line in compile_file_list:
                 fw.write('"'+line+'"'+'\n')
@@ -83,7 +81,7 @@ class Baseline(db.Model):
 
         # 3. 使用request触发Jenkins构建
         job_name = os.path.basename(self.app.jenkins_job_dir)
-        request_result = build_by_token(job_name)
+        request_result = build_with_parameters(job_name,baseline_id=self.id)
         return msg
 
     # 发布DB,flag=0,发布SIT，flag=1发，基线合并发布,num为更新包次数
