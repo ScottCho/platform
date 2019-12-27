@@ -1,7 +1,7 @@
-PORT=8181
-REMOTE_HOST="tomcat@192.168.0.51"
-DEPLOY_DIR="/app/deployments/core"
-PACKAGE_DIR="/update/BOCHK/APP"
+PORT=8002
+REMOTE_HOST="tomcat@192.168.0.31"
+DEPLOY_DIR="/wls/webapps/8002"
+PACKAGE_DIR="/update/WLINK/APP_SIT"
 ALIAS="INS"
 
 # delete jar file in $WORKSPACE 
