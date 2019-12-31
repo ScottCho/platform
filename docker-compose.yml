@@ -15,7 +15,6 @@ services:
       - jenkins
     depends_on:
       - mysql
-    command: 
   
   mysql:
     image: mysql
@@ -43,12 +42,12 @@ services:
 
   jenkins:
     image: "jenkinsci/blueocean"
+    user: root
     ports:
       - "8080:8080"
     volumes:
       - jenkins_data:/var/lib/jenkins
       - /var/run/docker.sock:/var/run/docker.sock
-       -v "$HOME":/home
 
 volumes:
   redis_data:
