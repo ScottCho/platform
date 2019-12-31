@@ -46,6 +46,7 @@ def make_celery(app):
 ENV = os.getenv('FLASK_CONFIG') or 'default'
 flask_app = Flask(__name__,instance_relative_config=True)
 flask_app.config.from_object(config[ENV])
+flask_app.config.update(RESTFUL_JSON=dict(ensure_ascii=False))
 config[ENV].init_app(flask_app)
 flask_app.logger.setLevel(logging.INFO)
 
@@ -63,25 +64,29 @@ mail.init_app(flask_app)
 login_manager.init_app(flask_app)
 csrf.init_app(flask_app)
 
-#注册用户认证蓝图
+# 注册用户认证蓝图
 from .auth import auth_bp
 flask_app.register_blueprint(auth_bp, url_prefix='/auth')
 
-#注册版本管理蓝图
+# 注册版本管理蓝图
 from app.version import version_bp
 flask_app.register_blueprint(version_bp, url_prefix='/version')
 
-#注册日志蓝图
+# 注册日志蓝图
 from .log import log_bp
 flask_app.register_blueprint(log_bp, url_prefix='/log')
 
-#注册服务管理蓝图
+# 注册服务管理蓝图
 from .service import service_bp
 flask_app.register_blueprint(service_bp, url_prefix='/service')
 
-#注册后台管理蓝图
+# 注册后台管理蓝图
 from .backstage import backstage_bp
 flask_app.register_blueprint(backstage_bp,url_prefix='/backstage')
+
+# 注册api蓝图api
+import app.apis
+
 
 
 
