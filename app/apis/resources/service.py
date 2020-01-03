@@ -3,7 +3,8 @@ from flask_rest_jsonapi import Api, ResourceDetail, ResourceList, ResourceRelati
 from marshmallow_jsonapi.flask import Schema, Relationship
 
 from  app import flask_app
-from app.models.service import Database, Schema, App, Env, Subsystem
+from app.models.service import Database, App, Env, Subsystem
+from app.models.service import Schema as DBSchema
 from app import db
 
 from app.apis import api
@@ -30,7 +31,7 @@ class DatabaseSchema(Schema):
 
 class SchemaSchema(Schema):
     class Meta:
-        type_ = 'db_schemas'
+        type_ = 'schema'
         self_view = 'schema_detail'
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'schema_list'
@@ -65,22 +66,18 @@ class DatabaseRelationship(ResourceRelationship):
 class SchemaList(ResourceList):
     schema = SchemaSchema
     data_layer = {'session': db.session,
-                  'model': Schema}
+                  'model': DBSchema}
 
-class SchemarDetail(ResourceDetail):
+class SchemaDetail(ResourceDetail):
     schema = SchemaSchema
     data_layer = {'session': db.session,
-                  'model': Schema}
-
-class SchemaRelationship(ResourceRelationship):
-    schema = SchemaSchema
-    data_layer = {'session': db.session,
-                  'model': Schema}
+                  'model': DBSchema}
 
 class SchemaRelationship(ResourceRelationship):
     schema = SchemaSchema
     data_layer = {'session': db.session,
                   'model': Schema}
+
 
 # Create endpoints
 api.route(DatabaseList, 'database_list', '/api/databases')
