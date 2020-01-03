@@ -1,18 +1,18 @@
 from .. import db
 
+
 #数据库实例
 class Database(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	instance = db.Column(db.String(80),nullable=False)
-	host = db.Column(db.String(80),nullable=False)
 	port = db.Column(db.String(32),nullable=False)
-	username = db.Column(db.String(20),nullable=False)
-	password = db.Column(db.String(80),nullable=False)
 	project = db.Column(db.String(80),nullable=False)
 	project_id = db.Column(db.Integer,db.ForeignKey('projects.id'))
 	mark = db.Column(db.String(80))
 	project = db.relationship('Project')
 	schemas = db.relationship('Schema',back_populates='instance')
+	credence_id = db.Column(db.Integer,db.ForeignKey('credences.id'))
+	credence = db.relationship('Credence')
 
 #数据库的Schema
 class Schema(db.Model):
@@ -28,10 +28,7 @@ class Schema(db.Model):
 class App(db.Model):
 	__tablename__ = 'apps'
 	id = db.Column(db.Integer, primary_key=True)
-	host = db.Column(db.String(20),nullable=False)
 	env = db.Column(db.String(20),nullable=False)
-	username = db.Column(db.String(20),nullable=False)
-	password = db.Column(db.String(80),nullable=False)
 	log_dir = db.Column(db.String(80),nullable=False)
 	jenkins_job_dir = db.Column(db.String(256))
 	source_dir = db.Column(db.String(256))
@@ -43,6 +40,8 @@ class App(db.Model):
 	env = db.relationship('Env',back_populates='apps')
 	subsystem = db.relationship('Subsystem')
 	baselines = db.relationship('app.models.version.Baseline',back_populates='app')
+	machine_id = db.Column(db.Integer,db.ForeignKey('machines.id'))
+	machine = db.relationship('Machine')
 
 class Subsystem(db.Model):
 	__tablename__ = 'subsystems'

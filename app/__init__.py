@@ -46,7 +46,6 @@ def make_celery(app):
 ENV = os.getenv('FLASK_CONFIG') or 'default'
 flask_app = Flask(__name__,instance_relative_config=True)
 flask_app.config.from_object(config[ENV])
-flask_app.config.update(RESTFUL_JSON=dict(ensure_ascii=False))
 config[ENV].init_app(flask_app)
 flask_app.logger.setLevel(logging.INFO)
 
@@ -62,7 +61,8 @@ db.init_app(flask_app)
 migrate.init_app(flask_app, db)
 mail.init_app(flask_app)
 login_manager.init_app(flask_app)
-csrf.init_app(flask_app)
+# csrf.init_app(flask_app)
+
 
 # 注册用户认证蓝图
 from .auth import auth_bp
@@ -105,31 +105,31 @@ def make_shell_context():
 
 
 # 错误处理
-@flask_app.errorhandler(400)
-def bad_request(e):
-    return render_template('errors/400.html'), 400
+# @flask_app.errorhandler(400)
+# def bad_request(e):
+#     return render_template('errors/400.html'), 400
 
 
-@flask_app.errorhandler(403)
-def forbidden(e):
-    return render_template('errors/403.html'), 403
+# @flask_app.errorhandler(403)
+# def forbidden(e):
+#     return render_template('errors/403.html'), 403
 
 
-@flask_app.errorhandler(404)
-def page_not_found(e):
-    return render_template('errors/404.html'), 404
+# @flask_app.errorhandler(404)
+# def page_not_found(e):
+#     return render_template('errors/404.html'), 404
 
 
-@flask_app.errorhandler(413)
-def request_entity_too_large(e):
-    return render_template('errors/413.html'), 413
+# @flask_app.errorhandler(413)
+# def request_entity_too_large(e):
+#     return render_template('errors/413.html'), 413
 
 
-@flask_app.errorhandler(500)
-def internal_server_error(e):
-    return render_template('errors/500.html'), 500
+# @flask_app.errorhandler(500)
+# def internal_server_error(e):
+#     return render_template('errors/500.html'), 500
 
 
-@flask_app.errorhandler(CSRFError)
-def handle_csrf_error(e):
-    return render_template('errors/400.html', description=e.description), 400
+# @flask_app.errorhandler(CSRFError)
+# def handle_csrf_error(e):
+#     return render_template('errors/400.html', description=e.description), 400
