@@ -26,22 +26,21 @@ class Schema(db.Model):
 	instance = db.relationship('Database',back_populates='schemas')
 
 class App(db.Model):
-	__tablename__ = 'apps'
-	id = db.Column(db.Integer, primary_key=True)
-	env = db.Column(db.String(20),nullable=False)
-	log_dir = db.Column(db.String(80),nullable=False)
-	jenkins_job_dir = db.Column(db.String(256))
-	source_dir = db.Column(db.String(256))
-	subsystem_id = db.Column(db.Integer,db.ForeignKey('subsystems.id'))
-	env_id = db.Column(db.Integer,db.ForeignKey('envs.id'))
-	schema = db.relationship('Schema',uselist=False)
-	project_id = db.Column(db.Integer,db.ForeignKey('projects.id'))
-	project = db.relationship('Project',back_populates='apps')
-	env = db.relationship('Env',back_populates='apps')
-	subsystem = db.relationship('Subsystem')
-	baselines = db.relationship('app.models.version.Baseline',back_populates='app')
-	machine_id = db.Column(db.Integer,db.ForeignKey('machines.id'))
-	machine = db.relationship('Machine')
+    __tablename__ = 'apps'
+    id = db.Column(db.Integer, primary_key=True)
+    log_dir = db.Column(db.String(80),nullable=False)
+    jenkins_job_dir = db.Column(db.String(256))
+    source_dir = db.Column(db.String(256))
+    schema = db.relationship('Schema',uselist=False)
+    project_id = db.Column(db.Integer,db.ForeignKey('projects.id'))
+    project = db.relationship('Project',back_populates='apps')
+    env_id = db.Column(db.Integer,db.ForeignKey('envs.id'))
+    env = db.relationship('Env',back_populates='apps')
+    subsystem_id = db.Column(db.Integer,db.ForeignKey('subsystems.id'))
+    subsystem = db.relationship('Subsystem')
+    baselines = db.relationship('app.models.version.Baseline',back_populates='app')
+    machine_id = db.Column(db.Integer,db.ForeignKey('machines.id'))
+    machine = db.relationship('Machine')
 
 class Subsystem(db.Model):
 	__tablename__ = 'subsystems'

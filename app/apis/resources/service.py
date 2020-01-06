@@ -47,6 +47,48 @@ class SchemaSchema(Schema):
                              type_='database')
 
 
+class EnvSchema(Schema):
+    class Meta:
+        type_ = 'env'
+        self_view = 'env_detail'
+        self_view_kwargs = {'id': '<id>'}
+        self_view_many = 'env_list'
+        
+    id = fields.Integer(as_string=True, dump_only=True)
+    name = fields.Str(required=True)
+    # apps = Relationship(self_view='app_schemas',
+    #                          self_view_kwargs={'id': '<id>'},
+    #                          related_view='schema_list',
+    #                          related_view_kwargs={'id': '<id>'},
+    #                          many=True,
+    #                          schema='SchemaSchema',
+    #                          type_='schema')
+
+class SubsystemSchema(Schema):
+    class Meta:
+        type_ = 'subsystem'
+        self_view = 'subsystem_detail'
+        self_view_kwargs = {'id': '<id>'}
+        self_view_many = 'subsystem_list'
+        
+    id = fields.Integer(as_string=True, dump_only=True)
+    en_name = fields.Str(required=True)
+    zh_name = fields.Str(required=True)
+
+class AppSchema(Schema):
+    class Meta:
+        type_ = 'app'
+        self_view = 'app_detail'
+        self_view_kwargs = {'id': '<id>'}
+        self_view_many = 'app_list'
+        
+    id = fields.Integer(as_string=True, dump_only=True)
+    log_dir = fields.Str()
+    jenkins_job_dir = fields.Str()
+    source_dir = fields.Str()
+    #, obj.env.name.upper(),obj.subsystem.name.upper()
+    display_name = fields.Function(lambda obj: "{}-{}-{}".format(obj.project.name.lower(),obj.env.name.lower(),obj.subsystem.en_name.lower()))
+
 # Create resource managers
 class DatabaseList(ResourceList):
     schema = DatabaseSchema
@@ -78,7 +120,35 @@ class SchemaRelationship(ResourceRelationship):
     data_layer = {'session': db.session,
                   'model': Schema}
 
+class EnvList(ResourceList):
+    schema = EnvSchema
+    data_layer = {'session': db.session,
+                  'model': Env}
 
+class EnvDetail(ResourceDetail):
+    schema = EnvSchema
+    data_layer = {'session': db.session,
+                  'model': Env}
+
+class SubsystemList(ResourceList):
+    schema = SubsystemSchema
+    data_layer = {'session': db.session,
+                  'model': Subsystem}
+
+class SubsystemDetail(ResourceDetail):
+    schema = SubsystemSchema
+    data_layer = {'session': db.session,
+                  'model': Subsystem}
+
+class AppList(ResourceList):
+    schema = AppSchema
+    data_layer = {'session': db.session,
+                  'model': App}
+
+class AppDetail(ResourceDetail):
+    schema = AppSchema
+    data_layer = {'session': db.session,
+                  'model': App}
 # Create endpoints
 api.route(DatabaseList, 'database_list', '/api/databases')
 api.route(DatabaseDetail, 'database_detail', '/api/databases/<int:id>')
@@ -86,3 +156,9 @@ api.route(DatabaseRelationship, 'database_schemas', '/api/databases/<int:id>/rel
 api.route(SchemaList, 'schema_list', '/api/schemas')
 api.route(SchemaDetail, 'schema_detail', '/api/schemas/<int:id>')
 api.route(SchemaRelationship, 'schema_database', '/api/schemas/<int:id>/relationships/databases')
+api.route(EnvList, 'env_list', '/api/envs')
+api.route(EnvDetail, 'env_detail', '/api/envs/<int:id>')
+api.route(SchemaList, 'subsystem_list', '/api/subsystems')
+api.route(SchemaDetail, 'subsystem_detail', '/api/subsystems/<int:id>')
+api.route(AppList, 'app_list', '/api/apps')
+api.route(AppDetail, 'app_detail', '/api/apps/<int:id>')

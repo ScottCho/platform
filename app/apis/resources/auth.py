@@ -55,7 +55,7 @@ class UserSchema(Schema):
     role = Relationship(self_view='user_role',
                         self_view_kwargs={'id': '<id>'},
                         related_view='role_detail',
-                        related_view_kwargs={'id': '<id>'},
+                        related_view_kwargs={'user_id': '<id>'},
                         schema='RoleSchema',
                         type_='role')
 
@@ -129,10 +129,10 @@ class RoleRelationship(ResourceRelationship):
 api.route(ProjectList, 'project_list', '/api/projects')
 api.route(ProjectDetail, 'project_detail', '/api/projects/<int:id>')
 api.route(ProjectRelationship, 'project_users', '/api/projects/<int:id>/relationships/users')
-api.route(UserList, 'user_list', '/api/users')
+api.route(UserList, 'user_list', '/api/users','/api/roles/<int:id>/users')
 api.route(UserDetail, 'user_detail', '/api/users/<int:id>')
 api.route(UserRelationship, 'user_projects', '/api/users/<int:id>/relationships/projects')
 api.route(UserRelationship, 'user_role', '/api/users/<int:id>/relationships/role')
 api.route(RoleList, 'role_list', '/api/roles')
-api.route(RoleDetail, 'role_detail', '/api/roles/<int:id>')
+api.route(RoleDetail, 'role_detail', '/api/roles/<int:id>','/api/users/<int:user_id>/role')
 api.route(RoleRelationship, 'role_users', '/api/roles/<int:id>/relationships/users')
