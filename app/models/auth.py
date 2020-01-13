@@ -28,10 +28,11 @@ class User(UserMixin, db.Model):
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     confirmed = db.Column(db.Boolean, default=False)
     active = db.Column(db.Boolean, default=True)
+    role = db.relationship('Role',back_populates='users')
     projects = db.relationship(
         'Project', secondary='group', back_populates='users')
+    
     # 将密码加密存储
-
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
@@ -168,7 +169,7 @@ class Role(db.Model):
     name = db.Column(db.String(64), unique=True)
     default = db.Column(db.Boolean, default=False, index=True)
     permissions = db.Column(db.Integer)
-    users = db.relationship('User', backref='role', lazy='dynamic')
+    users = db.relationship('User',back_populates='role')
 
     @staticmethod
     def insert_roles():

@@ -89,6 +89,37 @@ class AppSchema(Schema):
     #, obj.env.name.upper(),obj.subsystem.name.upper()
     display_name = fields.Function(lambda obj: "{}-{}-{}".format(obj.project.name.lower(),obj.env.name.lower(),obj.subsystem.en_name.lower()))
 
+    machine = Relationship(self_view='app_machine',
+                             self_view_kwargs={'id': '<id>'},
+                             related_view='machine_detail',
+                             related_view_kwargs={'id': '<machine_id>'},
+                             schema='MachineSchema',
+                             type_='machine') 
+    project = Relationship(self_view='app_project',
+                             self_view_kwargs={'id': '<id>'},
+                             related_view='project_detail',
+                             related_view_kwargs={'id': '<project_id>'},
+                             schema='ProjectSchema',
+                             type_='project')   
+    env = Relationship(self_view='app_env',
+                             self_view_kwargs={'id': '<id>'},
+                             related_view='env_detail',
+                             related_view_kwargs={'id': '<env_id>'},
+                             schema='EnvSchema',
+                             type_='env')
+    subsystem = Relationship(self_view='app_subsystem',
+                             self_view_kwargs={'id': '<id>'},
+                             related_view='subsystem_detail',
+                             related_view_kwargs={'id': '<subsystem_id>'},
+                             schema='SubsystemSchema',
+                             type_='subsystem')
+    schema = Relationship(self_view='app_schema',
+                             self_view_kwargs={'id': '<id>'},
+                             related_view='schema_detail',
+                             related_view_kwargs={'id': '<schema_id>'},
+                             schema='SchemaSchema',
+                             type_='schema')
+
 # Create resource managers
 class DatabaseList(ResourceList):
     schema = DatabaseSchema
@@ -149,6 +180,12 @@ class AppDetail(ResourceDetail):
     schema = AppSchema
     data_layer = {'session': db.session,
                   'model': App}
+
+class AppRelationship(ResourceRelationship):
+    schema = AppSchema
+    data_layer = {'session': db.session,
+                  'model': App}
+
 # Create endpoints
 api.route(DatabaseList, 'database_list', '/api/databases')
 api.route(DatabaseDetail, 'database_detail', '/api/databases/<int:id>')
@@ -162,3 +199,8 @@ api.route(SchemaList, 'subsystem_list', '/api/subsystems')
 api.route(SchemaDetail, 'subsystem_detail', '/api/subsystems/<int:id>')
 api.route(AppList, 'app_list', '/api/apps')
 api.route(AppDetail, 'app_detail', '/api/apps/<int:id>')
+api.route(AppRelationship, 'app_project', '/api/apps/<int:id>/relationships/project')
+api.route(AppRelationship, 'app_env', '/api/apps/<int:id>/relationships/env')
+api.route(AppRelationship, 'app_subsystem', '/api/apps/<int:id>/relationships/subsystem')
+api.route(AppRelationship, 'app_machine', '/api/apps/<int:id>/relationships/machine')
+api.route(AppRelationship, 'app_schema', '/api/apps/<int:id>/relationships/schema')

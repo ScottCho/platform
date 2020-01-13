@@ -24,7 +24,6 @@ class Baseline(db.Model):
     __tablename__ = 'baselines'
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
-    developer = db.Column(db.String(120), nullable=False)
     sqlno = db.Column(db.String(1024))
     pckno = db.Column(db.String(1024))
     rollbackno = db.Column(db.String(1024))
@@ -33,14 +32,16 @@ class Baseline(db.Model):
     mantisno = db.Column(db.String(256))
     jenkins_last_build = db.Column(db.Boolean)
     jenkins_build_number = db.Column(db.Integer)
-    app_id = db.Column(db.Integer, db.ForeignKey('apps.id'))
-    status = db.Column(db.String(20), db.ForeignKey('blstatus.status'),
-                       nullable=False)
     versionno = db.Column(db.String(1024))
     mark = db.Column(db.Text)
+    app_id = db.Column(db.Integer, db.ForeignKey('apps.id'))
     app = db.relationship('App', back_populates='baselines')
     package_id = db.Column(db.Integer, db.ForeignKey('packages.id'))
     package = db.relationship('Package', back_populates='baselines')
+    developer_id = db.Column(db.Integer,db.ForeignKey('users.id'))
+    developer = db.relationship('User')
+    status_id = db.Column(db.Integer, db.ForeignKey('blstatus.id'))
+    status = db.relationship('Blstatus')
 
     # 发布程序
     def build_app_job(self, flag=0):

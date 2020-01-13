@@ -20,9 +20,8 @@ class Schema(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	username = db.Column(db.String(128),nullable=False)
 	password = db.Column(db.String(80),nullable=False)
-	app_id = db.Column(db.Integer,db.ForeignKey('apps.id'))
 	instance_id = db.Column(db.Integer,db.ForeignKey('database.id'))
-	app = db.relationship('App') #建立与APP一对一的关系
+	app = db.relationship('App',uselist=False) #建立与APP一对一的关系
 	instance = db.relationship('Database',back_populates='schemas')
 
 class App(db.Model):
@@ -31,7 +30,6 @@ class App(db.Model):
     log_dir = db.Column(db.String(80),nullable=False)
     jenkins_job_dir = db.Column(db.String(256))
     source_dir = db.Column(db.String(256))
-    schema = db.relationship('Schema',uselist=False)
     project_id = db.Column(db.Integer,db.ForeignKey('projects.id'))
     project = db.relationship('Project',back_populates='apps')
     env_id = db.Column(db.Integer,db.ForeignKey('envs.id'))
@@ -41,6 +39,8 @@ class App(db.Model):
     baselines = db.relationship('app.models.version.Baseline',back_populates='app')
     machine_id = db.Column(db.Integer,db.ForeignKey('machines.id'))
     machine = db.relationship('Machine')
+    schema_id = db.Column(db.Integer,db.ForeignKey('db_schemas.id'))
+    schema = db.relationship('Schema')
 
 class Subsystem(db.Model):
 	__tablename__ = 'subsystems'

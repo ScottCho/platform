@@ -5,4 +5,4 @@ from app import  flask_app
 
 api = Api(flask_app)
 
-from app.apis.resources import auth, cmdb, service
+from app.apis.resources import auth, cmdb, service, vcs
