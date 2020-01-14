@@ -90,7 +90,7 @@ class Baseline(db.Model):
         # DB的用户名实例密码
         db_username = self.app.schema.username
         db_password = self.app.schema.password
-        db_host = self.app.schema.instance.machine
+        db_host = self.app.schema.instance.machine.ip
         db_port = self.app.schema.instance.port
         db_instance = self.app.schema.instance.instance
         source_dbdir = self.app.project.source_dir
