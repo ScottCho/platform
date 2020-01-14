@@ -26,6 +26,7 @@ jenkinsapi = "*"
 openpyxl = "*"
 paramiko = "*"
 requests = "*"
+flask-rest-jsonapi = "*"
 ansible = "*"
 
 [requires]

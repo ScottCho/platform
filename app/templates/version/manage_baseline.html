@@ -55,12 +55,12 @@
       <tbody>
         <tr>
           <th scope="row" width="5%">{{ baseline.id }}</th>
-          <td width="10%">{{ baseline.developer }}</td>
+          <td width="10%">{{ baseline.developer.username }}</td>
           <td width="5%">{{ baseline.mantisno }}</td>
           <td width="40%">{{ baseline.content|striptags|truncate(100,False, '...', 0) }}</td>
           <td width="10%">{{ moment(baseline.created).format('YY-MM-DD') }}</td>
           <td width="10%">
-            <a href="{{ url_for('version.edit_blstatus',id=baseline.id,next=request.full_path) }}">{{ baseline.status }}</a>
+            <a href="{{ url_for('version.edit_blstatus',id=baseline.id,next=request.full_path) }}">{{ baseline.status.status }}</a>
           </td>
           <td>{{ baseline.app.project.name }}</td>
           <td>

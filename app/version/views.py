@@ -142,17 +142,17 @@ def manage_baseline(project_id):
     if filter_rule == 'all':
         filtered_baselines = Baseline.query.filter(Baseline.app_id.in_(app_ids))
     elif filter_rule == 'SIT':
-        filtered_baselines = Baseline.query.filter(Baseline.status=='SIT提测',Baseline.app_id.in_(app_ids))
+        filtered_baselines = Baseline.query.filter(Baseline.status_id==5,Baseline.app_id.in_(app_ids))
     elif filter_rule == 'PUAT':
-        filtered_baselines = Baseline.query.filter(Baseline.status=='预UAT提测',Baseline.app_id.in_(app_ids))
+        filtered_baselines = Baseline.query.filter(Baseline.status_id==8,Baseline.app_id.in_(app_ids))
     elif filter_rule == 'fail':
-        filtered_baselines = Baseline.query.filter(Baseline.status.in_(['SIT不通过','预UAT失败','UAT不通过','生产不通过']),Baseline.app_id.in_(app_ids))
+        filtered_baselines = Baseline.query.filter(Baseline.status_id.in_([6,10,13]),Baseline.app_id.in_(app_ids))
     elif filter_rule == 'unrelease':
-        filtered_baselines = Baseline.query.filter(~Baseline.status.in_(['已发布UAT','UAT通过','UAT不通过','作废']),Baseline.app_id.in_(app_ids))
+        filtered_baselines = Baseline.query.filter(~Baseline.status_id.in_([17,12,13,16]),Baseline.app_id.in_(app_ids))
     elif filter_rule == 'release':
-        filtered_baselines = Baseline.query.filter(Baseline.status.in_(['已发布UAT','UAT提测','UAT通过','已上生产']),Baseline.app_id.in_(app_ids))
+        filtered_baselines = Baseline.query.filter(Baseline.status_id.in_([17,11,12,1]),Baseline.app_id.in_(app_ids))
     else:
-        filtered_baselines = Baseline.query.filter(Baseline.developer==current_user.username,Baseline.app_id.in_(app_ids))
+        filtered_baselines = Baseline.query.filter(Baseline.developer_id==current_user.id,Baseline.app_id.in_(app_ids))
     pagination = filtered_baselines.order_by(Baseline.id.desc()).paginate(
         page, per_page,
         error_out=False)
