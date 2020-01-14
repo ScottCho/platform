@@ -13,6 +13,8 @@ class Database(db.Model):
 	schemas = db.relationship('Schema',back_populates='instance')
 	credence_id = db.Column(db.Integer,db.ForeignKey('credences.id'))
 	credence = db.relationship('Credence')
+	machine_id = db.Column(db.Integer,db.ForeignKey('machines.id'))
+	credence = db.relationship('Machine')
 
 #数据库的Schema
 class Schema(db.Model):
