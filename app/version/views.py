@@ -57,7 +57,6 @@ def update_baseline(project_id,subsystem_id,env_id):
         content = form.content.data
         mark = form.mark.data
         updateno = 1
-        status = 'SIT提测'
         job_name = os.path.basename(app.jenkins_job_dir)
         job = get_jenkins_job(job_name)
         jenkins_last_build = job.get_last_build().is_good()
@@ -71,11 +70,11 @@ def update_baseline(project_id,subsystem_id,env_id):
             mantisno=mantisno,
             content=content,
             mark=mark,
-            developer=current_user.username,
+            developer_id=current_user.id,
             jenkins_build_number=jenkins_build_number,
             jenkins_last_build=jenkins_last_build,
             updateno = updateno,
-            status=status,
+            status_id=5,
             app_id=app_id)
         db.session.add(baseline)
         db.session.commit()
@@ -225,7 +224,7 @@ def edit_baseline(id):
         baseline.content = form.content.data
         baseline.mark = form.mark.data
         baseline.updateno = int(baseline.updateno) + 1
-        baseline.status = 'SIT提测'
+        baseline.status_id = 5
         job_name = os.path.basename(app.jenkins_job_dir)
         job = get_jenkins_job(job_name)
         jenkins_last_build = job.get_last_build().is_good()
@@ -339,9 +338,9 @@ def merge_baseline():
                 created=bdate,
                 app_id=merge_app.id,
                 content='合并基线',
-                developer=current_user.username,
+                developer_id=current_user.id,
                 updateno=1,
-                status='SIT提测',
+                status_id=5,
                 jenkins_last_build = job.get_last_build().is_good(),
                 jenkins_build_number = job.get_next_build_number()
             )
