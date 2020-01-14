@@ -85,7 +85,7 @@ class Baseline(db.Model):
         request_result = build_with_parameters(job_name,baseline_id=self.id)
         return msg
 
-    # 发布DB,flag=0,发布SIT，flag=1发，基线合并发布,num为更新包次数
+    # 发布DB,flag=0,发布SIT，flag=1基线合并发布,num为更新包次数
     def build_db_job(self, flag=0, num='01'):
         # DB的用户名实例密码
         db_username = self.app.schema.username
@@ -101,6 +101,7 @@ class Baseline(db.Model):
         if flag == 1:
             base_dir = os.path.join(target_dir, 'DB')
             log_dir = os.path.join(target_dir, 'LOG')
+            source_pckdir = os.path.join(source_dbdir, '02-pck','puat')
         else:
             base_dir = os.path.join(target_dir, 'DB'+'_'+str(self.id))
             log_dir = os.path.join(target_dir, 'LOG'+'_'+str(self.id))
