@@ -14,7 +14,7 @@ class Database(db.Model):
 	credence_id = db.Column(db.Integer,db.ForeignKey('credences.id'))
 	credence = db.relationship('Credence')
 	machine_id = db.Column(db.Integer,db.ForeignKey('machines.id'))
-	credence = db.relationship('Machine')
+	machine = db.relationship('Machine')
 
 #数据库的Schema
 class Schema(db.Model):

@@ -22,7 +22,7 @@
           <td>{{ db.instance }}</td>
           <td>{{ db.project.name }}</td>
           <td>{{ db.mark }}</td>
-          <td>{{ db.host }}</td>
+          <td>{{ db.machine.ip }}</td>
           <td><a href="{{ url_for('service.dbmanage',instance=db.instance,action='stop') }}">关闭</a></td>
           <td><a href="{{ url_for('service.dbmanage',instance=db.instance,action='start') }}">重启</a></td>
         </tr>
