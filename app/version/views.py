@@ -447,7 +447,7 @@ def edit_package(id):
         add_blineno_set = set(change_blineno_list) - set(original_blineno)
         for no in add_blineno_set:
             baseline = Baseline.query.get_or_404(no)
-            baseline.status = 'SIT提测'
+            baseline.status_id = 5
             baseline.package_id = package.id
             db.session.add(baseline)
             db.session.commit()
@@ -490,7 +490,7 @@ def edit_package(id):
                 bversionno = baseline.versionno
                 bpckno = baseline.pckno
                 brollbackno = baseline.rollbackno
-                baseline.status = '预UAT提测'
+                baseline.status_id = 8
                 db.session.add(baseline)
                 db.session.commit()
                 # 拼接基线
@@ -515,9 +515,9 @@ def edit_package(id):
                                   created=package.rlsdate,
                                   app_id=merge_app.id,
                                   content='合并发布',
-                                  developer=current_user.username,
+                                  developer_id=current_user.id,
                                   updateno=1,
-                                  status='已发布UAT',
+                                  status_id=17,
                                   jenkins_last_build = job.get_last_build().is_good(),
                                   jenkins_build_number = job.get_next_build_number()
                                   )
@@ -552,7 +552,7 @@ def release_package(id):
     baselines = package.baselines
     merge_blineno = package.merge_blineno.split(',')
     for baseline in baselines:
-        baseline.status = '已发布UAT'
+        baseline.status_id = 17
         db.session.add(baseline)
         db.session.commit()
     
