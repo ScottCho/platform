@@ -85,24 +85,20 @@ class RoleSchema(Schema):
 # Create resource managers
 # 项目
 class ProjectList(ResourceList):
-    def before_create_object(self, data, view_kwargs):
+    def after_create_object(self, obj, data, view_kwargs):
         print('*'*50)
         print(data)
-        print(self)
+        print(obj.name)
+        print(view_kwargs.values())
     schema = ProjectSchema
     data_layer = {'session': db.session,
                   'model': Project,
-                  'methods': {'before_create_object': before_create_object}}
+                  'methods': {'after_create_object': after_create_object}}
 
 class ProjectDetail(ResourceDetail):
-    def before_create_object(self, data, view_kwargs):
-        print('*'*50)
-        print(view_kwargs['id'])
-        print('data='+data)
     schema = ProjectSchema
     data_layer = {'session': db.session,
-                  'model': Project,
-                  'methods': {'before_create_object': before_create_object}}
+                  'model': Project}
 
 class ProjectRelationship(ResourceRelationship):
     schema = ProjectSchema

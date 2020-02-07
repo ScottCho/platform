@@ -56,8 +56,14 @@ class Baseline(db.Model):
             compile_file_list += [trans_java(self.app.subsystem.en_name,
                                              self.app.source_dir, f) for f in source_files]
 
-        # 2. 将compile_file_list中的文件写入到jenkins_job_home中的txt中（B2B_WEB_12.txt)
-        compile_file_path = os.path.join(self.app.jenkins_job_dir, 'workspace', self.app.subsystem.en_name +
+        # 2. 将compile_file_list中的文件写入到jenkins_job_home中的txt中（core_20191224_1246.txt)
+        # 防止有相同基线序号的文件存在
+        old_file_list = glob.glob(os.path.join(self.app.jenkins_job_dir,'/')+'*_'+str(self.id)+'.txt')
+        if old_file_list:
+            for old_file in old_file_list:
+                os.remove(old_file)
+
+        compile_file_path = os.path.join(self.app.jenkins_job_dir, self.app.subsystem.en_name +
                                          '_'+datetime.utcnow().strftime("%Y%m%d")+'_'+str(self.id)+'.txt')
         #compile_file_path = self.app.jenkins_job_dir+'/'+self.app.subsystem.en_name+'_'+datetime.utcnow().strftime("%Y%m%d")+'_'+str(self.id)+'.txt'
         print(compile_file_path)
@@ -65,7 +71,11 @@ class Baseline(db.Model):
             for line in compile_file_list:
                 fw.write('"'+line+'"'+'\n')
 
-        job_name = os.path.basename(self.app.jenkins_job_dir)
+        
+        #jenkins_job_dir=/root/.jenkins/jobs/WLink_CORE/WORKSPACE
+        dir_list = self.app.jenkins_job_dir.split('/')
+        job_name_index = dir_list.index('jobs')+1
+        job_name = dir_list[job_name_index]
         job = get_jenkins_job(job_name)
         jenkins_last_build = job.get_last_build().is_good()
 
@@ -81,8 +91,7 @@ class Baseline(db.Model):
         print(msg)
 
         # 3. 使用request触发Jenkins构建
-        job_name = os.path.basename(self.app.jenkins_job_dir)
-        request_result = build_with_parameters(job_name,baseline_id=self.id)
+        build_with_parameters(job_name,baseline_id=self.id)
         return msg
 
     # 发布DB,flag=0,发布SIT，flag=1基线合并发布,num为更新包次数
