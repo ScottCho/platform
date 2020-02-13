@@ -6,7 +6,7 @@ from  app import flask_app
 from app.models.machine import Machine, MachineGroub, Agreement, Credence
 from app import db
 
-from app.apis import api
+from app.apis.v2 import api
 
 # Create logical data abstraction
 class MachineSchema(Schema):

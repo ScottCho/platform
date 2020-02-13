@@ -84,8 +84,12 @@ flask_app.register_blueprint(service_bp, url_prefix='/service')
 from .backstage import backstage_bp
 flask_app.register_blueprint(backstage_bp,url_prefix='/backstage')
 
-# 注册api蓝图api
-import app.apis
+# 注册api蓝图api v1
+from .apis.v1 import api_v1
+flask_app.register_blueprint(api_v1, url_prefix='/api/v1')
+
+# 导入api v2
+import app.apis.v2
 
 
 

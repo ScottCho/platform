@@ -7,7 +7,7 @@ from app.models.service import Database, App, Env, Subsystem
 from app.models.service import Schema as DBSchema
 from app import db
 
-from app.apis import api
+from app.apis.v2 import api
 
 # Create logical data abstraction
 class DatabaseSchema(Schema):
@@ -86,6 +86,10 @@ class AppSchema(Schema):
     log_dir = fields.Str()
     jenkins_job_dir = fields.Str()
     source_dir = fields.Str()
+    project_id = fields.Integer()
+    machine_id = fields.Integer()
+    schema_id = fields.Integer()
+    subsystem_id = fields.Integer()
     #, obj.env.name.upper(),obj.subsystem.name.upper()
     display_name = fields.Function(lambda obj: "{}-{}-{}".format(obj.project.name.lower(),obj.env.name.lower(),obj.subsystem.en_name.lower()))
 

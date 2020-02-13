@@ -32,7 +32,7 @@ class User(UserMixin, db.Model):
     projects = db.relationship(
         'Project', secondary='group', back_populates='users')
     
-    # 将密码加密存储
+    
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 

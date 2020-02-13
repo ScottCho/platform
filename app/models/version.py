@@ -65,7 +65,6 @@ class Baseline(db.Model):
 
         compile_file_path = os.path.join(self.app.jenkins_job_dir, self.app.subsystem.en_name +
                                          '_'+datetime.utcnow().strftime("%Y%m%d")+'_'+str(self.id)+'.txt')
-        #compile_file_path = self.app.jenkins_job_dir+'/'+self.app.subsystem.en_name+'_'+datetime.utcnow().strftime("%Y%m%d")+'_'+str(self.id)+'.txt'
         print(compile_file_path)
         with open(compile_file_path, 'w') as fw:
             for line in compile_file_list:

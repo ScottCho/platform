@@ -1,10 +1,11 @@
+from flask import request
 from flask_rest_jsonapi import (Api, ResourceDetail, ResourceList,
                                 ResourceRelationship)
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
 from app import db, flask_app
-from app.apis import api
+from app.apis.v2 import api
 from app.models.version import Baseline, Blstatus, Package
 
 
@@ -28,6 +29,7 @@ class BaselineSchema(Schema):
     jenkins_build_number = fields.Integer()
     versionno = fields.Str()
     mark = fields.Str()
+    app_id = fields.Integer()
     developer = Relationship(self_view='baseline_developer',
                              self_view_kwargs={'id': '<id>'},
                              related_view='user_detail',
@@ -101,9 +103,18 @@ class PackageSchema(Schema):
 
 # Create resource managers
 class BaselineList(ResourceList):
+
+    def after_create_object(self, obj, data, view_kwargs):
+        print('*'*50)
+        print(data)
+        print(obj.content)
+        print(str(request.args))
+
+
     schema = BaselineSchema
     data_layer = {'session': db.session,
-                  'model': Baseline}
+                  'model': Baseline,
+                  'methods': {'after_create_object': after_create_object}}
 
 class BaselineDetail(ResourceDetail):
     schema = BaselineSchema

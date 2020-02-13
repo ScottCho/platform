@@ -1,0 +1,1 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d213787"],{ad8f:function(t,n,e){"use strict";e.r(n),e.d(n,"getList",(function(){return u}));var r=e("b775");function u(t){return Object(r["a"])({url:"/table/list",method:"get",params:t})}}}]);

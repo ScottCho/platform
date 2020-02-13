@@ -28,6 +28,7 @@ paramiko = "*"
 requests = "*"
 flask-rest-jsonapi = "*"
 ansible = "*"
+flask-cors = "*"
 
 [requires]
 python_version = "3.6"

@@ -6,7 +6,7 @@ from  app import flask_app
 from app.models.auth import Project, User, group, Role
 from app import db
 
-from app.apis import api
+from app.apis.v2 import api
 
 # Create logical data abstraction
 # 项目
@@ -89,7 +89,6 @@ class ProjectList(ResourceList):
         print('*'*50)
         print(data)
         print(obj.name)
-        print(view_kwargs.values())
     schema = ProjectSchema
     data_layer = {'session': db.session,
                   'model': Project,
