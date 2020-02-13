@@ -161,7 +161,7 @@ api.route(BaselineRelationship, 'baseline_app', '/api/baselines/<int:id>/relatio
 api.route(BaselineRelationship, 'baseline_status', '/api/baselines/<int:id>/relationships/status')
 api.route(BaselineRelationship, 'baseline_package', '/api/baselines/<int:id>/relationships/package')
 #基线状态
-api.route(BlstatusList, 'blstatus_list', '/api/blstatuss')
+api.route(BlstatusList, 'blstatus_list', '/api/blstatus')
 api.route(BlstatusDetail, 'blstatus_detail', '/api/blstatus/<int:id>')
 #更新包
 api.route(PackageList, 'package_list', '/api/packages')

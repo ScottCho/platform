@@ -8,6 +8,42 @@ from app import db
 
 from app.apis.v2 import api
 
+
+from flask import jsonify, request, current_app, url_for, g
+from flask.views import MethodView
+
+from app.apis.v2 import api_v2
+from app.apis.v2.auth import auth_required, generate_token
+from app.apis.v2.errors import api_abort, ValidationError
+from app.models.auth import User
+
+
+class AuthTokenAPI(MethodView):
+    
+    def post(self):
+        grant_type = request.form.get('grant_type')
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        if grant_type is None or grant_type.lower() != 'password':
+            return api_abort(code=400, message='The grant type must be password.')
+
+        user = User.query.filter_by(email=email).first()
+        if user is None or not user.verify_password(password):
+            return api_abort(code=400, message='Either the email or password was invalid.')
+
+        token, expiration = generate_token(user)
+
+        response = jsonify({
+            'access_token': token,
+            'token_type': 'Bearer',
+            'expires_in': expiration
+        })
+        response.headers['Cache-Control'] = 'no-store'
+        response.headers['Pragma'] = 'no-cache'
+        return response
+
+
 # Create logical data abstraction
 # 项目
 class ProjectSchema(Schema):
@@ -150,3 +186,6 @@ api.route(UserRelationship, 'user_role', '/api/users/<int:id>/relationships/role
 api.route(RoleList, 'role_list', '/api/roles')
 api.route(RoleDetail, 'role_detail', '/api/roles/<int:id>')
 api.route(RoleRelationship, 'role_users', '/api/roles/<int:id>/relationships/users')
+
+#生成token端点
+api_v2.add_url_rule('/oauth/token', view_func=AuthTokenAPI.as_view('token'), methods=['POST'])

@@ -90,6 +90,9 @@ flask_app.register_blueprint(api_v1, url_prefix='/api/v1')
 
 # 导入api v2
 import app.apis.v2
+# 注册api蓝图api v2
+from .apis.v2 import api_v2
+flask_app.register_blueprint(api_v2, url_prefix='/api')
 
 
 

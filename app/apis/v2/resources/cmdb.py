@@ -3,7 +3,7 @@ from flask_rest_jsonapi import Api, ResourceDetail, ResourceList, ResourceRelati
 from marshmallow_jsonapi.flask import Schema, Relationship
 
 from  app import flask_app
-from app.models.machine import Machine, MachineGroub, Agreement, Credence
+from app.models.cmdb import Machine, MachineGroub, Agreement, Credence
 from app import db
 
 from app.apis.v2 import api

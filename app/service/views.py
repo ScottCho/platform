@@ -12,7 +12,7 @@ from app.utils.redirect_back import redirect_back
 
 from .. import db
 from ..models.auth import Permission, Project
-from ..models.machine import Agreement, Credence, Machine
+from ..models.cmdb import Agreement, Credence, Machine
 from ..models.service import App, Database
 from . import service_bp
 
