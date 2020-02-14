@@ -46,7 +46,7 @@ class AuthTokenAPI(MethodView):
         return response
 
 # 根据token返回用户信息
-@api_v2.route('/token/userinfo')
+@api_v2.route('/tokeninfo')
 def token_user():
     token_type, token = get_token()
     s = Serializer(current_app.config['SECRET_KEY'])
