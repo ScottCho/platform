@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask_rest_jsonapi import Api, ResourceDetail, ResourceList, ResourceRelationship
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired
 
 
 from  app import flask_app
@@ -14,7 +15,7 @@ from flask import jsonify, request, current_app, url_for, g
 from flask.views import MethodView
 
 from app.apis.v2 import api_v2
-from app.apis.v2.auth import auth_required, generate_token
+from app.apis.v2.auth import auth_required, generate_token, get_token
 from app.apis.v2.errors import api_abort, ValidationError
 from app.models.auth import User
 
@@ -44,6 +45,26 @@ class AuthTokenAPI(MethodView):
         response.headers['Pragma'] = 'no-cache'
         return response
 
+# 根据token返回用户信息
+@api_v2.route('/token/userinfo')
+def token_user():
+    token_type, token = get_token()
+    s = Serializer(current_app.config['SECRET_KEY'])
+    try:
+        data = s.loads(token)
+    except (BadSignature, SignatureExpired):
+        return False
+    user = User.query.get(data['id'])   
+    response = jsonify({
+            'id': user.id
+            'username': user.username,
+            'email': user.email,
+        })
+    return response
+
+
+
+
 # Create resource managers
 # 项目
 class ProjectList(ResourceList):
@@ -55,6 +76,8 @@ class ProjectList(ResourceList):
     data_layer = {'session': db.session,
                   'model': Project,
                   'methods': {'after_create_object': after_create_object}}
+
+
 class ProjectDetail(ResourceDetail):
     schema = ProjectSchema
     data_layer = {'session': db.session,
