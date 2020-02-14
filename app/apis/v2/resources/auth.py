@@ -56,7 +56,7 @@ def token_user():
         return False
     user = User.query.get(data['id'])   
     response = jsonify({
-            'id': user.id
+            'id': user.id,
             'username': user.username,
             'email': user.email,
         })
