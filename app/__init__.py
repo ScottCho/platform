@@ -61,7 +61,7 @@ db.init_app(flask_app)
 migrate.init_app(flask_app, db)
 mail.init_app(flask_app)
 login_manager.init_app(flask_app)
-# csrf.init_app(flask_app)
+csrf.init_app(flask_app)
 
 
 # 注册用户认证蓝图

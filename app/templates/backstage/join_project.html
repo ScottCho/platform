@@ -11,6 +11,7 @@
 
     <div class="box-body">
       <form  method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <select  class="form-control" name='project_id'>
         <option>--请选择--</option>
             {% for p in projects %}
