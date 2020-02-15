@@ -24,6 +24,9 @@ class BaselineSchema(Schema):
     versionno = fields.Str()
     mark = fields.Str()
     app_id = fields.Integer()
+    package_id = fields.Integer()
+    developer_id = fields.Integer()
+    status_id = fields.Integer()
     developer = Relationship(self_view='baseline_developer',
                              self_view_kwargs={'id': '<id>'},
                              related_view='user_detail',
