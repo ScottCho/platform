@@ -76,6 +76,8 @@ class PackageSchema(Schema):
     blineno = fields.Str()
     merge_blineno = fields.Str()
     remark = fields.Str()
+    project_id = fields.Integer()
+    env_id = fields.Integer()
     project = Relationship(self_view='package_project',
                              self_view_kwargs={'id': '<id>'},
                              related_view='project_detail',

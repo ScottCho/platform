@@ -17,6 +17,7 @@ class MachineSchema(Schema):
     status = fields.Bool()
     os =  fields.Str()
     remarks = fields.Str()
+    credence_id = fields.Integer()
     credence = Relationship(self_view='machine_credence',
                         self_view_kwargs={'id': '<id>'},
                         related_view='credence_detail',
