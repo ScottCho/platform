@@ -68,6 +68,7 @@ def token_user():
 # Create resource managers
 # 项目
 class ProjectList(ResourceList):
+    decorators = auth_required,
     def after_create_object(self, obj, data, view_kwargs):
         print('after_create_object')
         print('*'*50)
@@ -77,6 +78,7 @@ class ProjectList(ResourceList):
     def before_post(self, args, kwargs, data=None):
         print("""Hook to make custom work before post method""")
         print(data)
+        print(g.current_user)
 
     def after_post(self, result):
         print("""Hook to make custom work after post method""")

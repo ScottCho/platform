@@ -12,7 +12,7 @@ from app.apis.v2.schemas.vcs import  BaselineSchema, BlstatusSchema, PackageSche
 
 # Create resource managers
 class BaselineList(ResourceList):
-
+    decorators = auth_required,
     def after_create_object(self, obj, data, view_kwargs):
         print('*'*50)
         print(data)
@@ -23,6 +23,7 @@ class BaselineList(ResourceList):
         print("""Hook to make custom work before post method""")
         data['developer_id'] = g.current_user.id
         data['status_id'] = 1
+        data['package_id'] = 1
         print(data)
 
     schema = BaselineSchema
