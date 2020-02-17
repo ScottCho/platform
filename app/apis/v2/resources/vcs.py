@@ -22,6 +22,8 @@ class BaselineList(ResourceList):
     def before_post(self, args, kwargs, data=None):
         print("""Hook to make custom work before post method""")
         data['developer_id'] = g.current_user.id
+        data['updateno'] = 1
+        data['status_id'] =5
         print(data)
 
     schema = BaselineSchema
