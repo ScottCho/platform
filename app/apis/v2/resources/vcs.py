@@ -8,7 +8,7 @@ from app.apis.v2 import api
 from app.models.version import Baseline, Blstatus, Package
 
 from app.apis.v2.schemas.vcs import  BaselineSchema, BlstatusSchema, PackageSchema
-
+from app.apis.v2.auth import auth_required
 
 # Create resource managers
 class BaselineList(ResourceList):
