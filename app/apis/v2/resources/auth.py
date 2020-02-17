@@ -69,9 +69,20 @@ def token_user():
 # 项目
 class ProjectList(ResourceList):
     def after_create_object(self, obj, data, view_kwargs):
+        print('after_create_object')
         print('*'*50)
         print(data)
         print(obj.name)
+
+    def before_post(self, args, kwargs, data=None):
+        print("""Hook to make custom work before post method""")
+        print(data)
+
+    def after_post(self, result):
+        print("""Hook to make custom work after post method""")
+        print('#'*50)
+        print(result)
+
     schema = ProjectSchema
     data_layer = {'session': db.session,
                   'model': Project,
