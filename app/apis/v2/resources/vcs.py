@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, g
 from flask_rest_jsonapi import (Api, ResourceDetail, ResourceList,
                                 ResourceRelationship)
 
