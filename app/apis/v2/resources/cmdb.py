@@ -68,6 +68,7 @@ api.route(MachineRelationship, 'machine_credence', '/api/machines/<int:id>/relat
 api.route(CredenceList, 'credence_list', '/api/credences')
 api.route(CredenceDetail, 'credence_detail', '/api/credences/<int:id>')
 api.route(CredenceRelationship, 'credence_machines', '/api/credences/<int:id>/relationships/machines')
+api.route(CredenceRelationship, 'credence_agreement', '/api/credences/<int:id>/relationships/agreement')
 api.route(AgreementList, 'agreement_list', '/api/agreements')
 api.route(AgreementDetail, 'agreement_detail', '/api/agreements/<int:id>')
 api.route(AgreementRelationship, 'agreement_credences', '/api/agreements/<int:id>/relationships/credences')
