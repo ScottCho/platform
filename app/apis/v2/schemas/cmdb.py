@@ -38,6 +38,7 @@ class CredenceSchema(Schema):
     username = fields.Str()
     password = fields.Str()
     ssh_key = fields.Str()
+    agreement_id = fields.Integer()
     machines = Relationship(self_view='credence_machines',
                            self_view_kwargs={'id': '<id>'},
                            related_view='machine_list',
@@ -45,3 +46,28 @@ class CredenceSchema(Schema):
                            many=True,
                            schema='MachineSchema',
                            type_='machine')
+    agreement = Relationship(self_view='credence_agreement',
+                           self_view_kwargs={'id': '<id>'},
+                           related_view='agreement_detail',
+                           related_view_kwargs={'id': '<id>'},
+                           many=True,
+                           schema='AgreementSchema',
+                           type_='agreement')
+
+class AgreementSchema(Schema):
+    class Meta:
+        type_ = 'agreement'
+        self_view = 'agreement_detail'
+        self_view_kwargs = {'id': '<id>'}
+        self_view_many = 'agreement_list'
+
+    id = fields.Integer(as_string=True, dump_only=True)
+    name = fields.Str(required=True)
+
+    credences = Relationship(self_view='agreement_credences',
+                           self_view_kwargs={'id': '<id>'},
+                           related_view='credence_list',
+                           related_view_kwargs={'id': '<id>'},
+                           many=True,
+                           schema='CrendenceSchema',
+                           type_='credence')
