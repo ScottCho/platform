@@ -26,6 +26,7 @@ def validate_token(token):
     if user is None:
         return False
     g.current_user = user
+    print(g.current_user.id)
     return True
 
 
