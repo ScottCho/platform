@@ -54,8 +54,7 @@ def token_user():
         data = s.loads(token)
     except (BadSignature, SignatureExpired):
         return False
-    user = User.query.get(data['id'])
-    g.current_user = user   
+    user = User.query.get(data['id'])   
     response = jsonify({
             'id': user.id,
             'username': user.username,
@@ -78,7 +77,6 @@ class ProjectList(ResourceList):
     def before_post(self, args, kwargs, data=None):
         print("""Hook to make custom work before post method""")
         print(data)
-        # print(g.current_user.id)
 
     def after_post(self, result):
         print("""Hook to make custom work after post method""")
