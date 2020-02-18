@@ -1,3 +1,5 @@
+import os
+
 from flask import request, g
 from flask_rest_jsonapi import (Api, ResourceDetail, ResourceList,
                                 ResourceRelationship)
@@ -9,32 +11,98 @@ from app.models.version import Baseline, Blstatus, Package
 
 from app.apis.v2.schemas.vcs import  BaselineSchema, BlstatusSchema, PackageSchema
 from app.apis.v2.auth import auth_required
+from app.utils import execute_cmd, fnmatch_file, switch_char
+from app.localemail import send_email
 
 # Create resource managers
 class BaselineList(ResourceList):
     decorators = auth_required,
-    def after_create_object(self, obj, data, view_kwargs):
-        print('*'*50)
-        print(data)
-        print(obj.content)
-        print(str(request.args))
-
+    
     def before_post(self, args, kwargs, data=None):
-        print("""Hook to make custom work before post method""")
+        """Hook to make custom work before post method"""
+        print('before_post before data:'+ str(data))
         data['developer_id'] = g.current_user.id
         data['updateno'] = 1
         data['status_id'] =5
-        print(data)
+        print('before_post aftrt data:'+ str(data))
 
+    def after_create_object(self, obj, data, view_kwargs):
+        """Make work after create object"""
+        print('after create object')
+        message = ''
+        #更新应用程序
+        if obj.versionno:
+            message += obj.build_app_job()
+        #更新数据库
+        if obj.sqlno or obj.pckno:
+            message += obj.build_db_job() 
+        print(message)
+
+        # 基线邮件主题
+        mailtheme = obj.app.project.name + '-' + obj.app.env.name + '-' + \
+            obj.created.strftime("%Y%m%d") + '-' + str(obj.id)
+        #收件人       
+        recipients = []
+        users = obj.app.project.users
+        for user in users:
+            if user.is_active:
+                recipients.append(user.email)
+        #附件
+        log_dir = os.path.join(str(obj.app.project.target_dir),
+                'LOG' + '_' + str(obj.id))
+        attachments = fnmatch_file.find_specific_files(
+            log_dir, '*log')
+        #发送邮件
+        send_email(recipients, mailtheme,
+               'mail/version/baseline.html', attachments, baseline=obj
+                )
+    
     schema = BaselineSchema
     data_layer = {'session': db.session,
                   'model': Baseline,
                   'methods': {'after_create_object': after_create_object}}
 
 class BaselineDetail(ResourceDetail):
+
+    def before_patch(self, args, kwargs, data=None):
+        """Hook to make custom work before patch method"""
+        obj = Baseline.query.get_or_404(kwargs['id'])
+        data['updateno'] = obj.updateno+1
+
+    def after_update_object(self, obj, data, view_kwargs):
+        """Make work after update object""" 
+        message = ''
+        #更新应用程序
+        if obj.versionno:
+            message += obj.build_app_job()
+        #更新数据库
+        if obj.sqlno or obj.pckno:
+            message += obj.build_db_job() 
+        print(message)
+
+        # 基线邮件主题
+        mailtheme = obj.app.project.name + '-' + obj.app.env.name + '-' + \
+            obj.created.strftime("%Y%m%d") + '-' + str(obj.id)
+        #收件人       
+        recipients = []
+        users = obj.app.project.users
+        for user in users:
+            if user.is_active:
+                recipients.append(user.email)
+        #附件
+        log_dir = os.path.join(str(obj.app.project.target_dir),
+                'LOG' + '_' + str(obj.id))
+        attachments = fnmatch_file.find_specific_files(
+            log_dir, '*log')
+        #发送邮件
+        send_email(recipients, mailtheme,
+               'mail/version/baseline.html', attachments, baseline=obj
+                )
     schema = BaselineSchema
     data_layer = {'session': db.session,
-                  'model': Baseline}
+                  'model': Baseline,
+                  'methods': {'after_update_object': after_update_object}
+                  }
 
 class BaselineRelationship(ResourceRelationship):
     schema = BaselineSchema

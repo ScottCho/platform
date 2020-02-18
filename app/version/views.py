@@ -130,6 +130,7 @@ def select_project():
 @version_bp.route('/manage/baseline/<int:project_id>')
 @login_required
 def manage_baseline(project_id):
+    print(current_user)
     page = request.args.get('page', 1, type=int)
     per_page=current_app.config['FLASKY_BASELINES_PER_PAGE']
     filter_rule = request.args.get('filter', 'me')
@@ -214,7 +215,7 @@ def edit_baseline(id):
     form = BaselineForm()
     if form.validate_on_submit():
         app = baseline.app
-        app_id=app.id
+        app_id = app.id
         versionno = form.versionno.data
         baseline.versionno = versionno
         sqlno = form.sqlno.data
