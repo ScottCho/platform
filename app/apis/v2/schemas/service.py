@@ -15,6 +15,9 @@ class DatabaseSchema(Schema):
     instance = fields.Str(required=True)
     port = fields.Str()
     mark = fields.Str()
+    credence_id = fields.Integer()
+    machine_id = fields.Integer()
+    machine_name = fields.Function(lambda obj: "{}".format(obj.machine.hostname))
     schemas = Relationship(self_view='database_schemas',
                              self_view_kwargs={'id': '<id>'},
                              related_view='schema_list',
