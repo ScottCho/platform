@@ -2,7 +2,21 @@
 
 from flask_rest_jsonapi import Api, ResourceDetail, ResourceList, ResourceRelationship
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired
+from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
+from werkzeug.wrappers import Response
+from flask import request, url_for, make_response, redirect
+from flask.wrappers import Response as FlaskResponse
+from flask.views import MethodView, MethodViewType
+from marshmallow_jsonapi.exceptions import IncorrectTypeError
+from marshmallow import ValidationError
 
+from flask_rest_jsonapi.pagination import add_pagination_links
+from flask_rest_jsonapi.exceptions import InvalidType, BadRequest, RelationNotFound
+from flask_rest_jsonapi.decorators import check_headers, check_method_requirements, jsonapi_exception_formatter
+from flask_rest_jsonapi.schema import compute_schema, get_relationships, get_model_field
+from flask_rest_jsonapi.data_layers.base import BaseDataLayer
+from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
+from flask_rest_jsonapi.utils import JSONEncoder
 
 from  app import flask_app
 from app.models.auth import Project, User, group, Role
@@ -18,8 +32,9 @@ from app.apis.v2 import api_v2
 from app.apis.v2.auth import auth_required, generate_token, get_token
 from app.apis.v2.errors import api_abort, ValidationError
 from app.models.auth import User
+from app.localemail import send_email
 
-
+# 返回登录产生的token
 class AuthTokenAPI(MethodView):
     
     def post(self):
@@ -45,6 +60,25 @@ class AuthTokenAPI(MethodView):
         response.headers['Pragma'] = 'no-cache'
         return response
 
+# 确认用户
+class ConfirmUserAPI(MethodView):
+    decorators = (auth_required,)
+    def get(self,token):
+        if g.current_user.confirmed:
+            response = jsonify({
+                'code': 200,
+                'message': g.current_user.username+'早已激活'
+            })
+        elif g.current_user.confirm(token):
+            db.session.commit()
+            response = jsonify({
+                'code': 200,
+                'message': g.current_user.username+'已激活'
+            })
+        else:
+            return api_abort(400,'链接无效或者过期')
+        return response
+
 # 根据token返回用户信息
 @api_v2.route('/tokeninfo')
 def token_user():
@@ -63,32 +97,13 @@ def token_user():
     return response
 
 
-
-
 # Create resource managers
 # 项目
 class ProjectList(ResourceList):
-    decorators = auth_required,
-    def after_create_object(self, obj, data, view_kwargs):
-        print('after_create_object')
-        print('*'*50)
-        print(data)
-        print(obj.name)
-
-    def before_post(self, args, kwargs, data=None):
-        print("""Hook to make custom work before post method""")
-        print(data)
-        print(g.current_user)
-
-    def after_post(self, result):
-        print("""Hook to make custom work after post method""")
-        print('#'*50)
-        print(result)
-
+    # decorators = (auth_required,)
     schema = ProjectSchema
     data_layer = {'session': db.session,
-                  'model': Project,
-                  'methods': {'after_create_object': after_create_object}}
+                  'model': Project}
 
 
 class ProjectDetail(ResourceDetail):
@@ -103,11 +118,84 @@ class ProjectRelationship(ResourceRelationship):
 
 # 用户
 class UserList(ResourceList):
+
+    # 自定义post方法,注册用户
+    def post(self, *args, **kwargs):
+        """Create an object"""
+        json_data = request.get_json() or {}
+
+        qs = QSManager(request.args, self.schema)
+
+        schema = compute_schema(self.schema,
+                                getattr(self, 'post_schema_kwargs', dict()),
+                                qs,
+                                qs.include)
+
+        try:
+            data, errors = schema.load(json_data)
+        except IncorrectTypeError as e:
+            errors = e.messages
+            for error in errors['errors']:
+                error['status'] = '409'
+                error['title'] = "Incorrect type"
+            return errors, 409
+        except ValidationError as e:
+            errors = e.messages
+            for message in errors['errors']:
+                message['status'] = '422'
+                message['title'] = "Validation error"
+            return errors, 422
+
+        if errors:
+            for error in errors['errors']:
+                error['status'] = "422"
+                error['title'] = "Validation error"
+            return errors, 422
+
+        username = data['username']
+        email = data['email']
+        if User.query.filter_by(email=email).first():
+            return api_abort(409,'email已经被注册')
+        if User.query.filter_by(username=username).first():
+            return api_abort(409,'用户名已经被注册')
+        
+        self.before_post(args, kwargs, data=data)
+
+        obj = self.create_object(data, kwargs)
+        token = obj.generate_confirmation_token()
+        send_email([email],'确认您的账户',
+            'mail/auth/confirm.html',user=obj,token=token)
+        result = schema.dump(obj).data
+
+        if result['data'].get('links', {}).get('self'):
+            final_result = (result, 201, {'Location': result['data']['links']['self']})
+        else:
+            final_result = (result, 201)
+
+        result = self.after_post(final_result)
+
+        return result
+
+  
+
     schema = UserSchema
     data_layer = {'session': db.session,
                   'model': User}
 
 class UserDetail(ResourceDetail):
+    decorators = (auth_required,)
+    def before_get(self, args, kwargs):
+        """Hook to make custom work before get method"""
+        print(request.args)
+        print(kwargs)
+        print(g.current_user)
+        pass
+
+    def before_patch(self, args, kwargs, data=None):
+        """Hook to make custom work before patch method"""
+        print(data)
+        pass
+
     schema = UserSchema
     data_layer = {'session': db.session,
                   'model': User}
@@ -150,3 +238,5 @@ api.route(RoleRelationship, 'role_users', '/api/roles/<int:id>/relationships/use
 
 #生成token端点
 api_v2.add_url_rule('/oauth/token', view_func=AuthTokenAPI.as_view('token'), methods=['POST'])
+# 确认用户端点
+api_v2.add_url_rule('/confirm/<token>', view_func=ConfirmUserAPI.as_view('confirm_user'), methods=['GET',])

@@ -43,6 +43,8 @@ class UserSchema(Schema):
     confirmed = fields.Bool()
     active = fields.Bool()
     role_id = fields.Integer()
+    role_name = fields.Function(lambda obj: "{}".format(obj.role.name))
+
     projects = Relationship(self_view='user_projects',
                            self_view_kwargs={'id': '<id>'},
                            related_view='project_list',

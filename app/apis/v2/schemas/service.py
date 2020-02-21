@@ -85,7 +85,11 @@ class AppSchema(Schema):
     schema_id = fields.Integer()
     subsystem_id = fields.Integer()
     env_id = fields.Integer()
-    display_name = fields.Function(lambda obj: "{}-{}-{}".format(obj.project.name.lower(),obj.env.name.lower(),obj.subsystem.en_name.lower()))
+    app_name = fields.Function(lambda obj: "{}-{}-{}".format(obj.project.name.lower(),obj.env.name.lower(),obj.subsystem.en_name.lower()))
+    project_name = fields.Function(lambda obj: "{}".format(obj.project.name))
+    subsystem_name = fields.Function(lambda obj: "{}".format(obj.subsystem.en_name))
+    env_name = fields.Function(lambda obj: "{}".format(obj.env.name))
+    machine_hostname = fields.Function(lambda obj: "{}".format(obj.machine.hostname))
 
     machine = Relationship(self_view='app_machine',
                              self_view_kwargs={'id': '<id>'},
