@@ -18,6 +18,7 @@ class MachineSchema(Schema):
     os =  fields.Str()
     remarks = fields.Str()
     credence_id = fields.Integer()
+    credence_name = fields.Function(lambda obj: "{}".format(obj.credence.name))
     credence = Relationship(self_view='machine_credence',
                         self_view_kwargs={'id': '<id>'},
                         related_view='credence_detail',
