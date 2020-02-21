@@ -69,7 +69,8 @@ class RoleSchema(Schema):
 
     id = fields.Integer(as_string=True, dump_only=True)
     name = fields.Str(required=True)
-    permissions = fields.Integer(required=True,  load_only=True)
+    permissions = fields.Integer()
+    default = fields.Integer()
     users = Relationship(self_view='role_users',
                         self_view_kwargs={'id': '<id>'},
                         related_view='user_list',
