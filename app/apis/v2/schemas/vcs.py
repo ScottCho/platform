@@ -28,7 +28,7 @@ class BaselineSchema(Schema):
     developer_id = fields.Integer()
     status_id = fields.Integer()
     status_name = fields.Function(lambda obj: "{}".format(obj.status.status))
-    package_name = fields.Function(lambda obj: "{}".format(obj.package.name))
+    package_name = fields.Function(lambda obj: "{}".format(obj.package.name) if obj.id != null else null)
     app_name = fields.Function(lambda obj: "{}-{}-{}".format(obj.app.project.name.lower(),obj.app.env.name.lower(),obj.app.subsystem.en_name.lower()))
     developer_username = fields.Function(lambda obj: "{}".format(obj.developer.username))
     developer = Relationship(self_view='baseline_developer',
@@ -82,6 +82,8 @@ class PackageSchema(Schema):
     remark = fields.Str()
     project_id = fields.Integer()
     env_id = fields.Integer()
+    project_name = fields.Function(lambda obj: "{}".format(obj.project.status))
+    env_name = fields.Function(lambda obj: "{}".format(obj.env.status))
     project = Relationship(self_view='package_project',
                              self_view_kwargs={'id': '<id>'},
                              related_view='project_detail',
