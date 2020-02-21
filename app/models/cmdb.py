@@ -13,7 +13,7 @@ class Machine(db.Model):
 	alias = db.Column(db.String(80), nullable=False)
 	hostname = db.Column(db.String(80), nullable=False)
 	ip = db.Column(db.String(80), nullable=False)
-	status = db.Column(db.Boolean, default=False)
+	state = db.Column(db.Boolean, default=False)
 	credence_id = db.Column(db.Integer,db.ForeignKey('credences.id'))
 	os = db.Column(db.String(80))
 	remarks =  db.Column(db.Text())

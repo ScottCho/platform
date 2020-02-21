@@ -14,7 +14,7 @@ class MachineSchema(Schema):
     alias = fields.Str()
     hostname = fields.Str(required=True)
     ip = fields.Str(required=True)
-    status = fields.Bool()
+    state = fields.Bool()
     os =  fields.Str()
     remarks = fields.Str()
     credence_id = fields.Integer()
