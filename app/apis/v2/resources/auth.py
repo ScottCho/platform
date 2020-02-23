@@ -87,7 +87,7 @@ def token_user():
     try:
         data = s.loads(token)
     except (BadSignature, SignatureExpired):
-        return False
+        return api_abort(code=400, message='The token expired or invalid.')
     user = User.query.get(data['id'])   
     response = jsonify({
             'id': user.id,
