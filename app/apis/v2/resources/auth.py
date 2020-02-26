@@ -33,6 +33,7 @@ from app.apis.v2.auth import auth_required, generate_token, get_token
 from app.apis.v2.errors import api_abort, ValidationError
 from app.models.auth import User
 from app.localemail import send_email
+from flask_rest_jsonapi.exceptions import AccessDenied, JsonApiException
 
 # 返回登录产生的token
 class AuthTokenAPI(MethodView):
@@ -43,11 +44,11 @@ class AuthTokenAPI(MethodView):
         password = request.json.get('password')
 
         if grant_type is None or grant_type.lower() != 'password':
-            return api_abort(code=400, message='The grant type must be password.')
+            return api_abort(status=400, detail='The grant type must be password.')
 
         user = User.query.filter_by(email=email).first()
         if user is None or not user.verify_password(password):
-            return api_abort(code=400, message='Either the email or password was invalid.')
+            return api_abort(status=400, detail='Either the email or password was invalid.')
 
         token, expiration = generate_token(user)
 

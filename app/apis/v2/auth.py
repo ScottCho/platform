@@ -55,8 +55,7 @@ def auth_required(f):
         # to avoid unwanted interactions with CORS.
         if request.method != 'OPTIONS':
             if token_type is None or token_type.lower() != 'bearer':
-                raise JsonApiException(title='Unauthorized',detail='用户没有登录.',status=401)
-                # return api_abort(400, 'The token type must be bearer.')
+                return api_abort(400, 'The token type must be bearer.')
             if token is None:
                 return token_missing()
             if not validate_token(token):

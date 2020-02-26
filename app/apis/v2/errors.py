@@ -3,16 +3,13 @@
 from flask import jsonify
 from werkzeug.http import HTTP_STATUS_CODES
 
-from app.apis.v1 import api_v1
 
-from flask_rest_jsonapi.exceptions import AccessDenied, JsonApiException
+def api_abort(status, detail=None, **kwargs):
+    if detail is None:
+        detail = HTTP_STATUS_CODES.get(code, '')
 
-def api_abort(code, message=None, **kwargs):
-    if message is None:
-        message = HTTP_STATUS_CODES.get(code, '')
-
-    response = jsonify(code=code, message=message, **kwargs)
-    response.status_code = code
+    response = jsonify(errors=[{'status':status, 'detail':detail}], jsonapi={"version": "1.0"},**kwargs)
+    response.status_code = status
     return response  # You can also just return (response, code) tuple
 
 
@@ -35,7 +32,7 @@ def access_denied():
 class ValidationError(ValueError):
     pass
 
-
-@api_v1.errorhandler(ValidationError)
-def validation_error(e):
-    return api_abort(400, e.args[0])
+# from app.apis.v2 import api_v2
+# @api_v2.errorhandler(ValidationError)
+# def validation_error(e):
+#     return api_abort(400, e.args[0])
