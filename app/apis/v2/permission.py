@@ -14,7 +14,7 @@ Permission={
         'project_detail': {'patch': True, 'get': True, 'delete': True},
         'user_list': {'post': True,  'get': True},
         'user_detail': {'patch': True, 'get': True, 'delete': True},
-        'subsystem_list ': {'post': True,  'get': True},
+        'subsystem_list': {'post': True,  'get': True},
         'subsystem_detail': {'patch': True, 'get': True, 'delete': True},
         'schema_list': {'post': True,  'get': True},
         'schema_detail': {'patch': True, 'get': True, 'delete': True},
