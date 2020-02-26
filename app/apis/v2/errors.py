@@ -26,6 +26,10 @@ def token_missing():
     response.headers['WWW-Authenticate'] = 'Bearer'
     return response
 
+def access_denied():
+    """Throw this error when requested resource owner doesn't match the user of the ticket"""
+    response = api_abort(403, error='Access denied', error_description='Either the token was expired or invalid.')
+    return response
 
 class ValidationError(ValueError):
     pass

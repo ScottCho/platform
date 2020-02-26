@@ -62,6 +62,7 @@ class AgreementRelationship(ResourceRelationship):
 
        
 # Create endpoints
+api.resource_registry = [MachineList,MachineDetail,CredenceList,CredenceDetail,AgreementList,AgreementDetail]
 api.route(MachineList, 'machine_list', '/api/machines')
 api.route(MachineDetail, 'machine_detail', '/api/machines/<int:id>')
 api.route(MachineRelationship, 'machine_credence', '/api/machines/<int:id>/relationships/credence')

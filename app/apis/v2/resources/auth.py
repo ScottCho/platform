@@ -100,7 +100,7 @@ def token_user():
 # Create resource managers
 # 项目
 class ProjectList(ResourceList):
-    # decorators = (auth_required,)
+    decorators = (auth_required,)
     schema = ProjectSchema
     data_layer = {'session': db.session,
                   'model': Project}
@@ -176,26 +176,12 @@ class UserList(ResourceList):
 
         return result
 
-  
-
     schema = UserSchema
     data_layer = {'session': db.session,
                   'model': User}
 
 class UserDetail(ResourceDetail):
     decorators = (auth_required,)
-    def before_get(self, args, kwargs):
-        """Hook to make custom work before get method"""
-        print(request.args)
-        print(kwargs)
-        print(g.current_user)
-        pass
-
-    def before_patch(self, args, kwargs, data=None):
-        """Hook to make custom work before patch method"""
-        print(data)
-        pass
-
     schema = UserSchema
     data_layer = {'session': db.session,
                   'model': User}
