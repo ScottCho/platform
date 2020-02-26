@@ -203,7 +203,5 @@ def permission_manager(view, view_args, view_kwargs, *args, **kwargs):
         raise JsonApiException(detail='Unauthorized.',status=401)
     
     # request.endpoint=project_list   view.__name__=get
-    print(role,request.endpoint)
-    print(Permission.get('Administrator').get('app_list'))
     if Permission.get(role,'Anonymous').get(request.endpoint).get(view.__name__) == False :
         raise AccessDenied(detail='Access Denied')

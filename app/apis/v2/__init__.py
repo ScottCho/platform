@@ -9,7 +9,8 @@ from .permission import permission_manager
 
 api_v2 = Blueprint('api_v2', __name__)
 # from app.apis.v2 import resources
-api = Api(flask_app,decorators=(auth_required,))
+#api = Api(flask_app,decorators=(auth_required,))
+api = Api(flask_app)
 api.init_app(flask_app)
 from .resources import auth, cmdb, service, vcs
 #　权限控制

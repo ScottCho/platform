@@ -37,18 +37,17 @@ from flask_rest_jsonapi.exceptions import AccessDenied, JsonApiException
 
 # 返回登录产生的token
 class AuthTokenAPI(MethodView):
-    
     def post(self):
         grant_type = request.json.get('grant_type')
         email = request.json.get('email')
         password = request.json.get('password')
 
         if grant_type is None or grant_type.lower() != 'password':
-            return api_abort(status=400, detail='The grant type must be password.')
+            return api_abort(400, 'The grant type must be password.')
 
         user = User.query.filter_by(email=email).first()
         if user is None or not user.verify_password(password):
-            return api_abort(status=400, detail='Either the email or password was invalid.')
+            return api_abort(400, 'Either the email or password was invalid.')
 
         token, expiration = generate_token(user)
 
@@ -61,23 +60,40 @@ class AuthTokenAPI(MethodView):
         response.headers['Pragma'] = 'no-cache'
         return response
 
+# 注册用户
+class RegisterAPI(MethodView):
+    def post(self):
+        email = request.json.get('email')
+        password = request.json.get('password')
+        role_id = request.json.get('role_id',1)
+        username = request.json.get('username')
+        print(email)
+        if User.query.filter_by(email=email).first():
+            return api_abort(409,'email已经被注册')
+        if User.query.filter_by(username=username).first():
+            return api_abort(409,'用户名已经被注册')
+        user = User(email=email,
+                    username=username,
+                    password=password,
+                    role_id=role_id
+                    )
+        db.session.add(user)
+        db.session.commit() 
+        token = user.generate_confirmation_token()
+        send_email([user.email],'确认您的账户',
+            'apis/v2/confirm.html',user=user,token=token)
+        return api_abort(200,'请在邮箱中的链接确认用户')
+
+
+
 # 确认用户
 class ConfirmUserAPI(MethodView):
+    decorators = [auth_required]
     def get(self,token):
-        if g.current_user.confirmed:
-            response = jsonify({
-                'code': 200,
-                'message': g.current_user.username+'早已激活'
-            })
-        elif g.current_user.confirm(token):
+        if g.current_user.confirm(token) or g.current_user.confirmed:
             db.session.commit()
-            response = jsonify({
-                'code': 200,
-                'message': g.current_user.username+'已激活'
-            })
         else:
             return api_abort(400,'链接无效或者过期')
-        return response
 
 # 根据token返回用户信息
 @api_v2.route('/tokeninfo')
@@ -87,7 +103,7 @@ def token_user():
     try:
         data = s.loads(token)
     except (BadSignature, SignatureExpired):
-        return api_abort(code=400, message='The token expired or invalid.')
+        return api_abort(status=400, detail='The token expired or invalid.')
     user = User.query.get(data['id'])   
     response = jsonify({
             'id': user.id,
@@ -166,7 +182,7 @@ class UserList(ResourceList):
         obj = self.create_object(data, kwargs)
         token = obj.generate_confirmation_token()
         send_email([email],'确认您的账户',
-            'mail/auth/confirm.html',user=obj,token=token)
+            'apis/v2/confirm.html',user=obj,token=token)
         result = schema.dump(obj).data
 
         if result['data'].get('links', {}).get('self'):
@@ -230,5 +246,7 @@ api.route(RoleRelationship, 'role_users', '/api/roles/<int:id>/relationships/use
 
 #生成token端点
 api_v2.add_url_rule('/oauth/token', view_func=AuthTokenAPI.as_view('token'), methods=['POST'])
+# 注册用户
+api_v2.add_url_rule('/register/user', view_func=RegisterAPI.as_view('register_user'), methods=['POST'])
 # 确认用户端点
 api_v2.add_url_rule('/confirm/<token>', view_func=ConfirmUserAPI.as_view('confirm_user'), methods=['GET',])
