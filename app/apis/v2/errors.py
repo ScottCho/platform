@@ -5,6 +5,7 @@ from werkzeug.http import HTTP_STATUS_CODES
 
 from app.apis.v1 import api_v1
 
+from flask_rest_jsonapi.exceptions import AccessDenied, JsonApiException
 
 def api_abort(code, message=None, **kwargs):
     if message is None:

@@ -200,8 +200,8 @@ def permission_manager(view, view_args, view_kwargs, *args, **kwargs):
         # 如果没有登录抛出异常
         role = g.current_user.role.name
     except:
-        raise JsonApiException(title='Not logged in',detail='用户没有登录.',code='403',status=403)
+        raise JsonApiException(title='Unauthorized',detail='用户没有登录.',status=401)
     
     # request.endpoint=project_list   view.__name__=get
     if Permission.get(role,'Anonymous').get(request.endpoint).get(view.__name__,True) == False :
-        raise AccessDenied(detail='Access Denied',code='403')
+        raise AccessDenied(detail='Access Denied')
