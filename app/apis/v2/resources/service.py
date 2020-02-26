@@ -13,66 +13,79 @@ from app.apis.v2.schemas.service import DatabaseSchema, SchemaSchema, EnvSchema,
 
 # Create resource managers
 class DatabaseList(ResourceList):
+    decorators = (auth_required,)
     schema = DatabaseSchema
     data_layer = {'session': db.session,
                   'model': Database}
 
 class DatabaseDetail(ResourceDetail):
+    decorators = (auth_required,)
     schema = DatabaseSchema
     data_layer = {'session': db.session,
                   'model': Database}
 
 class DatabaseRelationship(ResourceRelationship):
+    decorators = (auth_required,)
     schema = DatabaseSchema
     data_layer = {'session': db.session,
                   'model': Database}
 
 class SchemaList(ResourceList):
+    decorators = (auth_required,)
     schema = SchemaSchema
     data_layer = {'session': db.session,
                   'model': DBSchema}
 
 class SchemaDetail(ResourceDetail):
+    decorators = (auth_required,)
     schema = SchemaSchema
     data_layer = {'session': db.session,
                   'model': DBSchema}
 
 class SchemaRelationship(ResourceRelationship):
+    decorators = (auth_required,)
     schema = SchemaSchema
     data_layer = {'session': db.session,
                   'model': DBSchema}
 
 class EnvList(ResourceList):
+    decorators = (auth_required,)
     schema = EnvSchema
     data_layer = {'session': db.session,
                   'model': Env}
 
 class EnvDetail(ResourceDetail):
+    decorators = (auth_required,)
     schema = EnvSchema
     data_layer = {'session': db.session,
                   'model': Env}
 
 class SubsystemList(ResourceList):
+    decorators = (auth_required,)
     schema = SubsystemSchema
     data_layer = {'session': db.session,
                   'model': Subsystem}
 
 class SubsystemDetail(ResourceDetail):
+    decorators = (auth_required,)
     schema = SubsystemSchema
     data_layer = {'session': db.session,
                   'model': Subsystem}
 
 class AppList(ResourceList):
+    decorators = (auth_required,)
     schema = AppSchema
     data_layer = {'session': db.session,
                   'model': App}
 
 class AppDetail(ResourceDetail):
+    decorators = (auth_required,)
     schema = AppSchema
     data_layer = {'session': db.session,
                   'model': App}
 
 class AppRelationship(ResourceRelationship):
+    decorators = (auth_required,)
     schema = AppSchema
     data_layer = {'session': db.session,
                   'model': App}

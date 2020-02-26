@@ -62,7 +62,6 @@ class AuthTokenAPI(MethodView):
 
 # 确认用户
 class ConfirmUserAPI(MethodView):
-    decorators = (auth_required,)
     def get(self,token):
         if g.current_user.confirmed:
             response = jsonify({
@@ -107,18 +106,20 @@ class ProjectList(ResourceList):
 
 
 class ProjectDetail(ResourceDetail):
+    decorators = (auth_required,)
     schema = ProjectSchema
     data_layer = {'session': db.session,
                   'model': Project}
 
 class ProjectRelationship(ResourceRelationship):
+    decorators = (auth_required,)
     schema = ProjectSchema
     data_layer = {'session': db.session,
                   'model': Project}
 
 # 用户
 class UserList(ResourceList):
-
+    decorators = (auth_required,)
     # 自定义post方法,注册用户
     def post(self, *args, **kwargs):
         """Create an object"""
@@ -187,22 +188,26 @@ class UserDetail(ResourceDetail):
                   'model': User}
 
 class UserRelationship(ResourceRelationship):
+    decorators = (auth_required,)
     schema = UserSchema
     data_layer = {'session': db.session,
                   'model': User}
 
 # 角色
 class RoleList(ResourceList):
+    decorators = (auth_required,)
     schema = RoleSchema
     data_layer = {'session': db.session,
                   'model': Role}
 
 class RoleDetail(ResourceDetail):
+    decorators = (auth_required,)
     schema = RoleSchema
     data_layer = {'session': db.session,
                   'model': Role}
 
 class RoleRelationship(ResourceRelationship):
+    decorators = (auth_required,)
     schema = RoleSchema
     data_layer = {'session': db.session,
                   'model': Role}

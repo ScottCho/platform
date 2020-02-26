@@ -13,56 +13,62 @@ from app.apis.v2.auth import auth_required
 
 # Create resource managers
 class MachineList(ResourceList):
-    decorators = auth_required,
+    decorators = (auth_required,)
     schema = MachineSchema
     data_layer = {'session': db.session,
                   'model': Machine}
 
 class MachineDetail(ResourceDetail):
-    decorators = auth_required,
+    decorators = (auth_required,)
     schema = MachineSchema
     data_layer = {'session': db.session,
                   'model': Machine}
 
 class MachineRelationship(ResourceRelationship):
+    decorators = (auth_required,)
     schema = MachineSchema
     data_layer = {'session': db.session,
                   'model': Machine}
 
 class CredenceList(ResourceList):
+    decorators = (auth_required,)
     schema = CredenceSchema
     data_layer = {'session': db.session,
                   'model': Credence}
 
 class CredenceDetail(ResourceDetail):
+    decorators = (auth_required,)
     schema = CredenceSchema
     data_layer = {'session': db.session,
                   'model': Credence}
 
 class CredenceRelationship(ResourceRelationship):
+    decorators = (auth_required,)
     schema = CredenceSchema
     data_layer = {'session': db.session,
                   'model': Credence}
 
 
 class AgreementList(ResourceList):
+    decorators = (auth_required,)
     schema = AgreementSchema
     data_layer = {'session': db.session,
                   'model': Agreement}
 
 class AgreementDetail(ResourceDetail):
+    decorators = (auth_required,)
     schema = AgreementSchema
     data_layer = {'session': db.session,
                   'model': Agreement}
 
 class AgreementRelationship(ResourceRelationship):
+    decorators = (auth_required,)
     schema = AgreementSchema
     data_layer = {'session': db.session,
                   'model': Agreement}
 
        
 # Create endpoints
-api.resource_registry = [MachineList,MachineDetail,CredenceList,CredenceDetail,AgreementList,AgreementDetail]
 api.route(MachineList, 'machine_list', '/api/machines')
 api.route(MachineDetail, 'machine_detail', '/api/machines/<int:id>')
 api.route(MachineRelationship, 'machine_credence', '/api/machines/<int:id>/relationships/credence')

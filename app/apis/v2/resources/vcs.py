@@ -16,7 +16,7 @@ from app.localemail import send_email
 
 # Create resource managers
 class BaselineList(ResourceList):
-    decorators = auth_required,
+    decorators = (auth_required,)
     
     def before_post(self, args, kwargs, data=None):
         """Hook to make custom work before post method"""
@@ -63,7 +63,7 @@ class BaselineList(ResourceList):
                   'methods': {'after_create_object': after_create_object}}
 
 class BaselineDetail(ResourceDetail):
-
+    decorators = (auth_required,)
     def before_patch(self, args, kwargs, data=None):
         """Hook to make custom work before patch method"""
         obj = Baseline.query.get_or_404(kwargs['id'])
@@ -105,32 +105,38 @@ class BaselineDetail(ResourceDetail):
                   }
 
 class BaselineRelationship(ResourceRelationship):
+    decorators = (auth_required,)
     schema = BaselineSchema
     data_layer = {'session': db.session,
                   'model': Baseline}
 
 class BlstatusList(ResourceList):
+    decorators = (auth_required,)
     schema = BlstatusSchema
     data_layer = {'session': db.session,
                   'model': Blstatus}
 
 class BlstatusDetail(ResourceDetail):
+    decorators = (auth_required,)
     schema = BlstatusSchema
     data_layer = {'session': db.session,
                   'model': Blstatus}
 
 #更新包
 class PackageList(ResourceList):
+    decorators = (auth_required,)
     schema = PackageSchema
     data_layer = {'session': db.session,
                   'model': Package}
 
 class PackageDetail(ResourceDetail):
+    decorators = (auth_required,)
     schema = PackageSchema
     data_layer = {'session': db.session,
                   'model': Package}
 
 class PackageRelationship(ResourceRelationship):
+    decorators = (auth_required,)
     schema = PackageSchema
     data_layer = {'session': db.session,
                   'model': Package}   
