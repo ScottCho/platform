@@ -9,7 +9,7 @@ from app import db
 
 from app.apis.v2 import api
 from app.apis.v2.schemas.service import DatabaseSchema, SchemaSchema, EnvSchema, SubsystemSchema, AppSchema
-
+from app.apis.v2.auth import auth_required
 
 # Create resource managers
 class DatabaseList(ResourceList):
