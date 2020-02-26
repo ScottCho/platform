@@ -6,7 +6,7 @@ from werkzeug.http import HTTP_STATUS_CODES
 
 def api_abort(status, detail=None, **kwargs):
     if detail is None:
-        detail = HTTP_STATUS_CODES.get(code, '')
+        detail = HTTP_STATUS_CODES.get(status, '')
 
     response = jsonify(errors=[{'status':status, 'detail':detail}], jsonapi={"version": "1.0"},**kwargs)
     response.status_code = status
