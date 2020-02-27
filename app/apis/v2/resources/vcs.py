@@ -105,7 +105,7 @@ class BaselineList(ResourceList):
                 )
 
         result = schema.dump(obj).data
-        result.update({'detail'},message)
+        result.update({'detail':message})
         if result['data'].get('links', {}).get('self'):
             final_result = (result, 201, {'Location': result['data']['links']['self']})
         else:
