@@ -185,7 +185,7 @@ class BaselineDetail(ResourceDetail):
         print(message)
         # 基线邮件主题
         mailtheme = obj.app.project.name + '-' + obj.app.env.name + '-' + \
-            obj.created.strftime("%Y%m%d") + '-' + str(obj.id)
+            obj.created.strftime("%Y%m%d") + '-' + str(obj.id)+'第'+str(obj.updateno)+'次重更'
         #收件人       
         recipients = []
         users = obj.app.project.users
@@ -204,7 +204,6 @@ class BaselineDetail(ResourceDetail):
         result = schema.dump(obj).data
         result.update({'detail':message})
         final_result = self.after_patch(result)
-
         return final_result
     schema = BaselineSchema
     data_layer = {'session': db.session,
