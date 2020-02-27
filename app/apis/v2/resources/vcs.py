@@ -4,6 +4,13 @@ from flask import request, g
 from flask_rest_jsonapi import (Api, ResourceDetail, ResourceList,
                                 ResourceRelationship)
 
+from flask_rest_jsonapi.pagination import add_pagination_links
+from flask_rest_jsonapi.exceptions import InvalidType, BadRequest, RelationNotFound
+from flask_rest_jsonapi.decorators import check_headers, check_method_requirements, jsonapi_exception_formatter
+from flask_rest_jsonapi.schema import compute_schema, get_relationships, get_model_field
+from flask_rest_jsonapi.data_layers.base import BaseDataLayer
+from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
+from flask_rest_jsonapi.utils import JSONEncoder
 
 from app import db, flask_app
 from app.apis.v2 import api
@@ -18,17 +25,49 @@ from app.localemail import send_email
 class BaselineList(ResourceList):
     decorators = (auth_required,)
     
+    #　处理基线的默认内容
     def before_post(self, args, kwargs, data=None):
         """Hook to make custom work before post method"""
-        print('before_post before data:'+ str(data))
         data['developer_id'] = g.current_user.id
         data['updateno'] = 1
         data['status_id'] =5
-        print('before_post aftrt data:'+ str(data))
 
-    def after_create_object(self, obj, data, view_kwargs):
-        """Make work after create object"""
-        print('after create object')
+    def post(self, *args, **kwargs):
+        """Create an object"""
+        json_data = request.get_json() or {}
+
+        qs = QSManager(request.args, self.schema)
+
+        schema = compute_schema(self.schema,
+                                getattr(self, 'post_schema_kwargs', dict()),
+                                qs,
+                                qs.include)
+
+        try:
+            data, errors = schema.load(json_data)
+        except IncorrectTypeError as e:
+            errors = e.messages
+            for error in errors['errors']:
+                error['status'] = '409'
+                error['title'] = "Incorrect type"
+            return errors, 409
+        except ValidationError as e:
+            errors = e.messages
+            for message in errors['errors']:
+                message['status'] = '422'
+                message['title'] = "Validation error"
+            return errors, 422
+
+        if errors:
+            for error in errors['errors']:
+                error['status'] = "422"
+                error['title'] = "Validation error"
+            return errors, 422
+
+        self.before_post(args, kwargs, data=data)
+
+        obj = self.create_object(data, kwargs)
+
         message = ''
         #更新应用程序
         if obj.versionno:
@@ -56,11 +95,53 @@ class BaselineList(ResourceList):
         send_email(recipients, mailtheme,
                'mail/version/baseline.html', attachments, baseline=obj
                 )
+
+        result = schema.dump(obj).data
+
+        if result['data'].get('links', {}).get('self'):
+            final_result = (result, 201, {'Location': result['data']['links']['self']})
+        else:
+            final_result = (result, 201)
+
+        result = self.after_post(final_result)
+        result.update({'detail'},message)
+        return result
+
+        
+    # def after_create_object(self, obj, data, view_kwargs):
+    #     """Make work after create object"""
+    #     message = ''
+    #     #更新应用程序
+    #     if obj.versionno:
+    #         message += obj.build_app_job()
+    #     #更新数据库
+    #     if obj.sqlno or obj.pckno:
+    #         message += obj.build_db_job() 
+    #     print(message)
+
+    #     # 基线邮件主题
+    #     mailtheme = obj.app.project.name + '-' + obj.app.env.name + '-' + \
+    #         obj.created.strftime("%Y%m%d") + '-' + str(obj.id)
+    #     #收件人       
+    #     recipients = []
+    #     users = obj.app.project.users
+    #     for user in users:
+    #         if user.is_active:
+    #             recipients.append(user.email)
+    #     #附件
+    #     log_dir = os.path.join(str(obj.app.project.target_dir),
+    #             'LOG' + '_' + str(obj.id))
+    #     attachments = fnmatch_file.find_specific_files(
+    #         log_dir, '*log')
+    #     #发送邮件
+    #     send_email(recipients, mailtheme,
+    #            'mail/version/baseline.html', attachments, baseline=obj
+    #             )
     
     schema = BaselineSchema
     data_layer = {'session': db.session,
-                  'model': Baseline,
-                  'methods': {'after_create_object': after_create_object}}
+                  'model': Baseline
+                }
 
 class BaselineDetail(ResourceDetail):
     decorators = (auth_required,)
