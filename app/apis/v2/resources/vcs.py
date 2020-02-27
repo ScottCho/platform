@@ -4,6 +4,7 @@ from flask import request, g
 from flask_rest_jsonapi import (Api, ResourceDetail, ResourceList,
                                 ResourceRelationship)
 
+from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
 from flask_rest_jsonapi.pagination import add_pagination_links
 from flask_rest_jsonapi.exceptions import InvalidType, BadRequest, RelationNotFound
 from flask_rest_jsonapi.decorators import check_headers, check_method_requirements, jsonapi_exception_formatter
