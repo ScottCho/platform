@@ -13,6 +13,7 @@ def send_async_email(app, msg):
 
 
 def send_email(to, subject, template,attachments=None, **kwargs):
+    print('发送邮件: '+subject)
     app = current_app._get_current_object()
     msg = Message(subject,
                   recipients=to)
