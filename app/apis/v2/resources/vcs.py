@@ -4,6 +4,13 @@ from flask import request, g
 from flask_rest_jsonapi import (Api, ResourceDetail, ResourceList,
                                 ResourceRelationship)
 
+from werkzeug.wrappers import Response
+from flask import request, url_for, make_response
+from flask.wrappers import Response as FlaskResponse
+from flask.views import MethodView, MethodViewType
+from marshmallow_jsonapi.exceptions import IncorrectTypeError
+from marshmallow import ValidationError
+
 from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
 from flask_rest_jsonapi.pagination import add_pagination_links
 from flask_rest_jsonapi.exceptions import InvalidType, BadRequest, RelationNotFound
@@ -98,14 +105,14 @@ class BaselineList(ResourceList):
                 )
 
         result = schema.dump(obj).data
-
+        result.update({'detail'},message)
         if result['data'].get('links', {}).get('self'):
             final_result = (result, 201, {'Location': result['data']['links']['self']})
         else:
             final_result = (result, 201)
 
         result = self.after_post(final_result)
-        result.update({'detail'},message)
+        
         return result
 
         
