@@ -79,6 +79,7 @@ class RegisterAPI(MethodView):
         db.session.add(user)
         db.session.commit() 
         token = user.generate_confirmation_token()
+        print('开始发送邮件')
         send_email([user.email],'确认您的账户',
             'apis/v2/confirm.html',user=user,token=token)
         return api_abort(200,'请在邮箱中的链接确认用户')
