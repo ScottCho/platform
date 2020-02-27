@@ -56,8 +56,8 @@ class AuthTokenAPI(MethodView):
             'token_type': 'Bearer',
             'expires_in': expiration
         })
-        response.headers['Cache-Control'] = 'no-store'
-        response.headers['Pragma'] = 'no-cache'
+        # response.headers['Cache-Control'] = 'no-store'
+        # response.headers['Pragma'] = 'no-cache'
         return response
 
 # 注册用户
@@ -67,7 +67,6 @@ class RegisterAPI(MethodView):
         password = request.json.get('password')
         role_id = request.json.get('role_id',1)
         username = request.json.get('username')
-        print(email)
         if User.query.filter_by(email=email).first():
             return api_abort(409,'email已经被注册')
         if User.query.filter_by(username=username).first():
@@ -249,4 +248,4 @@ api_v2.add_url_rule('/oauth/token', view_func=AuthTokenAPI.as_view('token'), met
 # 注册用户
 api_v2.add_url_rule('/register/user', view_func=RegisterAPI.as_view('register_user'), methods=['POST'])
 # 确认用户端点
-api_v2.add_url_rule('/confirm/<token>', view_func=ConfirmUserAPI.as_view('confirm_user'), methods=['GET',])
+api_v2.add_url_rule('/confirm/user/<token>', view_func=ConfirmUserAPI.as_view('confirm_user'), methods=['GET',])
