@@ -46,7 +46,7 @@ class Baseline(db.Model):
     def update_baseline(self,flag=0,num='01'):
     # flag=0:单条基线更新，flag=1： 合并基线更新
     # num: 当天发布更新包的个数
-        messagge = '*****开始更新基线*****\n'
+        message = '*****开始更新基线*****\n'
         if self.versionno:
             version_list = self.versionno.split(',')
             compile_file_list = []  # 构建文件集
