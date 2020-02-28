@@ -40,82 +40,16 @@ class BaselineList(ResourceList):
         data['updateno'] = 1
         data['status_id'] =5
 
-    def post(self, *args, **kwargs):
-        """Create an object"""
-        json_data = request.get_json() or {}
-
-        qs = QSManager(request.args, self.schema)
-
-        schema = compute_schema(self.schema,
-                                getattr(self, 'post_schema_kwargs', dict()),
-                                qs,
-                                qs.include)
-
-        try:
-            data, errors = schema.load(json_data)
-        except IncorrectTypeError as e:
-            errors = e.messages
-            for error in errors['errors']:
-                error['status'] = '409'
-                error['title'] = "Incorrect type"
-            return errors, 409
-        except ValidationError as e:
-            errors = e.messages
-            for message in errors['errors']:
-                message['status'] = '422'
-                message['title'] = "Validation error"
-            return errors, 422
-
-        if errors:
-            for error in errors['errors']:
-                error['status'] = "422"
-                error['title'] = "Validation error"
-            return errors, 422
-
-        self.before_post(args, kwargs, data=data)
-
-        obj = self.create_object(data, kwargs)
-
-        message = ''
-        #更新应用程序
-        if obj.versionno:
-            message += obj.build_app_job()
-        #更新数据库
-        if obj.sqlno or obj.pckno:
-            message += obj.build_db_job() 
-        print(message)
-
-        # 基线邮件主题
-        mailtheme = obj.app.project.name + '-' + obj.app.env.name + '-' + \
-            obj.created.strftime("%Y%m%d") + '-' + str(obj.id)
-        #收件人       
-        recipients = []
-        users = obj.app.project.users
-        for user in users:
-            if user.is_active:
-                recipients.append(user.email)
-        #附件
-        log_dir = os.path.join(str(obj.app.project.target_dir),
-                'LOG' + '_' + str(obj.id))
-        attachments = fnmatch_file.find_specific_files(
-            log_dir, '*log')
-        #发送邮件
-        send_email(recipients, mailtheme,
-               'mail/version/baseline.html', attachments, baseline=obj
-                )
-
-        result = schema.dump(obj).data
-        result.update({'detail':message})
-        if result['data'].get('links', {}).get('self'):
-            final_result = (result, 201, {'Location': result['data']['links']['self']})
-        else:
-            final_result = (result, 201)
-
-        result = self.after_post(final_result)
-        
+    def after_post(self, result):
+        """Hook to make custom work after post method"""
+        obj = self._data_layer.get_object({'id':result['data']['id']})
+        message = obj.update_baseline()
+        # 发送邮件
+        obj.baseline_email()
+        # 更新结果返回
+        result.update({'detail': message})
         return result
 
-        
     schema = BaselineSchema
     data_layer = {'session': db.session,
                   'model': Baseline
@@ -128,85 +62,17 @@ class BaselineDetail(ResourceDetail):
         obj = Baseline.query.get_or_404(kwargs['id'])
         data['updateno'] = obj.updateno+1
     
-    def patch(self, *args, **kwargs):
-        """Update an object"""
-        json_data = request.get_json() or {}
+    def after_patch(self, result):
+        """Hook to make custom work after patch method"""
+        obj = self._data_layer.get_object({'id':result['data']['id']})
+        message = obj.update_baseline()
+        # 发送邮件
+        obj.baseline_email()
+        # 更新结果返回
+        result.update({'detail': message})
+        return result
 
-        qs = QSManager(request.args, self.schema)
-        schema_kwargs = getattr(self, 'patch_schema_kwargs', dict())
-        schema_kwargs.update({'partial': True})
-
-        self.before_marshmallow(args, kwargs)
-
-        schema = compute_schema(self.schema,
-                                schema_kwargs,
-                                qs,
-                                qs.include)
-
-        try:
-            data, errors = schema.load(json_data)
-        except IncorrectTypeError as e:
-            errors = e.messages
-            for error in errors['errors']:
-                error['status'] = '409'
-                error['title'] = "Incorrect type"
-            return errors, 409
-        except ValidationError as e:
-            errors = e.messages
-            for message in errors['errors']:
-                message['status'] = '422'
-                message['title'] = "Validation error"
-            return errors, 422
-
-        if errors:
-            for error in errors['errors']:
-                error['status'] = "422"
-                error['title'] = "Validation error"
-            return errors, 422
-
-        if 'id' not in json_data['data']:
-            raise BadRequest('Missing id in "data" node',
-                             source={'pointer': '/data/id'})
-        if (str(json_data['data']['id']) != str(kwargs[getattr(self._data_layer, 'url_field', 'id')])):
-            raise BadRequest('Value of id does not match the resource identifier in url',
-                             source={'pointer': '/data/id'})
-
-        self.before_patch(args, kwargs, data=data)
-
-        obj = self.update_object(data, qs, kwargs)
-        """Make work after update object""" 
-        message = ''
-        #更新应用程序
-        if obj.versionno:
-            message += obj.build_app_job()
-        #更新数据库
-        if obj.sqlno or obj.pckno:
-            message += obj.build_db_job() 
-        print(message)
-        # 基线邮件主题
-        mailtheme = obj.app.project.name + '-' + obj.app.env.name + '-' + \
-            obj.created.strftime("%Y%m%d") + '-' + str(obj.id)+'第'+str(obj.updateno)+'次重更'
-        #收件人       
-        recipients = []
-        users = obj.app.project.users
-        for user in users:
-            if user.is_active:
-                recipients.append(user.email)
-        #附件
-        log_dir = os.path.join(str(obj.app.project.target_dir),
-                'LOG' + '_' + str(obj.id))
-        attachments = fnmatch_file.find_specific_files(
-            log_dir, '*log')
-        #发送邮件
-        send_email(recipients, mailtheme,
-               'mail/version/baseline.html', attachments, baseline=obj
-                )
-        result = schema.dump(obj).data
-        result.update({'detail':message})
-        final_result = self.after_patch(result)
-        return final_result
-
-    # 改写成批量删除
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}
     def delete_object(self, kwargs):
         ids = kwargs.get('id')
         for id in ids[1:-1].split(','):
