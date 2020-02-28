@@ -69,7 +69,7 @@ class BaselineDetail(ResourceDetail):
         # 发送邮件
         obj.baseline_email()
         # 更新结果返回
-        result.update({'detail': message})
+        result[0].update({'detail': message})
         return result
 
     # 改写成批量删除，kwargs={'id':'[1,2,3]'}
