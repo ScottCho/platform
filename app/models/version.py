@@ -46,7 +46,7 @@ class Baseline(db.Model):
     def update_baseline(self,flag=0,num='01'):
     # flag=0:单条基线更新，flag=1： 合并基线更新
     # num: 当天发布更新包的个数
-        mesagge = '*****开始更新基线*****\n'
+        messagge = '*****开始更新基线*****\n'
         if self.versionno:
             version_list = self.versionno.split(',')
             compile_file_list = []  # 构建文件集
@@ -129,9 +129,9 @@ class Baseline(db.Model):
             r.update()
             # $base_DIR/HXUSER_20180409_01_ALL.sql
             DB_SCRIPT = os.path.join(base_dir, db_username.upper(
-            )+'_'+self.created.strftime("%Y%m%d")+'_'+num+'_ALL.sql')
+                    )+'_'+self.created.strftime("%Y%m%d")+'_'+num+'_ALL.sql')
             ROLLBACK_SCRIPT = os.path.join(target_rollbackdir, db_username.upper(
-            )+'_'+self.created.strftime("%Y%m%d")+'_'+'ALL_ROLLBACK_'+num+'.sql')
+                    )+'_'+self.created.strftime("%Y%m%d")+'_'+'ALL_ROLLBACK_'+num+'.sql')
             # 将sql文件复制到base_dir，,并将路径加到ALL.sql
             if self.sqlno:
                 for sql in self.sqlno.split(','):
