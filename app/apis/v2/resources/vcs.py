@@ -42,9 +42,7 @@ class BaselineList(ResourceList):
 
     def after_post(self, result):
         """Hook to make custom work after post method"""
-        id = result['data']['id']
-        print(id,type(id))
-        obj = self._data_layer.get_object({'id':result['data']['id']})
+        obj = self._data_layer.get_object({'id':result[0]['data']['id']})
         message = obj.update_baseline()
         # 发送邮件
         obj.baseline_email()
