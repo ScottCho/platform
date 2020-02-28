@@ -66,7 +66,7 @@ class Baseline(db.Model):
             # 变更文件写入到变更文本
             compile_file_path = os.path.join(self.app.jenkins_job_dir, self.app.subsystem.en_name +
                                          '_'+datetime.utcnow().strftime("%Y%m%d")+'_'+str(self.id)+'.txt')
-            print('本次基线的增量文本：'compile_file_path)
+            print('本次基线的增量文本：'+compile_file_path)
             with open(compile_file_path, 'w') as fw:
                 for line in compile_file_list:
                     fw.write('"'+line+'"'+'\n')
