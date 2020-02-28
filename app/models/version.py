@@ -87,7 +87,7 @@ class Baseline(db.Model):
             jenkins_build_number = job.get_next_build_number()
             message += 'jenkins构建日志请查： '+job.url + \
                 str(jenkins_build_number)+'/console'+'\n'
-            print(mesagge)
+            print(message)
 
         # DB更新
         if self.sqlno or self.pckno:
@@ -213,11 +213,11 @@ class Baseline(db.Model):
             returncode, output = execute_cmd.execute_cmd(cmd, update_content)
             if returncode != 0:
                 message += 'sqlplus中执行db脚本失败,请检查！！！'+output.decode('utf-8')
-                current_app.logger.error(err_message)
+                current_app.logger.error(message)
             else:
                 output = output.decode('utf-8')
                 current_app.logger.info(output)
-                messgae += output
+                message += output
 
             # 根据基线的id触发Jenkins参数构建
             build_with_parameters(job_name,baseline_id=self.id)
