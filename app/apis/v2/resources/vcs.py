@@ -42,7 +42,8 @@ class BaselineList(ResourceList):
 
     def after_post(self, result):
         """Hook to make custom work after post method"""
-        obj = self._data_layer.get_object({'id':result['data']['id']})
+        id = int(result['data']['id'])
+        obj = self._data_layer.get_object({'id':id})
         message = obj.update_baseline()
         # 发送邮件
         obj.baseline_email()
@@ -64,7 +65,8 @@ class BaselineDetail(ResourceDetail):
     
     def after_patch(self, result):
         """Hook to make custom work after patch method"""
-        obj = self._data_layer.get_object({'id':result['data']['id']})
+        id = int(result['data']['id'])
+        obj = self._data_layer.get_object({'id':id})
         message = obj.update_baseline()
         # 发送邮件
         obj.baseline_email()
