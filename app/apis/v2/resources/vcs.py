@@ -205,6 +205,14 @@ class BaselineDetail(ResourceDetail):
         result.update({'detail':message})
         final_result = self.after_patch(result)
         return final_result
+
+    # 改写成批量删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        for id in ids[1:-1].split(','):
+            obj = self._data_layer.get_object({'id':id})
+            self._data_layer.delete_object(obj, {'id':id})
+
     schema = BaselineSchema
     data_layer = {'session': db.session,
                   'model': Baseline  
@@ -250,7 +258,7 @@ class PackageRelationship(ResourceRelationship):
 # Create endpoints
 #基线
 api.route(BaselineList, 'baseline_list', '/api/baselines')
-api.route(BaselineDetail, 'baseline_detail', '/api/baselines/<int:id>')
+api.route(BaselineDetail, 'baseline_detail', '/api/baselines/<id>')
 api.route(BaselineRelationship, 'baseline_developer', '/api/baselines/<int:id>/relationships/developer')
 api.route(BaselineRelationship, 'baseline_app', '/api/baselines/<int:id>/relationships/app')
 api.route(BaselineRelationship, 'baseline_status', '/api/baselines/<int:id>/relationships/status')
