@@ -44,10 +44,10 @@ class Baseline(db.Model):
     status = db.relationship('Blstatus')
 
     def update_baseline(self,flag=0,num='01'):
-    """
-        flag=0:单条基线更新，flag=1： 合并基线更新
-        num: 当天发布更新包的个数
-    """
+    '''
+    flag=0:单条基线更新，flag=1： 合并基线更新
+    num: 当天发布更新包的个数
+    '''
         mesagge = '*****开始更新基线*****\n'
         if self.versionno:
             version_list = self.versionno.split(',')
