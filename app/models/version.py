@@ -220,7 +220,7 @@ class Baseline(db.Model):
                 current_app.logger.info(output)
                 message += output
 
-            # 根据基线的id触发Jenkins参数构建
+            # 根据基线的id触发Jenkins参数构建,先更新DB，再更新应用
             build_with_parameters(job_name,baseline_id=self.id)
         return   message     
 
@@ -448,6 +448,7 @@ class Package(db.Model):
     rlsdate = db.Column(db.DateTime(), default=datetime.utcnow)
     blineno = db.Column(db.String(500), nullable=False)
     merge_blineno = db.Column(db.String(128))
+    package_count = db.Column(db.String(64))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
     env_id = db.Column(db.Integer, db.ForeignKey('envs.id'))
     remark = db.Column(db.String(500))

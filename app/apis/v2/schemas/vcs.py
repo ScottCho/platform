@@ -82,6 +82,7 @@ class PackageSchema(Schema):
     remark = fields.Str()
     project_id = fields.Integer()
     env_id = fields.Integer()
+    package_count = fields.Str()
     project_name = fields.Function(lambda obj: "{}".format(obj.project.name))
     env_name = fields.Function(lambda obj: "{}".format(obj.env.name))
     project = Relationship(self_view='package_project',
