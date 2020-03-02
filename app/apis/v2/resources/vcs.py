@@ -146,9 +146,6 @@ class PackageList(ResourceList):
             project_id = app_key.project_id
             merge_app = App.query.filter_by(project_id=project_id,subsystem_id=subsystem_id,env_id=env_id).first()
             dir_list = merge_app.jenkins_job_dir.split('/')
-            job_name_index = dir_list.index('jobs')+1
-            job_name = dir_list[job_name_index]
-            job = get_jenkins_job(job_name)
             merge_baseline = Baseline(
                 sqlno=sqlnos.strip(','),
                 versionno=versionnos.strip(','),
@@ -159,9 +156,7 @@ class PackageList(ResourceList):
                 content='合并发布',
                 developer_id=g.current_user.id,
                 updateno=1,
-                status_id=5,
-                jenkins_last_build = job.get_last_build().is_good(),
-                jenkins_build_number = job.get_next_build_number()
+                status_id=5
             )
             db.session.add(merge_baseline)    
             db.session.commit()
@@ -233,8 +228,7 @@ class PackageDetail(ResourceDetail):
             # 将多条基线合并到同一条
             subsystem_id = app_key.subsystem_id
             merge_app = App.query.filter_by(project_id=project_id,env_id=env_id,subsystem_id=subsystem_id).first()
-            job_name = os.path.basename(app_key.jenkins_job_dir)
-            job = get_jenkins_job(job_name)
+            dir_list = merge_app.jenkins_job_dir.split('/')
             merge_baseline = Baseline(sqlno=sqlnos,
                                   versionno=versionnos,
                                   pckno=pcknos,
@@ -244,9 +238,7 @@ class PackageDetail(ResourceDetail):
                                   content='合并发布',
                                   developer_id=g.current_user.id,
                                   updateno=1,
-                                  status_id=17,
-                                  jenkins_last_build = job.get_last_build().is_good(),
-                                  jenkins_build_number = job.get_next_build_number()
+                                  status_id=17
                                   )
             db.session.add(merge_baseline)    
             db.session.commit()
