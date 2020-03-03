@@ -576,7 +576,6 @@ class Package(db.Model):
         db_dir = os.path.join(target_dir, 'DB')
         log_dir = os.path.join(target_dir, 'LOG')
         package_dir = os.path.join(target_dir, self.name)
-        print(package_dir)
 
         if os.path.exists(package_dir):
             shutil.rmtree(package_dir)
