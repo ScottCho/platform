@@ -145,7 +145,6 @@ class PackageList(ResourceList):
             subsystem_id = app_key.subsystem_id
             project_id = app_key.project_id
             merge_app = App.query.filter_by(project_id=project_id,subsystem_id=subsystem_id,env_id=env_id).first()
-            dir_list = merge_app.jenkins_job_dir.split('/')
             merge_baseline = Baseline(
                 sqlno=sqlnos.strip(','),
                 versionno=versionnos.strip(','),
@@ -173,12 +172,10 @@ class PackageDetail(ResourceDetail):
 
     def before_patch(self, args, kwargs, data=None):
         """Hook to make custom work before patch method"""
-        print(data)
         env_id=data['env_id']
         rlsdate=data['rlsdate']
         project_id=data['project_id']
         merge_blineno = data['merge_blineno']
-        original_blineno = data['blineno'].split(',')
         original_merge_bline_list = merge_blineno.split(',')
         merge_list = []
         blineno = data['blineno']
@@ -212,9 +209,6 @@ class PackageDetail(ResourceDetail):
                 bversionno = baseline.versionno
                 bpckno = baseline.pckno
                 brollbackno = baseline.rollbackno
-                baseline.status_id = 8
-                db.session.add(baseline)
-                db.session.commit()
                 # 拼接基线
                 if bsqlno:
                     sqlnos = (str(bsqlno) + ',' + sqlnos).strip(',')
@@ -228,7 +222,6 @@ class PackageDetail(ResourceDetail):
             # 将多条基线合并到同一条
             subsystem_id = app_key.subsystem_id
             merge_app = App.query.filter_by(project_id=project_id,env_id=env_id,subsystem_id=subsystem_id).first()
-            dir_list = merge_app.jenkins_job_dir.split('/')
             merge_baseline = Baseline(sqlno=sqlnos,
                                   versionno=versionnos,
                                   pckno=pcknos,
@@ -259,6 +252,41 @@ class PackageRelationship(ResourceRelationship):
     data_layer = {'session': db.session,
                   'model': Package}   
 
+class PackageMerge(ResourceDetail):
+    decorators = (auth_required,)
+
+    def after_get(self, result):
+        package = self._data_layer.get_object({'id':result['data']['id']})
+        detail = package.package_merge()
+        result.update({'detail': detail})
+        return result
+
+    schema = PackageSchema
+    data_layer = {'session': db.session,
+                  'model': Package}
+
+class PackageDeploy(ResourceDetail):
+    decorators = (auth_required,)
+
+    def after_get(self, result):
+        package = self._data_layer.get_object({'id':result['data']['id']})
+        detail = package.package_deploy()
+        result.update({'detail': detail})
+        return result
+
+class PackageRelase(ResourceDetail):
+    decorators = (auth_required,)
+
+    def after_get(self, result):
+        package = self._data_layer.get_object({'id':result['data']['id']})
+        detail = package.package_relase()
+        result.update({'detail': detail})
+        return result
+
+    schema = PackageSchema
+    data_layer = {'session': db.session,
+                  'model': Package}
+
 # Create endpoints
 #基线
 api.route(BaselineList, 'baseline_list', '/api/baselines')
@@ -276,3 +304,9 @@ api.route(PackageDetail, 'package_detail', '/api/packages/<int:id>')
 api.route(PackageRelationship, 'package_project', '/api/packages/<int:id>/relationships/project')
 api.route(PackageRelationship, 'package_env', '/api/packages/<int:id>/relationships/env')
 api.route(PackageRelationship, 'package_baselines', '/api/packages/<int:id>/relationships/baselines')
+# 合并基线
+api.route(PackageMerge, 'package_merge', '/api/packages/merge/<int:id>')
+# 部署更新包
+api.route(PackageDeploy, 'package_deploy', '/api/packages/deploy/<int:id>')
+# 发布更新包
+api.route(PackageRelase, 'package_relase', '/api/packages/relase/<int:id>')

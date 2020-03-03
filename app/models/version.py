@@ -17,6 +17,7 @@ from app.utils.jenkins import (build_by_token, build_with_parameters,
 from app.utils.svn import diff_summary_files
 from app.utils.trans_path import trans_java
 
+
 from .. import db
 
 
@@ -496,3 +497,109 @@ class Package(db.Model):
 
         send_email(recipients, mailtheme,
                    'mail/version/package.html', attachments)
+
+
+    def package_merge(self):
+        merge_blineno = self.merge_blineno
+        merge_msg = '开始合并基线....</br>'
+        for blineno in merge_blineno.split(','):
+            baseline = Baseline.query.get_or_404(blineno)
+            app = baseline.app
+            version_list = sorted(baseline.versionno.split(','))
+            source_dir = app.source_dir
+            workspace = app.jenkins_job_dir
+            for version in version_list:
+                #更新SVN中的Jenkins中的源码目录
+                l = svn.local.LocalClient(workspace)
+                l.update()
+                #合并
+                source_log = l.run_command('log',[app.source_dir,'-c',version])[3]
+                message = 'Merged revision {} from {}'.format(version,source_dir)
+                current_app.logger.info(message)
+                merge_msg += message
+                try:
+                    merge_result = l.run_command('merge',
+                        [app.source_dir,workspace,'-c',version])
+                    if len(merge_result) > 2 and 'conflicts' in merge_result[3]:
+                        merge_msg += '合并'+version+'出现冲突\n'
+                        current_app.logger.error(merge_msg)
+                        l.run_command('revert',['-R',workspace])
+                    else:
+                        #提交
+                        l.commit(message)
+                        merge_msg += '合并成功.</br>'
+                except:
+                    merge_msg += '合并出现错误，请检查</br>'
+                    current_app.logger.error(merge_msg)
+                    l.run_command('revert',['-R',workspace])
+        return merge_msg
+
+    # 部署更新包
+    def package_deploy(self):
+        package_count = self.package_count
+        project = self.project
+        deploy_msg = ''
+        # 合并发布之前重建APP和DB目录
+        project.rebuild_relase_directory()
+        baselineno = self.merge_blineno.split(',')
+        for nu in baselineno:
+            merge_baseline = Baseline.query.get_or_404(nu)
+            deploy_msg += merge_baseline.update_baseline(flag=1,num=package_count)
+        return deploy_msg
+
+
+    #　发布更新包
+    def package_relase(self):
+        # 更新包中的基线状态修改为 ’已发布UAT‘
+        for baseline in baselines:
+            baseline.status_id = 17
+            db.session.add(baseline)
+            db.session.commit()
+
+        #　删除合并基线
+        for nu in merge_blineno:
+            merge_baseline = Baseline.query.get_or_404(nu)
+            db.session.delete(merge_baseline)
+            db.session.commit()
+
+        target_dir = self.project.target_dir
+        app_dir = os.path.join(target_dir, 'APP')
+        db_dir = os.path.join(target_dir, 'DB')
+        log_dir = os.path.join(target_dir, 'LOG')
+        package_dir = os.path.join(target_dir, self.name)
+
+        if os.path.exists(package_dir):
+            shutil.rmtree(package_dir)
+        os.mkdir(package_dir)
+        if os.path.exists(app_dir) and os.listdir(app_dir):
+            shutil.copytree(app_dir, os.path.join(package_dir, 'APP'))
+        if os.path.exists(db_dir) and os.listdir(db_dir):
+            shutil.copytree(db_dir, os.path.join(package_dir, 'DB'))
+        returncode, output = execute_cmd.execute_cmd(
+            'sh '+target_dir+'/relase_package.sh '+self.name)
+        package_path = ''
+        package_zip = glob.glob(target_dir+'/*zip')
+        package_7z = glob.glob(target_dir+'/*7z')
+        if package_zip:
+            package_path = package_zip[0]
+        else:
+            package_path = package_7z[0]
+
+        # 更新包接受者
+        recipients = []
+        users = self.project.users
+        for user in users:
+            if user.is_active and user.role.id in (3, 4):
+                recipients.append(user.email)
+        # 邮件主题
+        mailtheme = self.project.name+'今日发包'
+
+        attachments = [package_path]
+        if os.path.exists(log_dir):
+            logs = glob.glob(log_dir+'/*log')
+            attachments += logs
+
+        send_email(recipients, mailtheme,
+                   'mail/version/package.html', attachments)
+        
+        return '更新包已发布'
