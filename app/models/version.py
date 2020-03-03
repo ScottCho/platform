@@ -221,7 +221,8 @@ class Baseline(db.Model):
                 current_app.logger.info(output)
                 message += output
 
-            # 根据基线的id触发Jenkins参数构建,先更新DB，再更新应用
+        # 根据基线的id触发Jenkins参数构建,先更新DB，再更新应用
+        if self.versionno:
             build_with_parameters(job_name,baseline_id=self.id)
         return   message     
 
