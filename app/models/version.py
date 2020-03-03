@@ -566,7 +566,7 @@ class Package(db.Model):
 
         #　删除合并基线
         merge_blineno = self.merge_blineno
-        for nu in merge_blineno:
+        for nu in merge_blineno.split(','):
             merge_baseline = Baseline.query.get_or_404(nu)
             db.session.delete(merge_baseline)
             db.session.commit()
@@ -576,6 +576,7 @@ class Package(db.Model):
         db_dir = os.path.join(target_dir, 'DB')
         log_dir = os.path.join(target_dir, 'LOG')
         package_dir = os.path.join(target_dir, self.name)
+        print(package_dir)
 
         if os.path.exists(package_dir):
             shutil.rmtree(package_dir)
@@ -591,7 +592,7 @@ class Package(db.Model):
         package_7z = glob.glob(target_dir+'/*7z')
         if package_zip:
             package_path = package_zip[0]
-        else:
+        elif package_7z:
             package_path = package_7z[0]
 
         # 更新包接受者
