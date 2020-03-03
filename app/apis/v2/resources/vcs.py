@@ -283,7 +283,7 @@ class PackageRelease(ResourceDetail):
 
     def after_get(self, result):
         package = self._data_layer.get_object({'id':result['data']['id']})
-        detail = package.package_relase()
+        detail = package.package_release()
         result.update({'detail': detail})
         return result
 
