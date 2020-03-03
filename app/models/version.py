@@ -565,6 +565,7 @@ class Package(db.Model):
             db.session.commit()
 
         #　删除合并基线
+        merge_blineno = self.merge_blineno
         for nu in merge_blineno:
             merge_baseline = Baseline.query.get_or_404(nu)
             db.session.delete(merge_baseline)
