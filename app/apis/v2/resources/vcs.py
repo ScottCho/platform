@@ -273,12 +273,12 @@ class PackageDeploy(ResourceDetail):
         detail = package.package_deploy()
         result.update({'detail': detail})
         return result
-        
+
     schema = PackageSchema
     data_layer = {'session': db.session,
                   'model': Package}
 
-class PackageRelase(ResourceDetail):
+class PackageRelease(ResourceDetail):
     decorators = (auth_required,)
 
     def after_get(self, result):
@@ -313,4 +313,4 @@ api.route(PackageMerge, 'package_merge', '/api/packages/merge/<int:id>')
 # 部署更新包
 api.route(PackageDeploy, 'package_deploy', '/api/packages/deploy/<int:id>')
 # 发布更新包
-api.route(PackageRelase, 'package_relase', '/api/packages/relase/<int:id>')
+api.route(PackageRelease, 'package_release', '/api/packages/release/<int:id>')
