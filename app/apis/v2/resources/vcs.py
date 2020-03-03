@@ -273,6 +273,10 @@ class PackageDeploy(ResourceDetail):
         detail = package.package_deploy()
         result.update({'detail': detail})
         return result
+        
+    schema = PackageSchema
+    data_layer = {'session': db.session,
+                  'model': Package}
 
 class PackageRelase(ResourceDetail):
     decorators = (auth_required,)
