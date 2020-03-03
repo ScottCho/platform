@@ -556,7 +556,7 @@ class Package(db.Model):
 
 
     #　发布更新包
-    def package_relase(self):
+    def package_release(self):
         # 更新包中的基线状态修改为 '17 已发布UAT'
         baselines = self.baselines
         for baseline in baselines:
