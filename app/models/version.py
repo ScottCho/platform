@@ -539,11 +539,17 @@ class Package(db.Model):
     def package_deploy(self):
         package_count = self.package_count
         project = self.project
+        # 更新包中的基线状态修改为 '8 预UAT提测'
+        baselines = self.baselines
+        for baseline in baselines:
+            baseline.status_id = 8
+            db.session.add(baseline)
+            db.session.commit()
         deploy_msg = ''
         # 合并发布之前重建APP和DB目录
         project.rebuild_relase_directory()
-        baselineno = self.merge_blineno.split(',')
-        for nu in baselineno:
+        merge_blineno = self.merge_blineno.split(',')
+        for nu in merge_blineno:
             merge_baseline = Baseline.query.get_or_404(nu)
             deploy_msg += merge_baseline.update_baseline(flag=1,num=package_count)
         return deploy_msg
@@ -551,7 +557,8 @@ class Package(db.Model):
 
     #　发布更新包
     def package_relase(self):
-        # 更新包中的基线状态修改为 ’已发布UAT‘
+        # 更新包中的基线状态修改为 '17 已发布UAT'
+        baselines = self.baselines
         for baseline in baselines:
             baseline.status_id = 17
             db.session.add(baseline)
