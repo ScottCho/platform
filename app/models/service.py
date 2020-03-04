@@ -29,6 +29,7 @@ class Schema(db.Model):
 class App(db.Model):
     __tablename__ = 'apps'
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(256))
     log_dir = db.Column(db.String(80),nullable=False)
     jenkins_job_dir = db.Column(db.String(256))
     source_dir = db.Column(db.String(256))
