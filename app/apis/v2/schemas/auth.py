@@ -25,6 +25,13 @@ class ProjectSchema(Schema):
                              many=True,
                              schema='UserSchema',
                              type_='user')
+    apps = Relationship(self_view='project_apps',
+                             self_view_kwargs={'id': '<id>'},
+                             related_view='app_list',
+                             related_view_kwargs={'id': '<id>'},
+                             many=True,
+                             schema='AppSchema',
+                             type_='app')
 
 # 用户
 class UserSchema(Schema):
