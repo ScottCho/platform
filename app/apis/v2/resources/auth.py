@@ -234,6 +234,7 @@ class RoleRelationship(ResourceRelationship):
 api.route(ProjectList, 'project_list', '/api/projects')
 api.route(ProjectDetail, 'project_detail', '/api/projects/<int:id>')
 api.route(ProjectRelationship, 'project_users', '/api/projects/<int:id>/relationships/users')
+api.route(ProjectRelationship, 'project_apps', '/api/projects/<int:id>/relationships/apps')
 #用户
 api.route(UserList, 'user_list', '/api/users')
 api.route(UserDetail, 'user_detail', '/api/users/<int:id>')
