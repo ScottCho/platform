@@ -77,9 +77,13 @@ class BaselineDetail(ResourceDetail):
     # 改写成批量删除，kwargs={'id':'[1,2,3]'}
     def delete_object(self, kwargs):
         ids = kwargs.get('id')
-        for id in ids[1:-1].split(','):
-            obj = self._data_layer.get_object({'id':id})
-            self._data_layer.delete_object(obj, {'id':id})
+        if len(ids) == 1：
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
 
     schema = BaselineSchema
     data_layer = {'session': db.session,
@@ -284,7 +288,6 @@ class PackageRelease(ResourceDetail):
     def after_get(self, result):
         package = self._data_layer.get_object({'id':result['data']['id']})
         detail = package.package_release()
-        print(detail)
         result.update({'detail': detail})
         return result
 
