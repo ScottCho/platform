@@ -77,7 +77,7 @@ class BaselineDetail(ResourceDetail):
     # 改写成批量删除，kwargs={'id':'[1,2,3]'}
     def delete_object(self, kwargs):
         ids = kwargs.get('id')
-        if len(ids) == 1：
+        if len(ids) == 1:
             obj = self._data_layer.get_object(kwargs)
             self._data_layer.delete_object(obj, kwargs)
         else:
