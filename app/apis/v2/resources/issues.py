@@ -341,7 +341,7 @@ api.route(IssueTaskList, 'itask_list', '/api/itasks')
 api.route(IssueTaskDetail, 'itask_detail', '/api/itasks/<id>')
 api.route(IssueTaskRelationship, 'itask_status', '/api/itasks/<int:id>/relationships/status')
 api.route(IssueTaskRelationship, 'itask_requirement', '/api/itasks/<int:id>/relationships/requirement')
-api.route(IssueRequirementRelationship, 'itask_baselines', '/api/itasks/<int:id>/relationships/baselines')
+api.route(IssueTaskRelationship, 'itask_baselines', '/api/itasks/<int:id>/relationships/baselines')
 
 
 
