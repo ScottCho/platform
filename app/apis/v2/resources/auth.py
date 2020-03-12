@@ -111,6 +111,30 @@ class ConfirmUserAPI(MethodView):
             return api_abort(400,'链接无效或者过期')
         return jsonify(data=[{'status':201, 'detail':'账户已激活'}], jsonapi={"version": "1.0"})
 
+
+# 重置密码请求
+class PasswordResetRequestAPI(MethodView):
+    def post(self):
+        email = request.json.get('email')
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            token = user.generate_reset_token()
+            send_email([email], 'Frog平台-重置密码',
+                       'mail/api/auth/reset_password.html',
+                       user=user, token=token)
+            return jsonify(data=[{'status':201, 'detail':'请查收重置密码邮件'}])
+        else:
+            return api_abort(400,'邮箱不存在')
+# 重置密码
+class PasswordResetAPI(MethodView):
+    def post(self,token):
+        password = request.json.get('password')
+        if User.reset_password(token, password):
+            db.session.commit()
+            return jsonify(data=[{'status':201, 'detail':'密码重置成功'}])
+        else:
+            return api_abort(400,'密码重置失败')
+
 # 根据token返回用户信息
 @api_v2.route('/tokeninfo')
 def token_user():
@@ -268,3 +292,6 @@ api_v2.add_url_rule('/oauth/token', view_func=AuthTokenAPI.as_view('token'), met
 api_v2.add_url_rule('/register/user', view_func=RegisterAPI.as_view('register_user'), methods=['POST'])
 # 确认用户端点
 api_v2.add_url_rule('/confirm/user/<token>', view_func=ConfirmUserAPI.as_view('confirm_user'), methods=['GET',])
+#　重置密码请求
+api_v2.add_url_rule('/password/reset', view_func=PasswordResetRequestAPI.as_view('password_reset_request'), methods=['POST',])
+api_v2.add_url_rule('/password/reset/<token>', view_func=PasswordResetAPI.as_view('password_reset'), methods=['POST',])
