@@ -304,6 +304,9 @@ api.route(BaselineRelationship, 'baseline_developer', '/api/baselines/<int:id>/r
 api.route(BaselineRelationship, 'baseline_app', '/api/baselines/<int:id>/relationships/app')
 api.route(BaselineRelationship, 'baseline_status', '/api/baselines/<int:id>/relationships/status')
 api.route(BaselineRelationship, 'baseline_package', '/api/baselines/<int:id>/relationships/package')
+api.route(BaselineRelationship, 'baseline_bugs', '/api/baselines/<int:id>/relationships/bug')
+api.route(BaselineRelationship, 'baseline_tasks', '/api/baselines/<int:id>/relationships/task')
+api.route(BaselineRelationship, 'baseline_requirements', '/api/baselines/<int:id>/relationships/requirement')
 #基线状态
 api.route(BlstatusList, 'blstatus_list', '/api/blstatus')
 api.route(BlstatusDetail, 'blstatus_detail', '/api/blstatus/<int:id>')
