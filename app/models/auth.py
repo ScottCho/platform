@@ -31,6 +31,9 @@ class User(UserMixin, db.Model):
     role = db.relationship('Role',back_populates='users')
     projects = db.relationship(
         'Project', secondary='group', back_populates='users')
+    requirements = db.relationship('IssueRequirement',back_populates='assignee')
+    bugs = db.relationship('IssueBug',back_populates='assignee')
+    tasks = db.relationship('IssueTask',back_populates='assignee')
     
     
     def verify_password(self, password):
@@ -215,6 +218,11 @@ class Project(db.Model):
     apps = db.relationship('App',back_populates='project')
     users = db.relationship('User',secondary='group',back_populates='projects')
     packages = db.relationship('Package',back_populates='project')
+    requirements = db.relationship('IssueRequirement',back_populates='project')
+    bugs = db.relationship('IssueBug',back_populates='project')
+    tasks = db.relationship('IssueBug',back_populates='project')
+
+
     def __repr__(self):
         return '<Project.name %r>' % self.name
 

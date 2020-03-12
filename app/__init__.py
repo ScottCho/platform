@@ -105,6 +105,10 @@ def index():
 from app.models.service import Database, Schema,App,Subsystem,Env
 from app.models.auth import Project, Role
 from app.models.version import Baseline
+from app.models.issues import IssueSource, IssueCategory,  IssueModule, IssueReproducibility, \
+    IssuePriority, IssueSeverity, IssueStatus, IssueTag, IssueRequirement, IssueBug, IssueTask, \
+        bug_ass_baseline, requirement_ass_baseline, task_ass_baseline
+
 @flask_app.shell_context_processor
 def make_shell_context():
     return dict(db=db, Project=Project, Database=Database, App=App, Baseline=Baseline,

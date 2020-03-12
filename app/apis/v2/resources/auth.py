@@ -17,6 +17,7 @@ from flask_rest_jsonapi.schema import compute_schema, get_relationships, get_mod
 from flask_rest_jsonapi.data_layers.base import BaseDataLayer
 from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
 from flask_rest_jsonapi.utils import JSONEncoder
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 from  app import flask_app
 from app.models.auth import Project, User, group, Role
@@ -56,8 +57,8 @@ class AuthTokenAPI(MethodView):
             'token_type': 'Bearer',
             'expires_in': expiration
         })
-        # response.headers['Cache-Control'] = 'no-store'
-        # response.headers['Pragma'] = 'no-cache'
+        response.headers['Cache-Control'] = 'no-store'
+        response.headers['Pragma'] = 'no-cache'
         return response
 
 # 注册用户
@@ -85,15 +86,30 @@ class RegisterAPI(MethodView):
         return api_abort(200,'请在邮箱中的链接确认用户')
 
 
+# 无需登录确认用户
+# class ConfirmUserAPI(MethodView):
+#     def get(self,token):
+#         s = Serializer(current_app.config['SECRET_KEY'])
+#         try:
+#             data = s.loads(token.encode('utf-8'))
+#             user_id = data.get('confirm')
+#             user = User.query.get(user_id)
+#             user.confirmed = True
+#             db.session.add(user)
+#             db.session.commit()
+#         except:
+#             return api_abort(400,'链接无效或者过期')
+#         return jsonify(data=[{'status':201, 'detail':'账户已激活'}], jsonapi={"version": "1.0"})
+            
 
 # 确认用户
 class ConfirmUserAPI(MethodView):
-    decorators = [auth_required]
     def get(self,token):
         if g.current_user.confirm(token) or g.current_user.confirmed:
             db.session.commit()
         else:
             return api_abort(400,'链接无效或者过期')
+        return jsonify(data=[{'status':201, 'detail':'账户已激活'}], jsonapi={"version": "1.0"})
 
 # 根据token返回用户信息
 @api_v2.route('/tokeninfo')
@@ -240,6 +256,7 @@ api.route(UserList, 'user_list', '/api/users')
 api.route(UserDetail, 'user_detail', '/api/users/<int:id>')
 api.route(UserRelationship, 'user_projects', '/api/users/<int:id>/relationships/projects')
 api.route(UserRelationship, 'user_role', '/api/users/<int:id>/relationships/role')
+
 #角色
 api.route(RoleList, 'role_list', '/api/roles')
 api.route(RoleDetail, 'role_detail', '/api/roles/<int:id>')

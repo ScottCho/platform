@@ -43,6 +43,9 @@ class Baseline(db.Model):
     developer = db.relationship('User')
     status_id = db.Column(db.Integer, db.ForeignKey('blstatus.id'))
     status = db.relationship('Blstatus')
+    irequirements = db.relationship('IssueRequirement',secondary='requirement_ass_baseline',back_populates='baselines')
+    itasks = db.relationship('IssueTask', secondary='task_ass_baseline', back_populates='baselines')
+    ibugs= db.relationship('IssueBug', secondary='bug_ass_baseline', back_populates='baselines')
 
     def update_baseline(self,flag=0,num='01'):
     # flag=0:单条基线更新，flag=1： 合并基线更新
