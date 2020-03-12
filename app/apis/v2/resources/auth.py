@@ -153,6 +153,7 @@ class PasswordChangeAPI(MethodView):
         else:
             return api_abort(400,'密码更新失败')
 
+
 # 根据token返回用户信息
 @api_v2.route('/tokeninfo')
 def token_user():
@@ -167,6 +168,10 @@ def token_user():
             'id': user.id,
             'username': user.username,
             'email': user.email,
+            'projects': [ project.name for project in user.projects],
+            'created': user.created,
+            'last_seen': user.last_seen,
+            'role': user.role.name
         })
     return response
 
