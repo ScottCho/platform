@@ -55,8 +55,32 @@ class BaselineSchema(Schema):
                              related_view_kwargs={'id': '<package_id>'},
                              schema='PackageSchema',
                              type_='package')     
-  
 
+    bugs = Relationship(self_view='baseline_bugs',
+                           self_view_kwargs={'id': '<id>'},
+                           related_view='ibug_list',
+                           related_view_kwargs={'id': '<id>'},
+                           many=True,
+                           schema='IssueBugSchema',
+                           type_='ibug')
+                           
+
+    tasks = Relationship(self_view='baseline_tasks',
+                           self_view_kwargs={'id': '<id>'},
+                           related_view='itask_list',
+                           related_view_kwargs={'id': '<id>'},
+                           many=True,
+                           schema='IssueTaskSchema',
+                           type_='itask')
+
+    requirements = Relationship(self_view='baseline_requirements',
+                           self_view_kwargs={'id': '<id>'},
+                           related_view='irequirement_list',
+                           related_view_kwargs={'id': '<id>'},
+                           many=True,
+                           schema='IssueRequirementSchema',
+                           type_='irequirement')
+                           
 class BlstatusSchema(Schema):
     class Meta:
         type_ = 'blstatus'

@@ -68,6 +68,7 @@ class IssuePriority(db.Model):
 
     requirements = db.relationship('IssueRequirement', back_populates='priority')
     bugs = db.relationship('IssueBug', back_populates='priority')
+    tasks = db.relationship('IssueTask', back_populates='priority')
 
 #严重程度: 1.宕机 2.小调整 3.小错误 4.崩溃 5.很严重 6.文字 7.新功能 8.细节
 class IssueSeverity(db.Model):
@@ -157,7 +158,7 @@ class IssueBug(db.Model):
     reproducibility = db.relationship('IssueReproducibility', back_populates='bugs')
     source_id = db.Column(db.Integer, db.ForeignKey('issue_source.id')) #来源
     source = db.relationship('IssueSource', back_populates='bugs')
-    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))  #issue所属项目
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'),nullable=False)  #issue所属项目
     project = db.relationship('Project', back_populates='bugs')
     assignee_id = db.Column(db.Integer, db.ForeignKey('users.id'))   #负责人
     assignee = db.relationship('User',back_populates='bugs')
@@ -186,6 +187,8 @@ class IssueTask(db.Model):
     status = db.relationship('IssueStatus', back_populates='tasks')    
     requirement_id = db.Column(db.Integer, db.ForeignKey('issue_requirement.id'))   #所属需求
     requirement = db.relationship('IssueRequirement',back_populates='tasks')
-    assignee_id = db.Column(db.Integer, db.ForeignKey('users.id'))   # 分配到任务的人
+    assignee_id = db.Column(db.Integer, db.ForeignKey('users.id'),nullable=False)   # 分配到任务的人
     assignee = db.relationship('User',back_populates='tasks')
+    priority_id = db.Column(db.Integer, db.ForeignKey('issue_priority.id'))   #优先级
+    priority = db.relationship('IssuePriority', back_populates='tasks')
     baselines= db.relationship('Baseline', secondary='task_ass_baseline', back_populates='itasks')  

@@ -104,6 +104,13 @@ class IssuePrioritySchema(Schema):
                            schema='IssueRequirementSchema',
                            type_='irequirement')
 
+    tasks = Relationship(self_view='ipriority_tasks',
+                           self_view_kwargs={'id': '<id>'},
+                           related_view='itask_list',
+                           related_view_kwargs={'id': '<id>'},
+                           many=True,
+                           schema='IssueTaskSchema',
+                           type_='itask') 
 # 严重性
 class IssueSeveritySchema(Schema):
     class Meta:
@@ -250,6 +257,8 @@ class IssueBugSchema(Schema):
     manhour = fields.Str()
     status_id = fields.Integer()
     status = fields.Function(lambda obj: "{}".format(obj.status.name))
+    priority_id = fields.Integer()
+    priority = fields.Function(lambda obj: "{}".format(obj.priority.name))
     severity_id = fields.Integer()
     severity = fields.Function(lambda obj: "{}".format(obj.severity.name))
     reproducibility_id = fields.Integer()
@@ -288,6 +297,7 @@ class IssueTaskSchema(Schema):
         self_view_many = 'itask_list'
         
     id = fields.Integer(as_string=True, dump_only=True)
+    requirement_id = fields.Integer()
     name = fields.Str()
     number = fields.Str()
     reporter = fields.Str()
@@ -299,7 +309,9 @@ class IssueTaskSchema(Schema):
     deadline = fields.Date()
     manhour = fields.Str()
     status_id = fields.Integer()
-    status = fields.Function(lambda obj: "{}".format(obj.status.name))  
+    status = fields.Function(lambda obj: "{}".format(obj.status.name))
+    priority_id = fields.Integer()
+    priority = fields.Function(lambda obj: "{}".format(obj.priority.name))  
     assignee_id =  fields.Integer()
     assignee = fields.Function(lambda obj: "{}".format(obj.assignee.username))
     
