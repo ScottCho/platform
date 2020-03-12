@@ -115,8 +115,8 @@ class ConfirmUserAPI(MethodView):
 # 重置密码请求
 class PasswordResetRequestAPI(MethodView):
     def post(self):
-        email = request.json.get('email')
-        user = User.query.filter_by(email=form.email.data).first()
+        email = request.json.get('data').get('attributes').get('email')
+        user = User.query.filter_by(email=email).first()
         if user:
             token = user.generate_reset_token()
             send_email([email], 'Frog平台-重置密码',
@@ -125,15 +125,33 @@ class PasswordResetRequestAPI(MethodView):
             return jsonify(data=[{'status':201, 'detail':'请查收重置密码邮件'}])
         else:
             return api_abort(400,'邮箱不存在')
+
 # 重置密码
 class PasswordResetAPI(MethodView):
+    # def get(self,token):
+    #     return redirect
+
     def post(self,token):
-        password = request.json.get('password')
+        password = request.json.get('data').get('attributes').get('password')
         if User.reset_password(token, password):
             db.session.commit()
             return jsonify(data=[{'status':201, 'detail':'密码重置成功'}])
         else:
             return api_abort(400,'密码重置失败')
+# 修改密码
+class PasswordChangeAPI(MethodView):
+    decorators = [auth_required]
+    def post(self):
+        old_password = request.json.get('data').get('attributes').get('old_password')
+        print(old_password)
+        new_password = request.json.get('data').get('attributes').get('new_password')
+        if g.current_user.verify_password(old_password):
+            g.current_user.password = new_password
+            db.session.add(g.current_user)
+            db.session.commit()
+            return jsonify(data=[{'status':201, 'detail':'密码更新成功'}])
+        else:
+            return api_abort(400,'密码更新失败')
 
 # 根据token返回用户信息
 @api_v2.route('/tokeninfo')
@@ -295,3 +313,5 @@ api_v2.add_url_rule('/confirm/user/<token>', view_func=ConfirmUserAPI.as_view('c
 #　重置密码请求
 api_v2.add_url_rule('/password/reset', view_func=PasswordResetRequestAPI.as_view('password_reset_request'), methods=['POST',])
 api_v2.add_url_rule('/password/reset/<token>', view_func=PasswordResetAPI.as_view('password_reset'), methods=['POST',])
+# 更新密码
+api_v2.add_url_rule('/password/change', view_func=PasswordChangeAPI.as_view('password_change'), methods=['POST',])
