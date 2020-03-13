@@ -5,195 +5,195 @@ from marshmallow_jsonapi.flask import Schema, Relationship
 # Create logical data abstraction
 class IssueSourceSchema(Schema):
     class Meta:
-        type_ = 'isource'
-        self_view = 'isource_detail'
+        type_ = 'issue_source'
+        self_view = 'issue_source_detail'
         self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'isource_list'
+        self_view_many = 'issue_source_list'
         
     id = fields.Integer(as_string=True, dump_only=True)
     name = fields.Str()
 
-    requirements = Relationship(self_view='isource_requirements',
+    requirements = Relationship(self_view='issue_source_requirements',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='irequirement_list',
+                           related_view='issue_requirement_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueRequirementSchema',
-                           type_='irequirement')
+                           type_='issue_requirement')
     
-    bugs = Relationship(self_view='isource_bugs',
+    bugs = Relationship(self_view='issue_source_bugs',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='ibug_list',
+                           related_view='issue_bug_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueBugSchema',
-                           type_='ibug')  
+                           type_='issue_bug')  
                            
 
 # 模块
 class IssueModuleSchema(Schema):
     class Meta:
-        type_ = 'imodule'
+        type_ = 'issue_module'
         self_view = 'imodule_detail'
         self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'imodule_list'
+        self_view_many = 'issue_module_list'
         
     id = fields.Integer(as_string=True, dump_only=True)
     name = fields.Str()
     
-    requirements = Relationship(self_view='imodule_requirements',
+    requirements = Relationship(self_view='issue_module_requirements',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='ibug_list',
+                           related_view='issue_bug_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueRequirementSchema',
-                           type_='irequirement')
+                           type_='issue_requirement')
     
-    bugs = Relationship(self_view='imodule_bugs',
+    bugs = Relationship(self_view='issue_module_bugs',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='ibug_list',
+                           related_view='issue_bug_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueBugSchema',
-                           type_='ibug')  
+                           type_='issue_bug')  
                            
 
 # 再现性
 class IssueReproducibilitySchema(Schema):
     class Meta:
-        type_ = 'ireproducibility'
-        self_view = 'ireproducibility_detail'
+        type_ = 'issue_reproducibility'
+        self_view = 'issue_reproducibility_detail'
         self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'ireproducibility_list'
+        self_view_many = 'issue_reproducibility_list'
         
     id = fields.Integer(as_string=True, dump_only=True)
     name = fields.Str()
     
-    bugs = Relationship(self_view='ireproducibility_bugs',
+    bugs = Relationship(self_view='issue_reproducibility_bugs',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='ibug_list',
+                           related_view='issue_bug_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueBugSchema',
-                           type_='ibug')  
+                           type_='issue_bug')  
 
 # 优先级
 class IssuePrioritySchema(Schema):
     class Meta:
-        type_ = 'ipriority'
-        self_view = 'ipriority_detail'
+        type_ = 'issue_priority'
+        self_view = 'issue_priority_detail'
         self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'ipriority_list'
+        self_view_many = 'issue_priority_list'
         
     id = fields.Integer(as_string=True, dump_only=True)
     name = fields.Str()
     
-    bugs = Relationship(self_view='ipriority_bugs',
+    bugs = Relationship(self_view='issue_priority_bugs',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='ibug_list',
+                           related_view='issue_bug_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueBugSchema',
-                           type_='ibug')  
+                           type_='issue_bug')  
 
-    requirements = Relationship(self_view='ipriority_requirements',
+    requirements = Relationship(self_view='issue_priority_requirements',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='irequirement_list',
+                           related_view='issue_requirement_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueRequirementSchema',
-                           type_='irequirement')
+                           type_='issue_requirement')
 
-    tasks = Relationship(self_view='ipriority_tasks',
+    tasks = Relationship(self_view='issue_priority_tasks',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='itask_list',
+                           related_view='issue_task_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueTaskSchema',
-                           type_='itask') 
+                           type_='issue_task') 
 # 严重性
 class IssueSeveritySchema(Schema):
     class Meta:
-        type_ = 'iseverity'
-        self_view = 'iseverity_detail'
+        type_ = 'issue_severity'
+        self_view = 'issue_severity_detail'
         self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'iseverity_list'
+        self_view_many = 'issue_severity_list'
         
     id = fields.Integer(as_string=True, dump_only=True)
     name = fields.Str()
 
-    bugs = Relationship(self_view='iseverity_bugs',
+    bugs = Relationship(self_view='issue_severity_bugs',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='ibug_list',
+                           related_view='issue_bug_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueBugSchema',
-                           type_='ibug')  
+                           type_='issue_bug')  
 
 
 # 状态
 class IssueStatusSchema(Schema):
     class Meta:
-        type_ = 'istatus'
+        type_ = 'issue_status'
         self_view = 'istatus_detail'
         self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'istatus_list'
+        self_view_many = 'issue_status_list'
         
     id = fields.Integer(as_string=True, dump_only=True)
     name = fields.Str()
 
-    requirements = Relationship(self_view='istatus_requirements',
+    requirements = Relationship(self_view='issue_status_requirements',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='irequirement_list',
+                           related_view='issue_requirement_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueRequirementSchema',
-                           type_='irequirement')
+                           type_='issue_requirement')
     
-    bugs = Relationship(self_view='istatus_bugs',
+    bugs = Relationship(self_view='issue_status_bugs',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='ibug_list',
+                           related_view='issue_bug_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueBugSchema',
-                           type_='ibug')  
+                           type_='issue_bug')  
 
 
 # 标签
 class IssueTagSchema(Schema):
     class Meta:
-        type_ = 'itag'
-        self_view = 'itag_detail'
+        type_ = 'issue_tag'
+        self_view = 'issue_tag_detail'
         self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'itag_list'
+        self_view_many = 'issue_tag_list'
         
     id = fields.Integer(as_string=True, dump_only=True)
     name = fields.Str()
 
-    requirements = Relationship(self_view='itag_requirements',
+    requirements = Relationship(self_view='issue_tag_requirements',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='irequirement_list',
+                           related_view='issue_requirement_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueRequirementSchema',
-                           type_='irequirement')
+                           type_='issue_requirement')
     
-    bugs = Relationship(self_view='itag_bugs',
+    bugs = Relationship(self_view='issue_tag_bugs',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='ibug_list',
+                           related_view='issue_bug_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueBugSchema',
-                           type_='ibug')  
+                           type_='issue_bug')  
 
 
 # 需求
 class IssueRequirementSchema(Schema):
     class Meta:
-        type_ = 'irequirement'
-        self_view = 'irequirement_detail'
+        type_ = 'issue_requirement'
+        self_view = 'issue_requirement_detail'
         self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'irequirement_list'
+        self_view_many = 'issue_requirement_list'
         
     id = fields.Integer(as_string=True, dump_only=True)
     number = fields.Str()
@@ -221,15 +221,15 @@ class IssueRequirementSchema(Schema):
     tag_id = fields.Integer()
     tag = fields.Function(lambda obj: "{}".format(obj.tag.name))
 
-    tasks = Relationship(self_view='irequirement_tasks',
+    tasks = Relationship(self_view='issue_requirement_tasks',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='itask_list',
+                           related_view='issue_task_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueTaskSchema',
-                           type_='itask')
+                           type_='issue_task')
     
-    baselines = Relationship(self_view='irequirement_baselines',
+    baselines = Relationship(self_view='issue_requirement_baselines',
                              self_view_kwargs={'id': '<id>'},
                              related_view='baseline_list',
                              related_view_kwargs={'id': '<id>'},
@@ -240,10 +240,10 @@ class IssueRequirementSchema(Schema):
 
 class IssueBugSchema(Schema):
     class Meta:
-        type_ = 'ibug'
-        self_view = 'ibug_detail'
+        type_ = 'issue_bug'
+        self_view = 'issue_bug_detail'
         self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'ibug_list'
+        self_view_many = 'issue_bug_list'
         
     id = fields.Integer(as_string=True, dump_only=True)
     number = fields.Str()
@@ -273,7 +273,7 @@ class IssueBugSchema(Schema):
     tag = fields.Function(lambda obj: "{}".format(obj.tag.name)) 
     baseline_id =  fields.Integer()
 
-    baselines = Relationship(self_view='ibug_baselines',
+    baselines = Relationship(self_view='issue_bug_baselines',
                              self_view_kwargs={'id': '<id>'},
                              related_view='baseline_list',
                              related_view_kwargs={'id': '<id>'},
@@ -291,10 +291,10 @@ class IssueBugSchema(Schema):
 
 class IssueTaskSchema(Schema):
     class Meta:
-        type_ = 'itask'
-        self_view = 'itask_detail'
+        type_ = 'issue_task'
+        self_view = 'issue_task_detail'
         self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'itask_list'
+        self_view_many = 'issue_task_list'
         
     id = fields.Integer(as_string=True, dump_only=True)
     requirement_id = fields.Integer()
@@ -316,7 +316,7 @@ class IssueTaskSchema(Schema):
     assignee = fields.Function(lambda obj: "{}".format(obj.assignee.username))
     
 
-    baselines = Relationship(self_view='itask_baselines',
+    baselines = Relationship(self_view='issue_task_baselines',
                              self_view_kwargs={'id': '<id>'},
                              related_view='baseline_list',
                              related_view_kwargs={'id': '<id>'},
@@ -324,9 +324,9 @@ class IssueTaskSchema(Schema):
                              schema='BaselineSchema',
                              type_='baseline')
     
-    requirement = Relationship(self_view='itask_requirement',
+    requirement = Relationship(self_view='issue_task_requirement',
                         self_view_kwargs={'id': '<id>'},
-                        related_view='irequirement_detail',
+                        related_view='issue_requirement_detail',
                         related_view_kwargs={'id': '<id>'},
                         schema='IssueRequirementSchema',
-                        type_='irequirement')
+                        type_='issue_requirement')

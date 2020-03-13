@@ -287,67 +287,67 @@ class IssueBugRelationship(ResourceRelationship):
 
 # Create endpoints
 # 问题来源
-api.route(IssueSourceList, 'isource_list', '/api/isources')
-api.route(IssueSourceDetail, 'isource_detail', '/api/isources/<id>')
-api.route(IssueSourceRelationship, 'isource_requirements', '/api/isources/<int:id>/relationships/requirements')
-api.route(IssueSourceRelationship, 'isource_bugs', '/api/isources/<int:id>/relationships/bugs')
+api.route(IssueSourceList, 'issue_source_list', '/api/issue_sources')
+api.route(IssueSourceDetail, 'issue_source_detail', '/api/issue_sources/<id>')
+api.route(IssueSourceRelationship, 'issue_source_requirements', '/api/issue_sources/<int:id>/relationships/issue_requirements')
+api.route(IssueSourceRelationship, 'issue_source_bugs', '/api/issue_sources/<int:id>/relationships/issue_bugs')
 
 # 问题模块
-api.route(IssueModuleList, 'imodule_list', '/api/imodules')
-api.route(IssueModuleDetail, 'imodule_detail', '/api/imodule/<id>')
-api.route(IssueModuleRelationship, 'imodule_requirements', '/api/imodule/<int:id>/relationships/requirements')
-api.route(IssueModuleRelationship, 'imodule_bugs', '/api/imodule/<int:id>/relationships/bugs')
+api.route(IssueModuleList, 'issue_module_list', '/api/issue_modules')
+api.route(IssueModuleDetail, 'issue_module_detail', '/api/issue_module/<id>')
+api.route(IssueModuleRelationship, 'issue_module_requirements', '/api/issue_module/<int:id>/relationships/issue_requirements')
+api.route(IssueModuleRelationship, 'issue_module_bugs', '/api/issue_module/<int:id>/relationships/issue_bugs')
 
 # 问题再现性
-api.route(IssueReproducibilityList, 'ireproducibility_list', '/api/ireproducibility')
-api.route(IssueReproducibilityDetail, 'ireproducibility_detail', '/api/ireproducibility/<id>')
-api.route(IssueReproducibilityRelationship, 'ireproducibility_bugs', '/api/ireproducibility/<int:id>/relationships/bugs')
+api.route(IssueReproducibilityList, 'issue_reproducibility_list', '/api/issue_reproducibility')
+api.route(IssueReproducibilityDetail, 'issue_reproducibility_detail', '/api/issue_reproducibility/<id>')
+api.route(IssueReproducibilityRelationship, 'issue_reproducibility_bugs', '/api/issue_reproducibility/<int:id>/relationships/issue_bugs')
 
 #　问题严重性
-api.route(IssueSeverityList, 'iseverity_list', '/api/iseverity')
-api.route(IssueSeverityDetail, 'iseverity_detail', '/api/iseverity/<id>')
-api.route(IssueSeverityRelationship, 'iseverity_bugs', '/api/iseverity/<int:id>/relationships/bugs')
+api.route(IssueSeverityList, 'issue_severity_list', '/api/issue_severity')
+api.route(IssueSeverityDetail, 'issue_severity_detail', '/api/issue_severity/<id>')
+api.route(IssueSeverityRelationship, 'issue_severity_bugs', '/api/issue_severity/<int:id>/relationships/issue_bugs')
 
 #　问题状态
-api.route(IssueStatusList, 'istatus_list', '/api/istatus')
-api.route(IssueStatusDetail, 'istatus_detail', '/api/istatus/<id>')
-api.route(IssueStatusRelationship, 'istatus_requirements', '/api/istatus/<int:id>/relationships/requirements')
-api.route(IssueStatusRelationship, 'istatus_bugs', '/api/istatus/<int:id>/relationships/bugs')
-api.route(IssueStatusRelationship, 'istatus_tasks', '/api/istatus/<int:id>/relationships/tasks')
+api.route(IssueStatusList, 'issue_status_list', '/api/issue_status')
+api.route(IssueStatusDetail, 'issue_status_detail', '/api/issue_status/<id>')
+api.route(IssueStatusRelationship, 'issue_status_requirements', '/api/issue_status/<int:id>/relationships/issue_requirements')
+api.route(IssueStatusRelationship, 'issue_status_bugs', '/api/issue_status/<int:id>/relationships/issue_bugs')
+api.route(IssueStatusRelationship, 'issue_status_tasks', '/api/issue_status/<int:id>/relationships/issue_tasks')
 
 # 问题标签
-api.route(IssueTagList, 'itag_list', '/api/itags')
-api.route(IssueTagDetail, 'itag_detail', '/api/itags/<id>')
-api.route(IssueTagRelationship, 'itag_requirements', '/api/itag/<int:id>/relationships/requirements')
-api.route(IssueTagRelationship, 'itag_bugs', '/api/itag/<int:id>/relationships/bugs')
-api.route(IssueTagRelationship, 'itag_tasks', '/api/itag/<int:id>/relationships/tasks')
+api.route(IssueTagList, 'issue_tag_list', '/api/issue_tags')
+api.route(IssueTagDetail, 'issue_tag_detail', '/api/issue_tags/<id>')
+api.route(IssueTagRelationship, 'issue_tag_requirements', '/api/issue_tag/<int:id>/relationships/issue_requirements')
+api.route(IssueTagRelationship, 'issue_tag_bugs', '/api/issue_tag/<int:id>/relationships/issue_bugs')
+api.route(IssueTagRelationship, 'issue_tag_tasks', '/api/issue_tag/<int:id>/relationships/issue_tasks')
 
 # 问题优先级
-api.route(IssuePriorityList, 'ipriority_list', '/api/ipriority')
-api.route(IssuePriorityDetail, 'ipriority_detail', '/api/ipriority/<id>')
-api.route(IssuePriorityRelationship, 'ipriority_requirements', '/api/ipriority/<int:id>/relationships/requirements')
-api.route(IssuePriorityRelationship, 'ipriority_bugs', '/api/ipriority/<int:id>/relationships/bugs')
-api.route(IssuePriorityRelationship, 'ipriority_tasks', '/api/ipriority/<int:id>/relationships/tasks')
+api.route(IssuePriorityList, 'issue_priority_list', '/api/issue_priority')
+api.route(IssuePriorityDetail, 'issue_priority_detail', '/api/issue_priority/<id>')
+api.route(IssuePriorityRelationship, 'issue_priority_requirements', '/api/issue_priority/<int:id>/relationships/issue_requirements')
+api.route(IssuePriorityRelationship, 'issue_priority_bugs', '/api/issue_priority/<int:id>/relationships/issue_bugs')
+api.route(IssuePriorityRelationship, 'issue_priority_tasks', '/api/issue_priority/<int:id>/relationships/issue_tasks')
 
 #　需求
-api.route(IssueRequirementList, 'irequirement_list', '/api/irequirements')
-api.route(IssueRequirementDetail, 'irequirement_detail', '/api/irequirements/<id>')
-api.route(IssueRequirementRelationship, 'irequirement_tasks', '/api/irequirements/<int:id>/relationships/tasks')
-api.route(IssueRequirementRelationship, 'irequirement_status', '/api/irequirements/<int:id>/relationships/status')
-api.route(IssueRequirementRelationship, 'irequirement_baselines', '/api/irequirements/<int:id>/relationships/baselines')
+api.route(IssueRequirementList, 'issue_requirement_list', '/api/issue_requirements')
+api.route(IssueRequirementDetail, 'issue_requirement_detail', '/api/issue_requirements/<id>')
+api.route(IssueRequirementRelationship, 'issue_requirement_tasks', '/api/issue_requirements/<int:id>/relationships/issue_tasks')
+api.route(IssueRequirementRelationship, 'issue_requirement_status', '/api/issue_requirements/<int:id>/relationships/issue_status')
+api.route(IssueRequirementRelationship, 'issue_requirement_baselines', '/api/issue_requirements/<int:id>/relationships/baselines')
 
 # task
-api.route(IssueTaskList, 'itask_list', '/api/itasks')
-api.route(IssueTaskDetail, 'itask_detail', '/api/itasks/<id>')
-api.route(IssueTaskRelationship, 'itask_status', '/api/itasks/<int:id>/relationships/status')
-api.route(IssueTaskRelationship, 'itask_requirement', '/api/itasks/<int:id>/relationships/requirement')
-api.route(IssueTaskRelationship, 'itask_baselines', '/api/itasks/<int:id>/relationships/baselines')
+api.route(IssueTaskList, 'issue_task_list', '/api/issue_tasks')
+api.route(IssueTaskDetail, 'issue_task_detail', '/api/issue_tasks/<id>')
+api.route(IssueTaskRelationship, 'issue_task_status', '/api/issue_tasks/<int:id>/relationships/issue_status')
+api.route(IssueTaskRelationship, 'issue_task_requirement', '/api/issue_tasks/<int:id>/relationships/issue_requirement')
+api.route(IssueTaskRelationship, 'issue_task_baselines', '/api/issue_tasks/<int:id>/relationships/baselines')
 
 
 
 # bug
-api.route(IssueBugList, 'ibug_list', '/api/ibugs')
-api.route(IssueBugDetail, 'ibug_detail', '/api/ibugs/<id>')
-api.route(IssueBugRelationship, 'ibug_status', '/api/ibugs/<int:id>/relationships/status')
-api.route(IssueRequirementRelationship, 'ibug_baselines', '/api/ibugs/<int:id>/relationships/baselines')
+api.route(IssueBugList, 'issue_bug_list', '/api/issue_bugs')
+api.route(IssueBugDetail, 'issue_bug_detail', '/api/issue_bugs/<id>')
+api.route(IssueBugRelationship, 'issue_bug_status', '/api/issue_bugs/<int:id>/relationships/issue_status')
+api.route(IssueRequirementRelationship, 'issue_bug_baselines', '/api/issue_bugs/<int:id>/relationships/baselines')
 
