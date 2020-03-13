@@ -60,6 +60,7 @@ class AuthTokenAPI(MethodView):
         response.headers['Cache-Control'] = 'no-store'
         response.headers['Pragma'] = 'no-cache'
         return response
+    
 
 # 注册用户
 class RegisterAPI(MethodView):
@@ -109,7 +110,8 @@ class ConfirmUserAPI(MethodView):
             db.session.commit()
         else:
             return api_abort(400,'链接无效或者过期')
-        return jsonify(data=[{'status':201, 'detail':'账户已激活'}], jsonapi={"version": "1.0"})
+        # return jsonify(data=[{'status':201, 'detail':'账户已激活'}], jsonapi={"version": "1.0"})
+        return redirect('#/confirm'+token)
 
 
 # 重置密码请求
@@ -128,8 +130,8 @@ class PasswordResetRequestAPI(MethodView):
 
 # 重置密码
 class PasswordResetAPI(MethodView):
-    # def get(self,token):
-    #     return redirect
+    def get(self,token):
+        return redirect('#/reset/'+token)
 
     def post(self,token):
         password = request.json.get('data').get('attributes').get('password')
@@ -310,7 +312,7 @@ api.route(RoleDetail, 'role_detail', '/api/roles/<int:id>')
 api.route(RoleRelationship, 'role_users', '/api/roles/<int:id>/relationships/users')
 
 #生成token端点
-api_v2.add_url_rule('/oauth/token', view_func=AuthTokenAPI.as_view('token'), methods=['POST'])
+api_v2.add_url_rule('/oauth/token', view_func=AuthTokenAPI.as_view('token'), methods=['POST',])
 # 注册用户
 api_v2.add_url_rule('/register/user', view_func=RegisterAPI.as_view('register_user'), methods=['POST'])
 # 确认用户端点
