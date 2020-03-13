@@ -317,8 +317,8 @@ api_v2.add_url_rule('/oauth/token', view_func=AuthTokenAPI.as_view('token'), met
 api_v2.add_url_rule('/register/user', view_func=RegisterAPI.as_view('register_user'), methods=['POST'])
 # 确认用户端点
 api_v2.add_url_rule('/confirm/user/<token>', view_func=ConfirmUserAPI.as_view('confirm_user'), methods=['GET',])
-#　重置密码请求
+#　重置密码
 api_v2.add_url_rule('/password/reset', view_func=PasswordResetRequestAPI.as_view('password_reset_request'), methods=['POST',])
-api_v2.add_url_rule('/password/reset/<token>', view_func=PasswordResetAPI.as_view('password_reset'), methods=['POST',])
+api_v2.add_url_rule('/password/reset/<token>', view_func=PasswordResetAPI.as_view('password_reset'), methods=['POST','GET'])
 # 更新密码
 api_v2.add_url_rule('/password/change', view_func=PasswordChangeAPI.as_view('password_change'), methods=['POST',])
