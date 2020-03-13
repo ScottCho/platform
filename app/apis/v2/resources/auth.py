@@ -131,7 +131,7 @@ class PasswordResetRequestAPI(MethodView):
 # 重置密码
 class PasswordResetAPI(MethodView):
     def get(self,token):
-        return redirect('#/reset/'+token)
+        return redirect('/#/reset/'+token)
 
     def post(self,token):
         password = request.json.get('data').get('attributes').get('password')
