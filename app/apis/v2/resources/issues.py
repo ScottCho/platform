@@ -391,7 +391,7 @@ class IssueBugDetail(ResourceDetail):
             for id in ids[1:-1].split(','):
                 obj = self._data_layer.get_object({'id':id})
                 self._data_layer.delete_object(obj, {'id':id})
-                
+
     schema = IssueBugSchema
     data_layer = {'session': db.session,
                   'model': IssueBug
@@ -461,8 +461,6 @@ api.route(IssueTaskDetail, 'issue_task_detail', '/api/issue_tasks/<id>')
 api.route(IssueTaskRelationship, 'issue_task_status', '/api/issue_tasks/<int:id>/relationships/issue_status')
 api.route(IssueTaskRelationship, 'issue_task_requirement', '/api/issue_tasks/<int:id>/relationships/issue_requirement')
 api.route(IssueTaskRelationship, 'issue_task_baselines', '/api/issue_tasks/<int:id>/relationships/baselines')
-
-
 
 # bug
 api.route(IssueBugList, 'issue_bug_list', '/api/issue_bugs')

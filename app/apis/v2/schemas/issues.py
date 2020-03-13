@@ -34,7 +34,7 @@ class IssueSourceSchema(Schema):
 class IssueModuleSchema(Schema):
     class Meta:
         type_ = 'issue_module'
-        self_view = 'imodule_detail'
+        self_view = 'issue_module_detail'
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'issue_module_list'
         
