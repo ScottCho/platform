@@ -58,7 +58,7 @@ class BaselineSchema(Schema):
 
     ibugs = Relationship(self_view='baseline_bugs',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='ibug_list',
+                           related_view='issure_bug_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueBugSchema',
