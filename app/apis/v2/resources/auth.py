@@ -100,7 +100,7 @@ class ConfirmUserAPI(MethodView):
             db.session.commit()
         except:
             return api_abort(400,'链接无效或者过期')
-        return redirect('/#/confirm/')
+        return redirect('/#/confirm')
             
 
 # # 确认用户
