@@ -87,7 +87,7 @@ class RegisterAPI(MethodView):
         return api_abort(200,'请在邮箱中的链接确认用户')
 
 
-# 无需登录确认用户邮箱
+# 无需登录确认用户邮件
 class ConfirmUserAPI(MethodView):
     def get(self,token):
         s = Serializer(current_app.config['SECRET_KEY'])
@@ -110,8 +110,8 @@ class ConfirmUserAPI(MethodView):
 #             db.session.commit()
 #         else:
 #             return api_abort(400,'链接无效或者过期')
-#         # return jsonify(data=[{'status':201, 'detail':'账户已激活'}], jsonapi={"version": "1.0"})
-#         return redirect('#/confirm/'+token)
+#         return jsonify(data=[{'status':201, 'detail':'账户已激活'}], jsonapi={"version": "1.0"})
+#         # return redirect('/#/confirm/'+token)
 
 
 # 重置密码请求
