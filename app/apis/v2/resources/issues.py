@@ -51,6 +51,17 @@ class IssueSourceList(ResourceList):
 class IssueSourceDetail(ResourceDetail):
     decorators = (auth_required,)
 
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
     schema = IssueSourceSchema
     data_layer = {'session': db.session,
                   'model': IssueSource  
@@ -73,6 +84,18 @@ class IssueModuleList(ResourceList):
 
 class IssueModuleDetail(ResourceDetail):
     decorators = (auth_required,)
+
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
 
     schema = IssueModuleSchema
     data_layer = {'session': db.session,
@@ -98,6 +121,18 @@ class IssueReproducibilityList(ResourceList):
 
 class IssueReproducibilityDetail(ResourceDetail):
     decorators = (auth_required,)
+    
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
 
     schema = IssueReproducibilitySchema
     data_layer = {'session': db.session,
@@ -124,6 +159,18 @@ class IssueSeverityList(ResourceList):
 class IssueSeverityDetail(ResourceDetail):
     decorators = (auth_required,)
 
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
+
     schema = IssueSeveritySchema
     data_layer = {'session': db.session,
                   'model': IssueSeverity
@@ -148,6 +195,18 @@ class IssueStatusList(ResourceList):
 class IssueStatusDetail(ResourceDetail):
     decorators = (auth_required,)
 
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
+
     schema = IssueStatusSchema
     data_layer = {'session': db.session,
                   'model': IssueStatus  
@@ -170,6 +229,18 @@ class IssueTagList(ResourceList):
 
 class IssueTagDetail(ResourceDetail):
     decorators = (auth_required,)
+
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
 
     schema = IssueTagSchema
     data_layer = {'session': db.session,
@@ -195,6 +266,18 @@ class IssuePriorityList(ResourceList):
 
 class IssuePriorityDetail(ResourceDetail):
     decorators = (auth_required,)
+
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
 
     schema = IssuePrioritySchema
     data_layer = {'session': db.session,
@@ -223,6 +306,18 @@ class IssueRequirementList(ResourceList):
 class IssueRequirementDetail(ResourceDetail):
     decorators = (auth_required,)
 
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
+
     schema = IssueRequirementSchema
     data_layer = {'session': db.session,
                   'model': IssueRequirement
@@ -247,6 +342,18 @@ class IssueTaskList(ResourceList):
 
 class IssueTaskDetail(ResourceDetail):
     decorators = (auth_required,)
+
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
 
     schema = IssueTaskSchema
     data_layer = {'session': db.session,
@@ -273,6 +380,18 @@ class IssueBugList(ResourceList):
 class IssueBugDetail(ResourceDetail):
     decorators = (auth_required,)
 
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
+                
     schema = IssueBugSchema
     data_layer = {'session': db.session,
                   'model': IssueBug

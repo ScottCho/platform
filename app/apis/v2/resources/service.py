@@ -20,6 +20,17 @@ class DatabaseList(ResourceList):
 
 class DatabaseDetail(ResourceDetail):
     decorators = (auth_required,)
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
     schema = DatabaseSchema
     data_layer = {'session': db.session,
                   'model': Database}
@@ -38,6 +49,18 @@ class SchemaList(ResourceList):
 
 class SchemaDetail(ResourceDetail):
     decorators = (auth_required,)
+        # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
+
     schema = SchemaSchema
     data_layer = {'session': db.session,
                   'model': DBSchema}
@@ -56,6 +79,17 @@ class EnvList(ResourceList):
 
 class EnvDetail(ResourceDetail):
     decorators = (auth_required,)
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
     schema = EnvSchema
     data_layer = {'session': db.session,
                   'model': Env}
@@ -68,6 +102,17 @@ class SubsystemList(ResourceList):
 
 class SubsystemDetail(ResourceDetail):
     decorators = (auth_required,)
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
     schema = SubsystemSchema
     data_layer = {'session': db.session,
                   'model': Subsystem}
@@ -80,6 +125,17 @@ class AppList(ResourceList):
 
 class AppDetail(ResourceDetail):
     decorators = (auth_required,)
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
     schema = AppSchema
     data_layer = {'session': db.session,
                   'model': App}
