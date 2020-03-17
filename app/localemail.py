@@ -12,26 +12,10 @@ def send_async_email(app, msg):
         mail.send(msg)
 
 
-    # def __init__(self, subject='',
-    #              recipients=None,
-    #              body=None,
-    #              html=None,
-    #              sender=None,
-    #              cc=None,
-    #              bcc=None,
-    #              attachments=None,
-    #              reply_to=None,
-    #              date=None,
-    #              charset=None,
-    #              extra_headers=None,
-    #              mail_options=None,
-    #              rcpt_options=None):
-
-def send_email(to, subject, template,attachments=None, **kwargs):
+def send_email(to, subject, template,attachments=None,cc=None,bcc=None,sender=None,**kwargs):
     print('发送邮件: '+subject)
     app = current_app._get_current_object()
-    msg = Message(subject,
-                  recipients=to)
+    msg = Message(subject,recipients=to,cc=cc,bcc=bcc)
     #msg.body = render_template(template + '.txt', **kwargs)
     msg.html = render_template(template, **kwargs)
     #处理附件

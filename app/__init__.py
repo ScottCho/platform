@@ -145,8 +145,6 @@ def make_shell_context():
 # def handle_csrf_error(e):
 #     return render_template('errors/400.html', description=e.description), 400
 
-import app.utils.iemail
-
 rows_data = [
     [34, 72, 38, 30, 75, 48, 75],
     [6, 24, 1, 84, 54, 62, 60],
@@ -183,8 +181,8 @@ def test():
     csv_file = os.path.join('C:\\Users\\scott\\Documents\\GitHub\\platform\\app', 'statistics.csv')
     write_csv(csv_file, col_headers, rows_data)
 
-    send_email(['scottcho@qq.com'], '英语成绩',
-               'mail/panda.html', attachments=[csv_file], 
+    send_email(['张三 <scottcho@qq.com>'], '英语成绩',
+               'mail/panda.html', attachments=[csv_file],cc=['李四 <zhaoysz@sinosoft.com.cn>'], 
                col_headers=col_headers,
                row_headers=row_headers,
                rows_data=rows_data

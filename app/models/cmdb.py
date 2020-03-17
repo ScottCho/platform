@@ -30,6 +30,7 @@ class Credence(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(80), unique=True,nullable=False)
 	agreement_id = db.Column(db.Integer,db.ForeignKey('agreements.id'))
+	agreement = db.relationship('Agreement')
 	port = db.Column(db.String(20),nullable=False)
 	username = db.Column(db.String(80),nullable=False)
 	password = db.Column(db.String(80))
@@ -38,6 +39,8 @@ class Credence(db.Model):
 	# agent_port = db.Column(db.String(10))
 	# agent_password = db.Column(db.String(80))
 	machines = db.relationship('Machine',back_populates='credence')
+	apps = db.relationship('App',back_populates='credence')
+	databases = db.relationship('Database',back_populates='credence')
 	def __repr__(self):
 		return '<Credence.name %r>' % self.name
 

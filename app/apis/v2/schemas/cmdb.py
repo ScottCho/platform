@@ -40,6 +40,7 @@ class CredenceSchema(Schema):
     password = fields.Str()
     ssh_key = fields.Str()
     agreement_id = fields.Integer()
+    agreement_name = fields.Function(lambda obj: "{}".format(obj.agreement.name))
     machines = Relationship(self_view='credence_machines',
                            self_view_kwargs={'id': '<id>'},
                            related_view='machine_list',

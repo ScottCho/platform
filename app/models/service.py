@@ -12,7 +12,7 @@ class Database(db.Model):
 	project = db.relationship('Project')
 	schemas = db.relationship('Schema',back_populates='instance')
 	credence_id = db.Column(db.Integer,db.ForeignKey('credences.id'))
-	credence = db.relationship('Credence')
+	credence = db.relationship('Credence',back_populates='databases')
 	machine_id = db.Column(db.Integer,db.ForeignKey('machines.id'))
 	machine = db.relationship('Machine')
 
@@ -44,6 +44,8 @@ class App(db.Model):
     machine = db.relationship('Machine')
     schema_id = db.Column(db.Integer,db.ForeignKey('db_schemas.id'))
     schema = db.relationship('Schema')
+    credence_id = db.Column(db.Integer,db.ForeignKey('credences.id'))
+    credence = db.relationship('Credence',back_populates='apps')
 
 class Subsystem(db.Model):
 	__tablename__ = 'subsystems'

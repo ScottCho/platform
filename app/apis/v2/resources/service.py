@@ -1,3 +1,6 @@
+from flask import jsonify
+from flask.views import MethodView, MethodViewType
+from app.apis.v2 import api_v2
 from marshmallow_jsonapi import fields
 from flask_rest_jsonapi import Api, ResourceDetail, ResourceList, ResourceRelationship
 
@@ -10,6 +13,10 @@ from app import db
 from app.apis.v2 import api
 from app.apis.v2.schemas.service import DatabaseSchema, SchemaSchema, EnvSchema, SubsystemSchema, AppSchema
 from app.apis.v2.auth import auth_required
+from app.apis.v2.errors import api_abort
+from app.apis.v2 import api_v2
+
+from app.tasks import remote_shell
 
 # Create resource managers
 class DatabaseList(ResourceList):
@@ -146,6 +153,24 @@ class AppRelationship(ResourceRelationship):
     data_layer = {'session': db.session,
                   'model': App}
 
+# 应用的重启和关闭
+class AppManageAPI(MethodView):
+    decorators = [auth_required]
+    def get(self, app_id):
+        app = App.query.get(app_id)
+        env = app.env.name.lower()
+        subsystem = app.subsystem.en_name.lower()
+        username = app.credence.username
+        password = app.credence.password
+        ip = app.machine.ip
+        command='sh /usr/local/sbin/weblogic_{}.sh {} {}'.format(env,action,subsystem)
+        result = remote_shell(ip,command,username=username,password=password)
+            if app is not None:
+                return jsonify(data=[{'status':200, 'detail':'sucess'}])
+            else:
+                return api_abort(404,'app不存在')
+
+
 # Create endpoints
 api.route(DatabaseList, 'database_list', '/api/databases')
 api.route(DatabaseDetail, 'database_detail', '/api/databases/<int:id>')
@@ -164,3 +189,6 @@ api.route(AppRelationship, 'app_env', '/api/apps/<int:id>/relationships/env')
 api.route(AppRelationship, 'app_subsystem', '/api/apps/<int:id>/relationships/subsystem')
 api.route(AppRelationship, 'app_machine', '/api/apps/<int:id>/relationships/machine')
 api.route(AppRelationship, 'app_schema', '/api/apps/<int:id>/relationships/schema')
+
+# 重启应用api
+api_v2.add_url_rule('/app/manage/<int:app_id>', view_func=AppManageAPI.as_view('app_manage'), methods=['GET',])

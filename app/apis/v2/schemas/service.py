@@ -87,6 +87,8 @@ class AppSchema(Schema):
     machine_id = fields.Integer()
     schema_id = fields.Integer()
     subsystem_id = fields.Integer()
+    credence_id = fields.Integer()
+    credence_name = fields.Function(lambda obj: "{}".format(obj.credence.name))
     env_id = fields.Integer()
     name = fields.Str()
     project_name = fields.Function(lambda obj: "{}".format(obj.project.name))

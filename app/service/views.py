@@ -38,7 +38,7 @@ def manage_app():
 
 
 #操作应用
-@service_bp.route('/ctl/app/<action>/<int:id>',methods=('GET','POST'))
+@service_bp.route('/ctl/app/<action>/<int:id>')
 @login_required
 @permission_required(Permission.backend_manage)
 def ctl_app(id,action):
