@@ -164,11 +164,11 @@ class AppManageAPI(MethodView):
         password = app.credence.password
         ip = app.machine.ip
         command='sh /usr/local/sbin/weblogic_{}.sh {} {}'.format(env,action,subsystem)
-        result = remote_shell(ip,command,username=username,password=password)
-            if app is not None:
-                return jsonify(data=[{'status':200, 'detail':'sucess'}])
-            else:
-                return api_abort(404,'app不存在')
+        if app is not None:
+            result = remote_shell(ip,command,username=username,password=password)
+            return jsonify(data=[{'status':200, 'detail':result}])
+        else:
+            return api_abort(404,'app不存在')
 
 
 # Create endpoints
