@@ -144,3 +144,52 @@ def make_shell_context():
 # @flask_app.errorhandler(CSRFError)
 # def handle_csrf_error(e):
 #     return render_template('errors/400.html', description=e.description), 400
+
+import app.utils.iemail
+
+rows_data = [
+    [34, 72, 38, 30, 75, 48, 75],
+    [6, 24, 1, 84, 54, 62, 60],
+    [28, 79, 97, 13, 85, 93, 93],
+    [27, 71, 40, 17, 18, 79, 90],
+    [88, 25, 33, 23, 67, 1, 59],
+    [24, 100, 20, 88, 29, 33, 38],
+    [6, 57, 88, 28, 10, 26, 37],
+    [52, 78, 1, 96, 26, 45, 47],
+    [60, 54, 81, 66, 81, 90, 80],
+    [70, 5, 46, 14, 71, 19, 66],
+]
+col_headers = ['日期', '周一', '周二', '周三',
+               '周四', '周五', '周六', '周日']
+row_headers = ['用户{}'.format(i) for i in range(1, 11)]
+
+
+
+
+
+import csv,os
+from app.localemail import send_email
+
+def write_csv(csv_file, headers, rows):
+    f = open(csv_file, 'wt')
+    writer = csv.writer(f)
+    writer.writerow(headers)
+    for index, row in enumerate(rows):
+        writer.writerow([row_headers[index]] + row)
+    f.close()
+
+@flask_app.route('/test')
+def test():
+    csv_file = os.path.join('C:\\Users\\scott\\Documents\\GitHub\\platform\\app', 'statistics.csv')
+    write_csv(csv_file, col_headers, rows_data)
+
+    send_email(['scottcho@qq.com'], '英语成绩',
+               'mail/panda.html', attachments=[csv_file], 
+               col_headers=col_headers,
+               row_headers=row_headers,
+               rows_data=rows_data
+                )
+    
+    return render_template('mail/panda.html',col_headers=col_headers,
+               row_headers=row_headers,
+               rows_data=rows_data)
