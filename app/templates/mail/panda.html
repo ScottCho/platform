@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        {% include  'bootstrap-3.3.7.min.css'  %}
+    </style>
+</head>
+<body>
+    
+<table class="table table-bordered table-hover">
+    <tr>
+        {% for column in col_headers %}
+          <th>{{column}}</th>
+        {% endfor %}
+        {% for rows in rows_data %}
+            <tr>
+            {% for column in [row_headers[loop.index0]] + rows %}
+                <td>{{column}}</td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+        </tr>
+</table>
+</body>
+</html>
