@@ -156,7 +156,7 @@ class AppRelationship(ResourceRelationship):
 # 应用的重启和关闭
 class AppManageAPI(MethodView):
     decorators = [auth_required]
-    def get(self, app_id):
+    def get(self, action, app_id):
         app = App.query.get(app_id)
         env = app.env.name.lower()
         subsystem = app.subsystem.en_name.lower()
@@ -191,4 +191,4 @@ api.route(AppRelationship, 'app_machine', '/api/apps/<int:id>/relationships/mach
 api.route(AppRelationship, 'app_schema', '/api/apps/<int:id>/relationships/schema')
 
 # 重启应用api
-api_v2.add_url_rule('/app/manage/<int:app_id>', view_func=AppManageAPI.as_view('app_manage'), methods=['GET',])
+api_v2.add_url_rule('/app/manage/<action>/<int:app_id>', view_func=AppManageAPI.as_view('app_manage'), methods=['GET',])
