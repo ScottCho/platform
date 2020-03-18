@@ -170,6 +170,23 @@ class AppManageAPI(MethodView):
         else:
             return api_abort(404,'app不存在')
 
+# 数据库实例的重启和关闭
+class DatabaseManageAPI(MethodView):
+    decorators = [auth_required]
+    def get(self, action, database_id):
+	    db = Database.query.get(database_id)
+        username = db.credence.username
+        password = db.credence.password
+        instance = db.instance
+        ip = app.machine.ip
+	    command='sh /usr/local/sbin/restart_oracle.sh {} {}'.format(action,instance)
+	    logging.info('*'*8+'execute command ' + command + ' on oracle'+'@'+db.host+'*'*8)
+        if db is not None:
+            result = remote_shell(ip,command,username=username,password=password)
+            return jsonify(data=[{'status':200, 'detail':result}])
+        else:
+            return api_abort(404,'app不存在')
+	
 
 # Create endpoints
 api.route(DatabaseList, 'database_list', '/api/databases')
@@ -190,5 +207,7 @@ api.route(AppRelationship, 'app_subsystem', '/api/apps/<int:id>/relationships/su
 api.route(AppRelationship, 'app_machine', '/api/apps/<int:id>/relationships/machine')
 api.route(AppRelationship, 'app_schema', '/api/apps/<int:id>/relationships/schema')
 
-# 重启应用api
-api_v2.add_url_rule('/app/manage/<action>/<int:app_id>', view_func=AppManageAPI.as_view('app_manage'), methods=['GET',])
+# 重启应用端点
+api_v2.add_url_rule('/apps/<action>/<int:app_id>', view_func=AppManageAPI.as_view('app_manage'), methods=['GET',])
+#　数据库实例的重启和关闭端点
+api_v2.add_url_rule('/databases/<action>/<int:database_id>', view_func=DatabaseManageAPI.as_view('database_manage'), methods=['GET',])
