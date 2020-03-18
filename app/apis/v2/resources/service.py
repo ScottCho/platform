@@ -161,13 +161,13 @@ class AppManageAPI(MethodView):
     decorators = [auth_required]
     def get(self, action, app_id):
         app = App.query.get(app_id)
-        env = app.env.name.lower()
-        subsystem = app.subsystem.en_name.lower()
-        username = app.credence.username
-        password = app.credence.password
-        ip = app.machine.ip
-        command='sh /usr/local/sbin/weblogic_{}.sh {} {}'.format(env,action,subsystem)
         if app is not None:
+            env = app.env.name.lower()
+            subsystem = app.subsystem.en_name.lower()
+            username = app.credence.username
+            password = app.credence.password
+            ip = app.machine.ip
+            command='sh /usr/local/sbin/weblogic_{}.sh {} {}'.format(env,action,subsystem)
             try:
                 result = remote_shell(ip,command,username=username,password=password)
             except Exception as e:
@@ -182,13 +182,13 @@ class DatabaseManageAPI(MethodView):
     decorators = [auth_required]
     def get(self, action, database_id):
         db = Database.query.get(database_id)
-        username = db.credence.username
-        password = db.credence.password
-        instance = db.instance
-        ip = db.machine.ip
-        command='sh /usr/local/sbin/restart_oracle.sh {} {}'.format(action,instance)
-        logging.info('*'*8+'execute command ' + command + ' on oracle'+'@'+ip+'*'*8)
         if db is not None:
+            username = db.credence.username
+            password = db.credence.password
+            instance = db.instance
+            ip = db.machine.ip
+            command='sh /usr/local/sbin/restart_oracle.sh {} {}'.format(action,instance)
+            logging.info('*'*8+'execute command ' + command + ' on oracle'+'@'+ip+'*'*8)
             try:
                 result = remote_shell(ip,command,username=username,password=password)
             except Exception as e:
