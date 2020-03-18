@@ -17,6 +17,8 @@ class DatabaseSchema(Schema):
     mark = fields.Str()
     credence_id = fields.Integer()
     machine_id = fields.Integer()
+    project_id = fields.Integer()
+    project_name = fields.Function(lambda obj: "{}".format(obj.project.name))
     machine_name = fields.Function(lambda obj: "{}".format(obj.machine.hostname))
     schemas = Relationship(self_view='database_schemas',
                              self_view_kwargs={'id': '<id>'},
