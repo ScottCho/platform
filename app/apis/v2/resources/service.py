@@ -179,13 +179,13 @@ class DatabaseManageAPI(MethodView):
         password = db.credence.password
         instance = db.instance
         ip = app.machine.ip
-	    command='sh /usr/local/sbin/restart_oracle.sh {} {}'.format(action,instance)
+        command='sh /usr/local/sbin/restart_oracle.sh {} {}'.format(action,instance)
 	    logging.info('*'*8+'execute command ' + command + ' on oracle'+'@'+db.host+'*'*8)
         if db is not None:
             result = remote_shell(ip,command,username=username,password=password)
             return jsonify(data=[{'status':200, 'detail':result}])
         else:
-            return api_abort(404,'app不存在')
+            return api_abort(404,'数据库实例不存在')
 	
 
 # Create endpoints
