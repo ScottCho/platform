@@ -174,13 +174,13 @@ class AppManageAPI(MethodView):
 class DatabaseManageAPI(MethodView):
     decorators = [auth_required]
     def get(self, action, database_id):
-	    db = Database.query.get(database_id)
-        username = db.credence.username
+        db = Database.query.get(database_id)
+        username = dba.credence.username
         password = db.credence.password
         instance = db.instance
         ip = app.machine.ip
         command='sh /usr/local/sbin/restart_oracle.sh {} {}'.format(action,instance)
-	    logging.info('*'*8+'execute command ' + command + ' on oracle'+'@'+db.host+'*'*8)
+        logging.info('*'*8+'execute command ' + command + ' on oracle'+'@'+db.host+'*'*8)
         if db is not None:
             result = remote_shell(ip,command,username=username,password=password)
             return jsonify(data=[{'status':200, 'detail':result}])
