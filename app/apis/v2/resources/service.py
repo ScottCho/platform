@@ -1,3 +1,6 @@
+import logging
+
+
 from flask import jsonify
 from flask.views import MethodView, MethodViewType
 from app.apis.v2 import api_v2
@@ -165,8 +168,12 @@ class AppManageAPI(MethodView):
         ip = app.machine.ip
         command='sh /usr/local/sbin/weblogic_{}.sh {} {}'.format(env,action,subsystem)
         if app is not None:
-            result = remote_shell(ip,command,username=username,password=password)
-            return jsonify(data=[{'status':200, 'detail':result}])
+            try:
+                result = remote_shell(ip,command,username=username,password=password)
+            except Exception as e:
+                return api_abort(400,str(e))
+            else:
+                return jsonify(data=[{'status':200, 'detail':result}])
         else:
             return api_abort(404,'app不存在')
 
@@ -175,15 +182,19 @@ class DatabaseManageAPI(MethodView):
     decorators = [auth_required]
     def get(self, action, database_id):
         db = Database.query.get(database_id)
-        username = dba.credence.username
+        username = db.credence.username
         password = db.credence.password
         instance = db.instance
-        ip = app.machine.ip
+        ip = db.machine.ip
         command='sh /usr/local/sbin/restart_oracle.sh {} {}'.format(action,instance)
-        logging.info('*'*8+'execute command ' + command + ' on oracle'+'@'+db.host+'*'*8)
+        logging.info('*'*8+'execute command ' + command + ' on oracle'+'@'+ip+'*'*8)
         if db is not None:
-            result = remote_shell(ip,command,username=username,password=password)
-            return jsonify(data=[{'status':200, 'detail':result}])
+            try:
+                result = remote_shell(ip,command,username=username,password=password)
+            except Exception as e:
+                return api_abort(400,str(e))
+            else:
+                return jsonify(data=[{'status':200, 'detail':result}])
         else:
             return api_abort(404,'数据库实例不存在')
 	
