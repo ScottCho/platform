@@ -59,7 +59,7 @@ class App(db.Model):
      # Jnekins编译后执行得打包脚本
     def  package_script(self):
         # jenkins_ip = os.getenv(JENKINS_URL)  # http://192.168.0.80:8080/jenkins
-        package_shell_script = render_template('apis/v2/service/package.sh',
+        shell_script = render_template('apis/v2/service/package.sh',
             jenkins_job_dir = self.jenkins_job_dir,
             port = self.port,
             alias = self.alias,
@@ -67,12 +67,13 @@ class App(db.Model):
             deploy_dir = self.deploy_dir,
             package_dir = self.package_dir
         )
+        print('zzzzzzzzzzzzzzz'+shell_script)
         # jenkin的workspace不存在package.sh,则重新创建
         package_script = os.path.join(self.jenkins_job_dir,'package.sh')
         if not os.path.exists(package_script):
             with open(package_script, 'w') as f:
                 print(package_shell_script)
-                f.write(package_shell_script)
+                f.write(shell_script)
 
 
 class Subsystem(db.Model):
