@@ -65,8 +65,9 @@ class App(db.Model):
             deploy_dir = self.deploy_dir,
             package_dir = self.package_dir
         )
+        # jenkin的workspace不存在package.sh,则重新创建
         package_script = os.path.join(self.jenkins_job_dir,'package.sh')
-        if not os.path.exists(package_script)
+        if not os.path.exists(package_script):
             with open(package_script, 'w'):
                 f.write(package_shell_script)
 
