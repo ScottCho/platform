@@ -72,7 +72,7 @@ class App(db.Model):
         package_script = os.path.join(self.jenkins_job_dir,'package.sh')
         if not os.path.exists(package_script):
             with open(package_script, 'w') as f:
-                print(package_shell_script)
+                print('yyyyy'+shell_script)
                 f.write(shell_script)
 
 
