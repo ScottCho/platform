@@ -46,6 +46,12 @@ class App(db.Model):
     schema = db.relationship('Schema')
     credence_id = db.Column(db.Integer,db.ForeignKey('credences.id'))
     credence = db.relationship('Credence',back_populates='apps')
+    port = db.Column(db.String(16))     # 应用访问端口
+    deploy_dir = db.Column(db.String(256))   # 部署目录
+    package_dir = db.Column(db.String(256))    # 打包目录
+    alias = db.Column(db.String(32))   # 项目别名
+    context = db.Column(db.String(64))   # 应用访问的上下文
+
 
 class Subsystem(db.Model):
 	__tablename__ = 'subsystems'

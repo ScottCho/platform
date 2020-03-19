@@ -1,1 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d0aaf58"],{"12de":function(e,n,t){"use strict";t.r(n),t.d(n,"getTheme",(function(){return u}));var r=t("b775");function u(e){return Object(r["a"])({url:"/theme",method:"get",params:e})}}}]);

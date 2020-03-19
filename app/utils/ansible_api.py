@@ -166,5 +166,5 @@ if __name__ == '__main__':
     tasks = AnsibleTask('192.168.0.12,192.168.0.31')
     # tasks = AnsibleTask('/etc/ansible/hosts')
     tasks.exec_shell('192.168.0.31', 'shell', 'ls')
-    tasks.ansible_playbook('ansible',8,'/etc/ansible/roles/centos7/init.yml')
+    #tasks.ansible_playbook('ansible',8,'/etc/ansible/roles/centos7/init.yml')
 

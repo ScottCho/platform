@@ -29,6 +29,7 @@ requests = "*"
 ansible = "*"
 flask-cors = "*"
 pytest = "*"
+flask-rest-jsonapi = "*"
 
 [requires]
 python_version = "3.6"
