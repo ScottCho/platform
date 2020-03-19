@@ -1,4 +1,5 @@
-# delete jar file in $WORKSPACE 
+# delete old jar file in jenkins_job_dir
+
 cd {{ jenkins_job_dir }}
 find {{ jenkins_job_dir }} -maxdepth 1 -name *jar -print0|xargs -0 rm -rf
 
@@ -6,10 +7,9 @@ find {{ jenkins_job_dir }} -maxdepth 1 -name *jar -print0|xargs -0 rm -rf
 APP_LIST=$(ls {{ jenkins_job_dir }}/*_${baseline_id}.txt)
 
 if [[ ! -f $APP_LIST ]];then
-    echo {{ jenkins_job_dir }} is not exists java txt file,please check!!!
+    echo {{ jenkins_job_dir }} is not exists ${baseline_id} java txt file,please check!!!
     exit 2
 fi
-
 echo $APP_LIST
 
 
@@ -32,8 +32,12 @@ fi
 echo "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}" "{{ deploy_host }}:{{ deploy_dir }}"
 scp  "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}" "{{ deploy_host }}:{{ deploy_dir }}"
 scp  "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}"  "{{ deploy_host }}:{{ deploy_dir }}"
-mv "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  "${PACKAGE_DIR}"
-mv "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}" "${PACKAGE_DIR}"
+
+if [[ ! -d {{ package_dir }} ]];then
+    mkdir {{ package_dir }}
+fi 
+mv "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  "{{ package_dir }}"
+mv "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}" "{{ package_dir }}"
 
 echo ssh {{ deploy_host }} "sh {{ deploy_dir }}/update.sh"
 ssh {{ deploy_host }} "sh {{ deploy_dir }}/update.sh"
