@@ -1,3 +1,5 @@
+from flask import render_template
+
 from .. import db
 
 
@@ -52,6 +54,17 @@ class App(db.Model):
     alias = db.Column(db.String(32))   # 项目别名
     context = db.Column(db.String(64))   # 应用访问的上下文
 
+     # Jnekins编译后执行得打包脚本
+    def  package_script(self):
+        # jenkins_ip = os.getenv(JENKINS_URL)  # http://192.168.0.80:8080/jenkins
+        package_shell = render_template('apis/v2/service/package.sh',
+            jenkins_job_dir = self.jenkins_job_dir,
+            port = self.port,
+            alias = self.alias,
+            deploy_host = self.machine.ip,
+            deploy_dir = self.deploy_dir
+        )
+        print(package_shell)
 
 class Subsystem(db.Model):
 	__tablename__ = 'subsystems'

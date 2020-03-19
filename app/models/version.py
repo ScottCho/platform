@@ -8,7 +8,7 @@ from datetime import datetime
 
 import svn.local
 import svn.remote
-from flask import current_app
+from flask import current_app, render_template
 
 from app.localemail import send_email
 from app.utils import execute_cmd, fnmatch_file, switch_char
@@ -47,6 +47,7 @@ class Baseline(db.Model):
     itasks = db.relationship('IssueTask', secondary='task_ass_baseline', back_populates='baselines')
     ibugs= db.relationship('IssueBug', secondary='bug_ass_baseline', back_populates='baselines')
 
+
     def update_baseline(self,flag=0,num='01'):
     # flag=0:单条基线更新，flag=1： 合并基线更新
     # num: 当天发布更新包的个数
@@ -77,12 +78,12 @@ class Baseline(db.Model):
                     fw.write('"'+line+'"'+'\n')
 
             #　判断前一次是否构建成功
-            dir_list = self.app.jenkins_job_dir.split('/')
+            jenkins_job_dir = self.app.jenkins_job_dir
+            dir_list = jenkins_job_dir.split('/')
             job_name_index = dir_list.index('jobs')+1
             job_name = dir_list[job_name_index]
             job = get_jenkins_job(job_name)
             jenkins_last_build = job.get_last_build().is_good()
-
             message += '开始构建程序.....'+job_name+'\n'
             if jenkins_last_build:
                 message += '该系统上一次构建结果： 成功\n'
@@ -226,6 +227,7 @@ class Baseline(db.Model):
 
         # 根据基线的id触发Jenkins参数构建,先更新DB，再更新应用
         if self.versionno:
+            self.app.package_script()
             build_with_parameters(job_name,baseline_id=self.id)
         return   message     
 

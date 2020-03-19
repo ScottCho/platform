@@ -69,7 +69,7 @@ class BaselineDetail(ResourceDetail):
         obj = self._data_layer.get_object({'id':result['data']['id']})
         message = obj.update_baseline()
         # 发送邮件
-        obj.baseline_email()
+        #obj.baseline_email()
         # 更新结果返回
         result.update({'detail': message})
         return result
