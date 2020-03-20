@@ -148,7 +148,7 @@ class Baseline(db.Model):
                     sqlfile = glob.glob(source_sqldir+'/'+sql+'_*')
                     # 判断匹配的SQL是否唯一
                     if len(sqlfile) == 0:
-                        #current_app.logger.error(sql + '号sql文件不存在')
+                        current_app.logger.error(sql + '号sql文件不存在')
                         raise Exception(sql+'号sql文件不存在!') 
                     elif len(sqlfile) == 1:
                         sqlfile = sqlfile[0]
@@ -160,14 +160,14 @@ class Baseline(db.Model):
                                                         os.path.basename(sqlfile))+'\n')
                     else:
                         current_app.logger.error('存在多个相同的sql文件')
-                        return '更新DB失败，可能存在多个'+sql+'号文件'
+                        raise Exception(sql+'存在多个相同的sql文件!') 
             # 将pck文件复制到base_dir,并将路径加到ALL.sql
             if self.pckno:
                 for pck in self.pckno.split(','):
                     pckfile = glob.glob(source_pckdir+'/'+pck+'_*')
                     if len(pckfile) == 0:
                         current_app.logger.error(pck + '号pck文件不存在')
-                        return pck+'号pck文件不存在'
+                        raise Exception(pck+'号pck文件不存在')
                     elif len(pckfile) == 1:
                         shutil.copy(pckfile[0], target_pckdir)
                         with open(DB_SCRIPT, 'a') as pckf:
@@ -176,8 +176,8 @@ class Baseline(db.Model):
                             pckf.write('@'+os.path.join(target_pckdir,
                                                         os.path.basename(pckfile[0]))+'\n')
                     else:
-                        current_app.logger.error(pck + '号pck文件不存在')
-                        return '更新DB失败，可能存在多个'+pck+'号文件'
+                        current_app.logger.error('更新DB失败,存在多个'+pck+'号文件')
+                        raise Exception('更新DB失败,存在多个'+pck+'号文件')
 
             # 将rollback文件复制到base_dir,并将路径加到ALL.sql
             if self.rollbackno:
@@ -185,7 +185,7 @@ class Baseline(db.Model):
                     rollbackfile = glob.glob(source_rollbackdir+'/'+nu+'_*')
                     if len(rollbackfile) == 0:
                         current_app.logger.error(nu + '号rollback文件不存在')
-                        return nu+'号rollback文件不存在'
+                        raise Exception(nu+'号rollback文件不存在')
                     elif len(rollbackfile) == 1:
                         shutil.copy(rollbackfile[0], target_rollbackdir)
                         with open(ROLLBACK_SCRIPT, 'a') as rollbackf:
@@ -194,8 +194,9 @@ class Baseline(db.Model):
                             rollbackf.write(
                                 '@'+os.path.join(target_rollbackdir, os.path.basename(rollbackfile[0]))+'\n')
                     else:
-                        current_app.logger.error(nu + '号rollback文件不存在')
-                        return '更新DB失败，可能存在多个'+nu+'号文件'
+                        current_app.logger.error('更新DB失败，存在多个rollback'+nu+'号文件')
+                        raise Exception('更新DB失败，存在多个rollback'+nu+'号文件')
+                        
 
             # 将base_dir中的文件统一为utf-8
             if switch_char.switch_char(fnmatch_file.find_specific_files(base_dir)) is False:
