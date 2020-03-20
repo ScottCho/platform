@@ -4,7 +4,7 @@ from flask_rest_jsonapi import Api, ResourceDetail, ResourceList, ResourceRelati
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired
 from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
 from werkzeug.wrappers import Response
-from flask import request, url_for, make_response, redirect
+from flask import request, url_for, make_response, redirect, jsonify
 from flask.wrappers import Response as FlaskResponse
 from flask.views import MethodView, MethodViewType
 from marshmallow_jsonapi.exceptions import IncorrectTypeError
@@ -81,10 +81,9 @@ class RegisterAPI(MethodView):
         db.session.add(user)
         db.session.commit() 
         token = user.generate_confirmation_token()
-        print('开始发送邮件')
         send_email([user.email],'确认您的账户',
-            'apis/v2/confirm.html',user=user,token=token)
-        return api_abort(200,'请在邮箱中的链接确认用户')
+            'apis/v2/mail/auth/confirm.html',user=user,token=token)
+        return jsonify(data=[{'status':200, 'detail':'请在邮箱中的链接确认用户'}])
 
 
 # 用户邮件确认
