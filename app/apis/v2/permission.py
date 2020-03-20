@@ -30,7 +30,7 @@ default={
         'blstatus_detail': {'patch': False, 'get': True, 'delete': False},
         'machine_list': {'post': False,  'get': False},
         'machine_detail': {'patch': False, 'get': False, 'delete': False},
-        'role_list': {'post': False,  'get': False},
+        'role_list': {'post': False,  'get': True},
         'role_detail': {'patch': False, 'get': False, 'delete': False},
         'database_list': {'post': False,  'get': False},
         'database_detail': {'patch': False, 'get': False, 'delete': False},
