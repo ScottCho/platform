@@ -34,7 +34,7 @@ default={
         'role_detail': {'patch': False, 'get': False, 'delete': False},
         'database_list': {'post': False,  'get': False},
         'database_detail': {'patch': False, 'get': False, 'delete': False},
-        'env_list': {'post': False,  'get': False},
+        'env_list': {'post': False,  'get': True},
         'env_detail': {'patch': False, 'get': False, 'delete': False},
         'credence_list': {'post': False,  'get': False},
         'credence_detail': {'patch': False, 'get': False, 'delete': False},
