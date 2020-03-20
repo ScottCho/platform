@@ -148,8 +148,8 @@ class Baseline(db.Model):
                     sqlfile = glob.glob(source_sqldir+'/'+sql+'_*')
                     # 判断匹配的SQL是否唯一
                     if len(sqlfile) == 0:
-                        current_app.logger.error(sql + '号sql文件不存在')
-                        return sql+'号sql文件不存在\n'
+                        #current_app.logger.error(sql + '号sql文件不存在')
+                        raise Exception(sql+'号sql文件不存在!') 
                     elif len(sqlfile) == 1:
                         sqlfile = sqlfile[0]
                         shutil.copy(sqlfile, target_sqldir)
@@ -254,8 +254,8 @@ class Baseline(db.Model):
         attachments = fnmatch_file.find_specific_files(
             log_dir, '*log')
         #发送邮件
-        send_email(recipients, mailtheme,
-               'mail/version/baseline.html', attachments, baseline=self
+        send_email(['zhaoysz@sinosoft.com.cn'], mailtheme,
+               'apis/v2/mail/vcs/baseline.html', attachments, baseline=self
                 )
     
 # 基线状态表

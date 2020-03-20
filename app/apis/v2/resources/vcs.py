@@ -30,6 +30,7 @@ from app.apis.v2.auth import auth_required
 from app.utils import execute_cmd, fnmatch_file, switch_char
 from app.localemail import send_email
 from app.utils.jenkins import get_jenkins_job
+from app.apis.v2.errors import api_abort
 
 # Create resource managers
 class BaselineList(ResourceList):
@@ -45,12 +46,16 @@ class BaselineList(ResourceList):
     def after_post(self, result):
         """Hook to make custom work after post method"""
         obj = self._data_layer.get_object({'id':result[0]['data']['id']})
-        message = obj.update_baseline()
-        # 发送邮件
-        obj.baseline_email()
-        # 更新结果返回
-        result[0].update({'detail': message})
-        return result
+        try:
+            message = obj.update_baseline()
+        except Exception as e:
+            return api_abort(400,detail=str(e))
+        else:
+            # 发送邮件
+            obj.baseline_email()
+            # 更新结果返回
+            result[0].update({'detail': message})
+            return result
 
     schema = BaselineSchema
     data_layer = {'session': db.session,
@@ -67,12 +72,16 @@ class BaselineDetail(ResourceDetail):
     def after_patch(self, result):
         """Hook to make custom work after patch method"""
         obj = self._data_layer.get_object({'id':result['data']['id']})
-        message = obj.update_baseline()
-        # 发送邮件
-        #obj.baseline_email()
-        # 更新结果返回
-        result.update({'detail': message})
-        return result
+        try:
+            message = obj.update_baseline()
+        except Exception as e:
+            return api_abort(400,detail=str(e))
+        else:
+            # 发送邮件
+            obj.baseline_email()
+            # 更新结果返回
+            result.update({'detail': message})
+            return result
 
     # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
     # 支持两种方式删除
