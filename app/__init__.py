@@ -1,22 +1,23 @@
  #!/usr/bin/python
 #-*- coding: UTF-8 -*-
 import os
+import subprocess
+from threading import Lock
 import logging
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_moment import Moment
 from flask_mail import Mail
 from flask_login import LoginManager,current_user,logout_user
 from flask_wtf.csrf import CSRFError
 from flask_wtf.csrf import CSRFProtect
 from celery import Celery,platforms
+from flask_socketio import SocketIO
 from config import config
 
 
 db = SQLAlchemy()
 mail = Mail()
-moment = Moment()
 migrate = Migrate()
 csrf = CSRFProtect()
 login_manager = LoginManager()
@@ -54,8 +55,7 @@ flask_app.logger.setLevel(logging.INFO)
 celery = make_celery(flask_app)
 
 
-#时间处理
-moment.init_app(flask_app)
+
 #初始化数据库
 db.init_app(flask_app)
 migrate.init_app(flask_app, db)
@@ -115,36 +115,7 @@ def make_shell_context():
         Subsystem=Subsystem,Env=Env,Role=Role)
 
 
-# 错误处理
-# @flask_app.errorhandler(400)
-# def bad_request(e):
-#     return render_template('errors/400.html'), 400
-
-
-# @flask_app.errorhandler(403)
-# def forbidden(e):
-#     return render_template('errors/403.html'), 403
-
-
-# @flask_app.errorhandler(404)
-# def page_not_found(e):
-#     return render_template('errors/404.html'), 404
-
-
-# @flask_app.errorhandler(413)
-# def request_entity_too_large(e):
-#     return render_template('errors/413.html'), 413
-
-
-# @flask_app.errorhandler(500)
-# def internal_server_error(e):
-#     return render_template('errors/500.html'), 500
-
-
-# @flask_app.errorhandler(CSRFError)
-# def handle_csrf_error(e):
-#     return render_template('errors/400.html', description=e.description), 400
-
+###### 测试
 rows_data = [
     [34, 72, 38, 30, 75, 48, 75],
     [6, 24, 1, 84, 54, 62, 60],
@@ -191,3 +162,35 @@ def test():
     return render_template('mail/panda.html',col_headers=col_headers,
                row_headers=row_headers,
                rows_data=rows_data)
+
+
+socketio = SocketIO(flask_app)
+thread = None
+thread_lock = Lock()
+@socketio.on('event2',namespace='/task')
+def background_task():
+    global thread
+    with thread_lock:
+        if thread is None:
+            thread = socketio.start_background_task(target=background_thread)
+
+def background_thread():
+    p = subprocess.Popen('ping qq.com',shell=True,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    while True:
+        line = p.stdout.readline().strip()
+        line=line.decode(encoding='utf-8')
+        print('line='+line)
+        socketio.sleep(2)
+        socketio.emit('event2', line,namespace='/task')
+        if not line:
+            break
+
+@flask_app.route('/task')
+def start_background_task():
+    background_task()
+    return 'Started'
+
+@flask_app.route('/socket')
+def socket():
+        return render_template('apis/v2/socketio.html')
+

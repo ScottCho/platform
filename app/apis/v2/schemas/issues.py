@@ -135,7 +135,7 @@ class IssueSeveritySchema(Schema):
 class IssueStatusSchema(Schema):
     class Meta:
         type_ = 'issue_status'
-        self_view = 'istatus_detail'
+        self_view = 'issue_status_detail'
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'issue_status_list'
         

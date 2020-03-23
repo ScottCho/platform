@@ -19,7 +19,7 @@ class DatabaseSchema(Schema):
     machine_id = fields.Integer()
     project_id = fields.Integer()
     project_name = fields.Function(lambda obj: "{}".format(obj.project.name))
-    machine_name = fields.Function(lambda obj: "{}".format(obj.machine.hostname))
+    machine_hostname = fields.Function(lambda obj: "{}".format(obj.machine.hostname))
     schemas = Relationship(self_view='database_schemas',
                              self_view_kwargs={'id': '<id>'},
                              related_view='schema_list',
@@ -84,6 +84,12 @@ class AppSchema(Schema):
     id = fields.Integer(as_string=True, dump_only=True)
     log_dir = fields.Str()
     jenkins_job_dir = fields.Str()
+    port = fields.Str()
+    deploy_dir = fields.Str()
+    package_dir = fields.Str()
+    alias = fields.Str()
+    context = fields.Str()
+    service_url = fields.Function(lambda obj: "http://{}:{}/{}".format(obj.machine.ip,obj.port,obj.context))
     source_dir = fields.Str()
     project_id = fields.Integer()
     machine_id = fields.Integer()
