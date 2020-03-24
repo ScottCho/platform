@@ -19,31 +19,24 @@ def execute_cmd(cmd,*content):
         return p.returncode, stderr
     return p.returncode, stdout
 
-# 远程执行的结果通过socket-io发送到前端
+
+
+# 执行的结果通过socket-io发送到前端
 @socketio.on('event2',namespace='/task')
-def socket_shell(cmd,*content):
+def socket_shell(cmd):
     p = subprocess.Popen(cmd,shell=True,
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
-    if content:
-        stdout,stderr =  p.communicate(bytes(content[0], encoding="utf8"))
-    else:
-        stdout,stderr =  p.communicate()
-    line = ''
-    if p.returncode != 0:
-        while True:
-            line = (stderr.decode(encoding='utf-8')).readline().strip()
-            socketio.emit('event2', line,namespace='/task')
-            if not line:
-                break   
-    else:
-        while True:
-            line =stdout.readline()
-            print(line)
-            socketio.emit('event2', line,namespace='/task')
-            if not line:
-                break   
+                         stderr=subprocess.STDOUT)
+    while True: 
+        line = p.stdout.readline().strip()
+        line=line.decode(encoding='utf-8')
+        print('line='+line)
+        socketio.emit('event2', line,namespace='/task')
+        if not line:
+            break
+
+    
 
         
            
@@ -65,7 +58,7 @@ def remote_execute_command(hostname,command,port=22,username=None,password=None)
 
 # 远程执行的结果通过socket-io发送到前端
 @socketio.on('event2',namespace='/task')
-def remote_socket_shell(command='ping -cccc3 www.qq.com',hostname='127.0.0.1',username='root',password='Sinosoft_908',port=22):
+def remote_socket_shell(command='ping -c3 www.qq.com',hostname='127.0.0.1',username='root',password='123456',port=22):
     with paramiko.SSHClient() as client:
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(hostname=hostname,username=username,port=port,password=password)
@@ -75,7 +68,7 @@ def remote_socket_shell(command='ping -cccc3 www.qq.com',hostname='127.0.0.1',us
             err = stderr.readline().strip()
             line = ''
             if err:
-                line='Err: '+err
+                line=err
             else:
                 line=message
             socketio.emit('event2', line,namespace='/task')

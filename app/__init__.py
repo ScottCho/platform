@@ -173,7 +173,7 @@ from app.utils.execute_cmd import remote_socket_shell,socket_shell
 
 @flask_app.route('/task')
 def start_background_task():
-    #remote_socket_shell()
+    # remote_socket_shell()
     socket_shell('ping -c5 qq.com')
     return 'Started'
 
