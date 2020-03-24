@@ -12,8 +12,8 @@ from flask_login import LoginManager,current_user,logout_user
 from flask_wtf.csrf import CSRFError
 from flask_wtf.csrf import CSRFProtect
 from celery import Celery,platforms
-from flask_socketio import SocketIO
 from config import config
+from flask_socketio import SocketIO
 
 
 db = SQLAlchemy()
@@ -50,6 +50,8 @@ flask_app.config.from_object(config[ENV])
 config[ENV].init_app(flask_app)
 flask_app.logger.setLevel(logging.INFO)
 
+# 初始化SocketIO
+socketio = SocketIO(flask_app)
 
 #初始化celery
 celery = make_celery(flask_app)
@@ -164,30 +166,15 @@ def test():
                rows_data=rows_data)
 
 
-socketio = SocketIO(flask_app)
-thread = None
-thread_lock = Lock()
-@socketio.on('event2',namespace='/task')
-def background_task():
-    global thread
-    with thread_lock:
-        if thread is None:
-            thread = socketio.start_background_task(target=background_thread)
 
-def background_thread():
-    p = subprocess.Popen('ping qq.com',shell=True,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-    while True:
-        line = p.stdout.readline().strip()
-        line=line.decode(encoding='utf-8')
-        print('line='+line)
-        socketio.sleep(2)
-        socketio.emit('event2', line,namespace='/task')
-        if not line:
-            break
+
+from app.utils.execute_cmd import remote_socket_shell,socket_shell
+
 
 @flask_app.route('/task')
 def start_background_task():
-    background_task()
+    #remote_socket_shell()
+    socket_shell('ping -c5 qq.com')
     return 'Started'
 
 @flask_app.route('/socket')
