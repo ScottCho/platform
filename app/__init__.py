@@ -14,6 +14,8 @@ from flask_wtf.csrf import CSRFProtect
 from celery import Celery,platforms
 from config import config
 from flask_socketio import SocketIO,emit
+from flask_cors import CORS
+
 
 
 db = SQLAlchemy()
@@ -50,6 +52,8 @@ flask_app.config.from_object(config[ENV])
 config[ENV].init_app(flask_app)
 flask_app.logger.setLevel(logging.INFO)
 
+# 提供跨域支持
+CORS(flask_app)
 # 初始化SocketIO
 socketio = SocketIO(flask_app)
 
