@@ -13,7 +13,7 @@ from flask_wtf.csrf import CSRFError
 from flask_wtf.csrf import CSRFProtect
 from celery import Celery,platforms
 from config import config
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO,emit
 
 
 db = SQLAlchemy()
@@ -169,6 +169,16 @@ def test():
 
 
 from app.utils.execute_cmd import remote_socket_shell,socket_shell
+
+def ack():
+    print('message was received!')
+
+#处理接收到的客户端信息
+@socketio.on('connect event',namespace='/task')
+def handle_my_custom_event(json):
+    print('received json: ' + str(json))
+    emit('event2',str(json),namespace='/task',callback=ack)
+
 
 
 @flask_app.route('/task')
