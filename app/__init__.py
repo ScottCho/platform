@@ -8,9 +8,6 @@ from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_mail import Mail
-from flask_login import LoginManager,current_user,logout_user
-from flask_wtf.csrf import CSRFError
-from flask_wtf.csrf import CSRFProtect
 from celery import Celery,platforms
 from config import config
 from flask_socketio import SocketIO,emit
@@ -21,10 +18,6 @@ from flask_cors import CORS, cross_origin
 db = SQLAlchemy()
 mail = Mail()
 migrate = Migrate()
-csrf = CSRFProtect()
-login_manager = LoginManager()
-login_manager.login_message = '请在这登录注册的用户'
-login_manager.login_view = 'auth.login'
 
 platforms.C_FORCE_ROOT = True
 
@@ -66,29 +59,6 @@ celery = make_celery(flask_app)
 db.init_app(flask_app)
 migrate.init_app(flask_app, db)
 mail.init_app(flask_app)
-login_manager.init_app(flask_app)
-# csrf.init_app(flask_app)
-
-
-# 注册用户认证蓝图
-from .auth import auth_bp
-flask_app.register_blueprint(auth_bp, url_prefix='/auth')
-
-# 注册版本管理蓝图
-from app.version import version_bp
-flask_app.register_blueprint(version_bp, url_prefix='/version')
-
-# 注册日志蓝图
-from .log import log_bp
-flask_app.register_blueprint(log_bp, url_prefix='/log')
-
-# 注册服务管理蓝图
-from .service import service_bp
-flask_app.register_blueprint(service_bp, url_prefix='/service')
-
-# 注册后台管理蓝图
-from .backstage import backstage_bp
-flask_app.register_blueprint(backstage_bp,url_prefix='/backstage')
 
 # 注册api蓝图api v1
 from .apis.v1 import api_v1

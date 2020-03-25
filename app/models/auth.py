@@ -1,7 +1,5 @@
 import os,shutil
 
-from flask_login import UserMixin, AnonymousUserMixin
-from .. import login_manager
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from datetime import datetime
@@ -17,7 +15,7 @@ group = db.Table('group',
 )
 
 
-class User(UserMixin, db.Model):
+class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False, index=True)
@@ -134,9 +132,6 @@ class User(UserMixin, db.Model):
       return '<User %r>' % self.username
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
 
 
 '''
@@ -197,14 +192,7 @@ class Role(db.Model):
         return '<Role %r>' % self.name
 
 
-class AnonymousUser(AnonymousUserMixin):
-    def can(self, permissions):
-        return False
 
-    def is_administrator(self):
-        return False
-
-login_manager.anonymous_user = AnonymousUser
 
 
 class Project(db.Model):
