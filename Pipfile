@@ -13,7 +13,6 @@ sqlalchemy = "*"
 alembic = "*"
 celery = {extras = ["librabbitmq", "msgpack", "redis"],version = "*"}
 chardet = "*"
-flask-login = "*"
 flask-mail = "*"
 flask-migrate = "*"
 flask-wtf = "*"
@@ -29,8 +28,9 @@ ansible = "*"
 flask-cors = "*"
 pytest = "*"
 flask-rest-jsonapi = "*"
-flask-socketio = "*"
 eventlet = "*"
+flask-login = "*"
+flask-socketio = "==3.1.2"
 
 [requires]
 python_version = "3.6"

@@ -14,7 +14,7 @@ from flask_wtf.csrf import CSRFProtect
 from celery import Celery,platforms
 from config import config
 from flask_socketio import SocketIO,emit
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 
 
@@ -192,6 +192,7 @@ def start_background_task():
     return 'Started'
 
 @flask_app.route('/socket')
+@cross_origin(allow_headers=['Content-Type'])
 def socket():
         return render_template('apis/v2/socketio.html')
 
