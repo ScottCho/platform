@@ -25,6 +25,9 @@ class Config:
     CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
     CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND')
 
+    # 上传路径
+    UPLOAD_FOLDER = '/data/frog/issue'
+
     @staticmethod
     def init_app(app):
         pass

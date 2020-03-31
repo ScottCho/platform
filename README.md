@@ -34,7 +34,7 @@
 
         5. 启动实例
         gunicorn app:flask_app -b 0.0.0.0:5000 -w 3 -D -p /tmp/app5000.pid --log-file /tmp/app5000.log -t 500
-        gunicorn --worker-class eventlet -w 1 app:flask_app -b 0.0.0.0:5000
+        gunicorn --worker-class eventlet -w 1 app:flask_app -b 0.0.0.0:5000  -D -p /tmp/app5000.pid --log-file /tmp/app5000.log -t 500
 
         6. 启动celery
         调试： celery -A app.celery worker -l info

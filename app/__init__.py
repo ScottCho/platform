@@ -79,7 +79,7 @@ def index():
     return render_template('index.html')
 
 from app.models.service import Database, Schema,App,Subsystem,Env
-from app.models.auth import Project, Role
+from app.models.auth import Project, Role, User
 from app.models.version import Baseline
 from app.models.issues import IssueSource, IssueCategory,  IssueModule, IssueReproducibility, \
     IssuePriority, IssueSeverity, IssueStatus, IssueTag, IssueRequirement, IssueBug, IssueTask, \
@@ -88,7 +88,8 @@ from app.models.issues import IssueSource, IssueCategory,  IssueModule, IssueRep
 @flask_app.shell_context_processor
 def make_shell_context():
     return dict(db=db, Project=Project, Database=Database, App=App, Baseline=Baseline,
-        Subsystem=Subsystem,Env=Env,Role=Role)
+        Subsystem=Subsystem,Env=Env,Role=Role,IssueTask=IssueTask,IssueStatus=IssueStatus)
+
 
 
 ###### 测试
@@ -165,4 +166,102 @@ def start_background_task():
 @cross_origin(allow_headers=['Content-Type'])
 def socket():
         return render_template('apis/v2/socketio.html')
+
+
+### 测试文件上传
+from flask import Flask, flash, request, redirect, url_for
+from werkzeug.utils import secure_filename
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'xls', 'csv', 'md'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@flask_app.route('/upload', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(flask_app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('list_file'))
+    return '''
+    <!doctype html>
+    <title>Upload new File</title>
+    <h1>Upload new File</h1>
+    <form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload>
+    </form>
+    '''
+
+
+from flask import send_from_directory
+@flask_app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(flask_app.config['UPLOAD_FOLDER'],
+                               filename)
+
+
+@flask_app.route('/listfile')
+def list_file():
+    files = os.listdir(flask_app.config['UPLOAD_FOLDER'])
+    return render_template('apis/v2/issue/list_file.html',files=files)
+
+
+# 测试csv
+import csv, sys
+@flask_app.route('/csv')
+def read_csv():
+    row=''
+    filename = '/data/frog/issue/test.csv'
+    with open(filename, newline='') as file:
+        csv_reader = csv.DictReader(file)
+        for row in csv_reader:
+            # print(row)                # OrderedDict([('name', 'aa'), ('password', '22')])
+            # print(row['所属项目'])    # 返回：aa bb
+            number=row['编号']
+            summary=row['任务名称']
+            description=row['任务描述']
+            startdate = row['实际开始'] if row['实际开始'] != '0000-00-00' else None
+            enddate = row['完成时间'] if row['完成时间'] != '0000-00-00' else None
+            deadline = row['截止日期'] if row['截止日期'] != '0000-00-00' else None
+            manhour = row['最初预计'] 
+            status_name = row['任务状态']
+            status_id = IssueStatus.query.filter_by(name=status_name).one().id
+            requirement_summary = row['相关需求']
+            if requirement_summary:
+                requirement_id = requirement_summary.split('#')[-1].strip(')')
+            else:
+                requirement_id = None
+            assignee_name = '赵勇'
+            assignee_id = User.query.filter_by(username=assignee_name).one().id
+            priority_id = row['优先级'] if row['优先级'] != '' else None
+            itask = IssueTask(number=number,
+			                    summary = summary,
+			                    description = description,
+			                    startdate = startdate,
+                                enddate = enddate,
+                                deadline = deadline,
+                                manhour = manhour,
+                                status_id=status_id,
+                                requirement_id=requirement_id,
+                                assignee_id =assignee_id,
+                                priority_id=priority_id
+			)
+            db.session.add(itask)
+            db.session.commit()
+    return str(row['所属项目'])
+
+
+
 

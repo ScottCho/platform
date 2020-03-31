@@ -110,8 +110,8 @@ class IssueRequirement(db.Model):
     summary = db.Column(db.String(255), nullable=False)     #摘要
     description = db.Column(db.Text)        #详情
     inputdate = db.Column(db.DateTime(),default=datetime.now)  #录入日期
-    startdate = db.Column(db.DateTime(),default=datetime.now)  #开始日期
-    enddate = db.Column(db.DateTime(),default=datetime.now)     #结束日期
+    startdate = db.Column(db.DateTime())  #开始日期
+    enddate = db.Column(db.DateTime())     #结束日期
     deadline = db.Column(db.DateTime(),default=datetime.now)   #解决期限
     manhour = db.Column(db.String(64))    #工时
     sign = db.Column(db.Boolean, default=False)   #是否签字，默认为否
@@ -178,9 +178,9 @@ class IssueTask(db.Model):
     summary = db.Column(db.String(255), nullable=False)  # 摘要
     description = db.Column(db.Text)  # 详情
     inputdate = db.Column(db.DateTime(),default=datetime.now)  #录入日期
-    startdate = db.Column(db.DateTime(),default=datetime.now)  # 开始日期
-    enddate = db.Column(db.DateTime(),default=datetime.now)  # 结束日期
-    deadline = db.Column(db.DateTime(),default=datetime.now)   # 解决期限
+    startdate = db.Column(db.DateTime())  # 开始日期
+    enddate = db.Column(db.DateTime())  # 结束日期
+    deadline = db.Column(db.DateTime())   # 解决期限
     manhour = db.Column(db.String(64))    #工时
 
     status_id = db.Column(db.Integer, db.ForeignKey('issue_status.id'))  # 状态

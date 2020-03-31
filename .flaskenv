@@ -5,3 +5,5 @@ FLASK_RUN_HOST=0.0.0.0
 FLASK_CONFIG=production
 DEBUG_TB_INTERCEPT_REDIRECTS = False
 MAX_INCLUDE_DEPTH = 1
+UPLOAD_FOLDER = /data/frog/issue
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'xls'}
