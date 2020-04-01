@@ -168,6 +168,7 @@ class AppManageAPI(MethodView):
             password = app.credence.password
             ip = app.machine.ip
             command='sh /usr/local/sbin/weblogic_{}.sh {} {}'.format(env,action,subsystem)
+            print(command)
             try:
                 result = remote_shell(ip,command,username=username,password=password)
             except Exception as e:

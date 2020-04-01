@@ -140,6 +140,10 @@ class PackageList(ResourceList):
         blineno = data['blineno']
         bdate  = data['rlsdate']
         env_id = data['env_id']
+        package_count = data.get('package_count'.zfill(2),'01')
+        project_name = data.get('project_name')
+        bdate = date.get('rlsdate',datetime.now())
+        name = "{}_{}_{}".format(project_name, bdate.strftime("%Y%m%d"),package_count)
         #将基线按app分组 {<App 1>: [<Baseline 1>,  <Baseline 2>],<App 2>: [<Baseline 3>]}
         app_dict={}
         merge_list=[]
@@ -187,7 +191,8 @@ class PackageList(ResourceList):
             db.session.commit()
             merge_list.append(merge_baseline)
         merge_blineno = ','.join(str(bline.id) for bline in merge_list)
-        data['merge_blineno'] = merge_blineno
+        data['merge_blineno'] = merge_blineno      # 更新包合并出来的基线
+        data['name'] = name      # 根据日期和发布次数决定更新包的名字
 
     schema = PackageSchema
     data_layer = {'session': db.session,
