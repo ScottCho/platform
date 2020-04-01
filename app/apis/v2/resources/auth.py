@@ -121,7 +121,7 @@ class PasswordResetRequestAPI(MethodView):
         if user:
             token = user.generate_reset_token()
             send_email([email], 'Frog平台-重置密码',
-                       'mail/api/auth/reset_password.html',
+                       'apis/v2/mail/auth/reset_password.html',
                        user=user, token=token)
             return jsonify(data=[{'status':201, 'detail':'请查收重置密码邮件'}])
         else:
