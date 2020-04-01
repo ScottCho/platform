@@ -99,7 +99,7 @@ class PackageSchema(Schema):
         self_view_many = 'package_list'
         
     id = fields.Integer(as_string=True, dump_only=True)
-    name = fields.Str(required=True)
+    name = fields.Str()
     rlsdate = fields.Str()
     blineno = fields.Str()
     merge_blineno = fields.Str()

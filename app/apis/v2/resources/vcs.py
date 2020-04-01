@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from flask import request, g
 from flask_rest_jsonapi import (Api, ResourceDetail, ResourceList,
@@ -137,13 +138,16 @@ class PackageList(ResourceList):
     #　处理更新包的默认内容
     def before_post(self, args, kwargs, data=None):
         """Hook to make custom work before post method""" 
+        print(data)
         blineno = data['blineno']
         bdate  = data['rlsdate']
         env_id = data['env_id']
         package_count = data.get('package_count'.zfill(2),'01')
         project_name = data.get('project_name')
-        bdate = date.get('rlsdate',datetime.now())
-        name = "{}_{}_{}".format(project_name, bdate.strftime("%Y%m%d"),package_count)
+        bdate = data.get('rlsdate',datetime.now().strftime("%Y%m%d")).replace('-','')    # 2020-03-31
+        print(bdate)
+        name = "{}_{}_{}".format(project_name, bdate, package_count)
+        print(name)
         #将基线按app分组 {<App 1>: [<Baseline 1>,  <Baseline 2>],<App 2>: [<Baseline 3>]}
         app_dict={}
         merge_list=[]
@@ -193,6 +197,7 @@ class PackageList(ResourceList):
         merge_blineno = ','.join(str(bline.id) for bline in merge_list)
         data['merge_blineno'] = merge_blineno      # 更新包合并出来的基线
         data['name'] = name      # 根据日期和发布次数决定更新包的名字
+        data.pop('project_name')
 
     schema = PackageSchema
     data_layer = {'session': db.session,

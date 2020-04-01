@@ -270,7 +270,9 @@ class IssueBugSchema(Schema):
     module_id =  fields.Integer()
     module =  fields.Function(lambda obj: "{}".format(obj.module.name)) 
     tag_id =  fields.Integer()
-    tag = fields.Function(lambda obj: "{}".format(obj.tag.name)) 
+    tag = fields.Function(lambda obj: "{}".format(obj.tag.name))
+    source_id = fields.Integer()
+    source = fields.Function(lambda obj: "{}".format(obj.source.name)) 
     baseline_id =  fields.Integer()
 
     baselines = Relationship(self_view='issue_bug_baselines',
