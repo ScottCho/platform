@@ -13,9 +13,9 @@ class BaselineSchema(Schema):
         
     id = fields.Integer(as_string=True, dump_only=True)
     content = fields.Str()
-    sqlno = fields.Str()
-    pckno = fields.Str()
-    rollbackno = fields.Str()
+    sqlno = fields.Str(allow_none=True)
+    pckno = fields.Str(allow_none=True)
+    rollbackno = fields.Str(allow_none=True)
     created = fields.Str()
     updateno = fields.Str()
     mantisno = fields.Str()
