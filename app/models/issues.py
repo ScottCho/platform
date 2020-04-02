@@ -116,11 +116,11 @@ class IssueRequirement(db.Model):
     manhour = db.Column(db.String(64))    #工时
     sign = db.Column(db.Boolean, default=False)   #是否签字，默认为否
 
-    status_id = db.Column(db.Integer, db.ForeignKey('issue_status.id'))  # 需求状态
+    status_id = db.Column(db.Integer, db.ForeignKey('issue_status.id'),default=1)  # 需求状态
     status = db.relationship('IssueStatus', back_populates='requirements')    
     priority_id = db.Column(db.Integer, db.ForeignKey('issue_priority.id'))   #优先级
     priority = db.relationship('IssuePriority', back_populates='requirements')
-    source_id = db.Column(db.Integer, db.ForeignKey('issue_source.id')) #需求来源
+    source_id = db.Column(db.Integer, db.ForeignKey('issue_source.id'),default=1) #需求来源
     source = db.relationship('IssueSource', back_populates='requirements')
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))  #所属项目
     project = db.relationship('Project', back_populates='requirements')
@@ -148,7 +148,7 @@ class IssueBug(db.Model):
     enddate = db.Column(db.DateTime())  # 结束日期
     deadline = db.Column(db.DateTime())   # 解决期限
     manhour = db.Column(db.String(64))    #工时
-    status_id = db.Column(db.Integer, db.ForeignKey('issue_status.id'))  # bug状态
+    status_id = db.Column(db.Integer, db.ForeignKey('issue_status.id'),default=1)  # bug状态
     status = db.relationship('IssueStatus', back_populates='bugs')    
     priority_id = db.Column(db.Integer, db.ForeignKey('issue_priority.id'))   #优先级
     priority = db.relationship('IssuePriority', back_populates='bugs')
@@ -156,7 +156,7 @@ class IssueBug(db.Model):
     severity = db.relationship('IssueSeverity', back_populates='bugs')
     reproducibility_id = db.Column(db.Integer, db.ForeignKey('issue_reproducibility.id')) #再现性
     reproducibility = db.relationship('IssueReproducibility', back_populates='bugs')
-    source_id = db.Column(db.Integer, db.ForeignKey('issue_source.id')) #来源
+    source_id = db.Column(db.Integer, db.ForeignKey('issue_source.id'),default=1) #来源
     source = db.relationship('IssueSource', back_populates='bugs')
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'),nullable=False)  #issue所属项目
     project = db.relationship('Project', back_populates='bugs')
@@ -183,7 +183,7 @@ class IssueTask(db.Model):
     deadline = db.Column(db.DateTime())   # 解决期限
     manhour = db.Column(db.String(64))    #工时
 
-    status_id = db.Column(db.Integer, db.ForeignKey('issue_status.id'))  # 状态
+    status_id = db.Column(db.Integer, db.ForeignKey('issue_status.id'),default=1)  # 状态
     status = db.relationship('IssueStatus', back_populates='tasks')    
     requirement_id = db.Column(db.Integer, db.ForeignKey('issue_requirement.id'))   #所属需求
     requirement = db.relationship('IssueRequirement',back_populates='tasks')
