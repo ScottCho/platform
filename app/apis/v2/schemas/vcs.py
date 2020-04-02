@@ -21,7 +21,7 @@ class BaselineSchema(Schema):
     mantisno = fields.Str(allow_none=True)
     jenkins_last_build = fields.Boolean(allow_none=True)
     jenkins_build_number = fields.Integer(allow_none=True)
-    versionno = fields.Str()
+    versionno = fields.Str(allow_none=True)
     mark = fields.Str(allow_none=True)
     app_id = fields.Integer()
     package_id = fields.Integer(allow_none=True)
