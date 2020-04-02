@@ -43,6 +43,7 @@ class BaselineList(ResourceList):
         data['developer_id'] = g.current_user.id
         data['updateno'] = 1
         data['status_id'] =5
+        print(data)
 
     def after_post(self, result):
         """Hook to make custom work after post method"""
@@ -138,7 +139,6 @@ class PackageList(ResourceList):
     #　处理更新包的默认内容
     def before_post(self, args, kwargs, data=None):
         """Hook to make custom work before post method""" 
-        print(data)
         blineno = data['blineno']
         bdate  = data['rlsdate']
         env_id = data['env_id']
