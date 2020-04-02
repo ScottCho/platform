@@ -1,0 +1,1 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d0c4fc6"],{"3cbb":function(e,n,a){"use strict";a.r(n);var c=[{label:"Id",key:"id",type:"number"},{label:"Name",key:"name",type:"input"}];n["default"]=c}}]);
