@@ -45,7 +45,7 @@ class BaselineList(ResourceList):
         """Hook to make custom work before post method"""
         data['developer_id'] = g.current_user.id
         data['updateno'] = 1
-        data['status_id'] =5
+        data['status_id'] =203
         print(data)
 
     def after_post(self, result):
@@ -170,7 +170,7 @@ class PackageList(ResourceList):
                 content='合并发布',
                 developer_id=g.current_user.id,
                 updateno=1,
-                status_id=5
+                status_id=203
             )
             db.session.add(merge_baseline)    
             db.session.commit()
@@ -248,7 +248,7 @@ class PackageDetail(ResourceDetail):
                                   content='合并发布',
                                   developer_id=g.current_user.id,
                                   updateno=1,
-                                  status_id=17
+                                  status_id=213
                                   )
             db.session.add(merge_baseline)    
             db.session.commit()

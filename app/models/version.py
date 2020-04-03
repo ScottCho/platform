@@ -356,10 +356,10 @@ class Package(db.Model):
     def package_deploy(self):
         package_count = self.package_count
         project = self.project
-        # 更新包中的基线状态修改为 '8 预UAT提测'
+        # 更新包中的基线状态修改为 '206 预UAT提测'
         baselines = self.baselines
         for baseline in baselines:
-            baseline.status_id = 8
+            baseline.status_id = 206
             db.session.add(baseline)
             db.session.commit()
         deploy_msg = ''
@@ -374,10 +374,10 @@ class Package(db.Model):
 
     #　发布更新包
     def package_release(self):
-        # 更新包中的基线状态修改为 '17 已发布UAT'
+        # 更新包中的基线状态修改为 '213 已发布UAT'
         baselines = self.baselines
         for baseline in baselines:
-            baseline.status_id = 17
+            baseline.status_id = 213
             db.session.add(baseline)
             db.session.commit()
 

@@ -76,7 +76,7 @@ def update_baseline(project_id,subsystem_id,env_id):
             jenkins_build_number=jenkins_build_number,
             jenkins_last_build=jenkins_last_build,
             updateno = updateno,
-            status_id=5,
+            status_id=203,
             app_id=app_id)
         db.session.add(baseline)
         db.session.commit()
@@ -227,7 +227,7 @@ def edit_baseline(id):
         baseline.content = form.content.data
         baseline.mark = form.mark.data
         baseline.updateno = int(baseline.updateno) + 1
-        baseline.status_id = 5
+        baseline.status_id = 203
         dir_list = app.jenkins_job_dir.split('/')
         job_name_index = dir_list.index('jobs')+1
         job_name = dir_list[job_name_index]
@@ -347,7 +347,7 @@ def merge_baseline():
                 content='合并基线',
                 developer_id=current_user.id,
                 updateno=1,
-                status_id=5,
+                status_id=203,
                 jenkins_last_build = job.get_last_build().is_good(),
                 jenkins_build_number = job.get_next_build_number()
             )
@@ -454,7 +454,7 @@ def edit_package(id):
         add_blineno_set = set(change_blineno_list) - set(original_blineno)
         for no in add_blineno_set:
             baseline = Baseline.query.get_or_404(no)
-            baseline.status_id = 5
+            baseline.status_id = 203
             baseline.package_id = package.id
             db.session.add(baseline)
             db.session.commit()
@@ -497,7 +497,7 @@ def edit_package(id):
                 bversionno = baseline.versionno
                 bpckno = baseline.pckno
                 brollbackno = baseline.rollbackno
-                baseline.status_id = 8
+                baseline.status_id = 206
                 db.session.add(baseline)
                 db.session.commit()
                 # 拼接基线
@@ -524,7 +524,7 @@ def edit_package(id):
                                   content='合并发布',
                                   developer_id=current_user.id,
                                   updateno=1,
-                                  status_id=17,
+                                  status_id=213,
                                   jenkins_last_build = job.get_last_build().is_good(),
                                   jenkins_build_number = job.get_next_build_number()
                                   )
@@ -559,7 +559,7 @@ def release_package(id):
     baselines = package.baselines
     merge_blineno = package.merge_blineno.split(',')
     for baseline in baselines:
-        baseline.status_id = 17
+        baseline.status_id = 213
         db.session.add(baseline)
         db.session.commit()
     
