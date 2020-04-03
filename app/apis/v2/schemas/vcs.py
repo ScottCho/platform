@@ -45,10 +45,10 @@ class BaselineSchema(Schema):
                              type_='app')
     status = Relationship(self_view='baseline_status',
                              self_view_kwargs={'id': '<id>'},
-                             related_view='blstatus_detail',
+                             related_view='status_detail',
                              related_view_kwargs={'id': '<status_id>'},
-                             schema='BlstatusSchema',
-                             type_='blstatus')      
+                             schema='StatusSchema',
+                             type_='status')      
     package = Relationship(self_view='baseline_package',
                              self_view_kwargs={'id': '<id>'},
                              related_view='package_detail',
@@ -81,15 +81,6 @@ class BaselineSchema(Schema):
                            schema='IssueRequirementSchema',
                            type_='issue_requirement')
 
-class BlstatusSchema(Schema):
-    class Meta:
-        type_ = 'blstatus'
-        self_view = 'blstatus_detail'
-        self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'blstatus_list'
-        
-    id = fields.Integer(as_string=True, dump_only=True)
-    status = fields.Str(required=True)
 
 class PackageSchema(Schema):
     class Meta:

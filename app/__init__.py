@@ -78,12 +78,14 @@ flask_app.register_blueprint(api_v2, url_prefix='/api')
 def index():
     return render_template('index.html')
 
+from app.models.baseconfig import Status, Tag
 from app.models.service import Database, Schema,App,Subsystem,Env
 from app.models.auth import Project, Role, User
 from app.models.version import Baseline
 from app.models.issues import IssueSource, IssueCategory,  IssueModule, IssueReproducibility, \
-    IssuePriority, IssueSeverity, IssueStatus, IssueTag, IssueRequirement, IssueBug, IssueTask, \
+    IssuePriority, IssueSeverity, IssueRequirement, IssueBug, IssueTask, \
         bug_ass_baseline, requirement_ass_baseline, task_ass_baseline
+
 
 @flask_app.shell_context_processor
 def make_shell_context():

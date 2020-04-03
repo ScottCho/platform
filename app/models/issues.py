@@ -79,27 +79,6 @@ class IssueSeverity(db.Model):
     
     bugs = db.relationship('IssueBug', back_populates='severity')
 
-#状态: 1.未开始 2.进行中  3.已完成 4.已暂停 5.已取消 6.已关闭
-class IssueStatus(db.Model):
-    __tablename__ = 'issue_status'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(32), nullable=False,unique=True, index=True)
-    
-
-    requirements = db.relationship('IssueRequirement', back_populates='status')
-    bugs = db.relationship('IssueBug', back_populates='status')
-    tasks = db.relationship('IssueTask', back_populates='status')
-
-# 标签: 1.功能完善 2.待确认 3.新增需求 4.解释性问题 5.重复问题 6.需求变更
-class IssueTag(db.Model):
-    __tablename__ = 'issue_tag'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), nullable=False,unique=True, index=True)
-
-    requirements = db.relationship('IssueRequirement', back_populates='tag')
-    bugs = db.relationship('IssueBug', back_populates='tag')
-
-
 
 # 需求表
 class IssueRequirement(db.Model):
@@ -116,8 +95,8 @@ class IssueRequirement(db.Model):
     manhour = db.Column(db.String(64))    #工时
     sign = db.Column(db.Boolean, default=False)   #是否签字，默认为否
 
-    status_id = db.Column(db.Integer, db.ForeignKey('issue_status.id'),default=1)  # 需求状态
-    status = db.relationship('IssueStatus', back_populates='requirements')    
+    status_id = db.Column(db.Integer, db.ForeignKey('status.id'),default=1)  # 需求状态
+    status = db.relationship('Status', back_populates='requirements')    
     priority_id = db.Column(db.Integer, db.ForeignKey('issue_priority.id'))   #优先级
     priority = db.relationship('IssuePriority', back_populates='requirements')
     source_id = db.Column(db.Integer, db.ForeignKey('issue_source.id'),default=1) #需求来源
@@ -128,8 +107,8 @@ class IssueRequirement(db.Model):
     assignee = db.relationship('User', back_populates='requirements')
     module_id = db.Column(db.Integer, db.ForeignKey('issue_module.id'))   #模块
     module =  db.relationship('IssueModule', back_populates='requirements')   # 需求模块
-    tag_id = db.Column(db.Integer, db.ForeignKey('issue_tag.id'))   #模块
-    tag = db.relationship('IssueTag', back_populates='requirements')      # 标签
+    tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'))   #模块
+    tag = db.relationship('Tag', back_populates='requirements')      # 标签
     
     baselines= db.relationship('Baseline', secondary='requirement_ass_baseline', back_populates='irequirements')  #关联基线
     tasks = db.relationship('IssueTask', back_populates='requirement')  # 需求分解的任务
@@ -148,8 +127,8 @@ class IssueBug(db.Model):
     enddate = db.Column(db.DateTime())  # 结束日期
     deadline = db.Column(db.DateTime())   # 解决期限
     manhour = db.Column(db.String(64))    #工时
-    status_id = db.Column(db.Integer, db.ForeignKey('issue_status.id'),default=1)  # bug状态
-    status = db.relationship('IssueStatus', back_populates='bugs')    
+    status_id = db.Column(db.Integer, db.ForeignKey('status.id'),default=1)  # bug状态
+    status = db.relationship('Status', back_populates='bugs')    
     priority_id = db.Column(db.Integer, db.ForeignKey('issue_priority.id'))   #优先级
     priority = db.relationship('IssuePriority', back_populates='bugs')
     severity_id = db.Column(db.Integer, db.ForeignKey('issue_severity.id'))   #严重性
@@ -164,8 +143,8 @@ class IssueBug(db.Model):
     assignee = db.relationship('User',back_populates='bugs')
     module_id = db.Column(db.Integer, db.ForeignKey('issue_module.id'))   #模块
     module =  db.relationship('IssueModule', back_populates='bugs')   # 所属模块
-    tag_id = db.Column(db.Integer, db.ForeignKey('issue_tag.id'))   #模块
-    tag = db.relationship('IssueTag') # 标签
+    tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'))   #模块
+    tag = db.relationship('Tag') # 标签
     baselines= db.relationship('Baseline', secondary='bug_ass_baseline', back_populates='ibugs')
    
 
@@ -183,8 +162,8 @@ class IssueTask(db.Model):
     deadline = db.Column(db.DateTime())   # 解决期限
     manhour = db.Column(db.String(64))    #工时
 
-    status_id = db.Column(db.Integer, db.ForeignKey('issue_status.id'),default=1)  # 状态
-    status = db.relationship('IssueStatus', back_populates='tasks')    
+    status_id = db.Column(db.Integer, db.ForeignKey('status.id'),default=1)  # 状态
+    status = db.relationship('Status', back_populates='tasks')    
     requirement_id = db.Column(db.Integer, db.ForeignKey('issue_requirement.id'))   #所属需求
     requirement = db.relationship('IssueRequirement',back_populates='tasks')
     assignee_id = db.Column(db.Integer, db.ForeignKey('users.id'),nullable=False)   # 分配到任务的人

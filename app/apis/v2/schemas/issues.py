@@ -131,62 +131,6 @@ class IssueSeveritySchema(Schema):
                            type_='issue_bug')  
 
 
-# 状态
-class IssueStatusSchema(Schema):
-    class Meta:
-        type_ = 'issue_status'
-        self_view = 'issue_status_detail'
-        self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'issue_status_list'
-        
-    id = fields.Integer(as_string=True, dump_only=True)
-    name = fields.Str()
-
-    requirements = Relationship(self_view='issue_status_requirements',
-                           self_view_kwargs={'id': '<id>'},
-                           related_view='issue_requirement_list',
-                           related_view_kwargs={'id': '<id>'},
-                           many=True,
-                           schema='IssueRequirementSchema',
-                           type_='issue_requirement')
-    
-    bugs = Relationship(self_view='issue_status_bugs',
-                           self_view_kwargs={'id': '<id>'},
-                           related_view='issue_bug_list',
-                           related_view_kwargs={'id': '<id>'},
-                           many=True,
-                           schema='IssueBugSchema',
-                           type_='issue_bug')  
-
-
-# 标签
-class IssueTagSchema(Schema):
-    class Meta:
-        type_ = 'issue_tag'
-        self_view = 'issue_tag_detail'
-        self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'issue_tag_list'
-        
-    id = fields.Integer(as_string=True, dump_only=True)
-    name = fields.Str()
-
-    requirements = Relationship(self_view='issue_tag_requirements',
-                           self_view_kwargs={'id': '<id>'},
-                           related_view='issue_requirement_list',
-                           related_view_kwargs={'id': '<id>'},
-                           many=True,
-                           schema='IssueRequirementSchema',
-                           type_='issue_requirement')
-    
-    bugs = Relationship(self_view='issue_tag_bugs',
-                           self_view_kwargs={'id': '<id>'},
-                           related_view='issue_bug_list',
-                           related_view_kwargs={'id': '<id>'},
-                           many=True,
-                           schema='IssueBugSchema',
-                           type_='issue_bug')  
-
-
 # 需求
 class IssueRequirementSchema(Schema):
     class Meta:

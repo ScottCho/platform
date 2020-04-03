@@ -20,13 +20,15 @@ from flask_rest_jsonapi.utils import JSONEncoder
 
 from  app import flask_app
 from app.models.issues import IssueBug, IssueCategory, IssuePriority, IssueReproducibility, IssueModule, \
-     IssueRequirement, IssueSeverity, IssueSource, IssueStatus, IssueTag, IssueTask
-
+     IssueRequirement, IssueSeverity, IssueSource, IssueTask
+from app.models.baseconfig import Tag, Status
 from app import db
 
 from app.apis.v2 import api
 from app.apis.v2.schemas.issues import IssueBugSchema, IssueModuleSchema, IssuePrioritySchema, IssueReproducibilitySchema, \
-    IssueRequirementSchema, IssueSeveritySchema, IssueSourceSchema, IssueStatusSchema, IssueTagSchema, IssueTaskSchema
+    IssueRequirementSchema, IssueSeveritySchema, IssueSourceSchema, IssueTaskSchema
+
+from app.apis.v2.schemas.baseconfig import StatusSchema, TagSchema
 
 from flask import jsonify, request, current_app, url_for, g
 from flask.views import MethodView
@@ -39,6 +41,9 @@ from app.localemail import send_email
 from flask_rest_jsonapi.exceptions import AccessDenied, JsonApiException
 
 from werkzeug.utils import secure_filename
+
+
+from app.apis.v2.resources.baseconfig import StatusDetail, StatusList, TagDetail, TagList
 
 
 # Create resource managers
@@ -185,78 +190,6 @@ class IssueSeverityRelationship(ResourceRelationship):
     data_layer = {'session': db.session,
                   'model': IssueSeverity
                   }
-
-# 问题状态
-class IssueStatusList(ResourceList):
-    
-    decorators = (auth_required,)
-    schema = IssueStatusSchema
-    data_layer = {'session': db.session,
-                  'model': IssueStatus
-                }
-
-class IssueStatusDetail(ResourceDetail):
-    decorators = (auth_required,)
-
-    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
-    # 支持两种方式删除
-    def delete_object(self, kwargs):
-        ids = kwargs.get('id')
-        if ids[0] != '[':
-            obj = self._data_layer.get_object(kwargs)
-            self._data_layer.delete_object(obj, kwargs)
-        else:
-            for id in ids[1:-1].split(','):
-                obj = self._data_layer.get_object({'id':id})
-                self._data_layer.delete_object(obj, {'id':id})
-
-    schema = IssueStatusSchema
-    data_layer = {'session': db.session,
-                  'model': IssueStatus  
-                }
-
-class IssueStatusRelationship(ResourceRelationship):
-    decorators = (auth_required,)
-    schema = IssueStatusSchema
-    data_layer = {'session': db.session,
-                  'model': IssueStatus}
-
-#　问题标签
-class IssueTagList(ResourceList):
-    
-    decorators = (auth_required,)
-    schema = IssueTagSchema
-    data_layer = {'session': db.session,
-                  'model': IssueTag
-                }
-
-class IssueTagDetail(ResourceDetail):
-    decorators = (auth_required,)
-
-    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
-    # 支持两种方式删除
-    def delete_object(self, kwargs):
-        ids = kwargs.get('id')
-        if ids[0] != '[':
-            obj = self._data_layer.get_object(kwargs)
-            self._data_layer.delete_object(obj, kwargs)
-        else:
-            for id in ids[1:-1].split(','):
-                obj = self._data_layer.get_object({'id':id})
-                self._data_layer.delete_object(obj, {'id':id})
-
-    schema = IssueTagSchema
-    data_layer = {'session': db.session,
-                  'model': IssueTag 
-                }
-
-class IssueTagRelationship(ResourceRelationship):
-    decorators = (auth_required,)
-    schema = IssueTagSchema
-    data_layer = {'session': db.session,
-                  'model': IssueTag
-                  }
-
 
 #　问题优先级
 class IssuePriorityList(ResourceList):
@@ -439,7 +372,7 @@ class UploadIssueAPI(MethodView):
                     deadline = row['截止日期'] if row['截止日期'] != '0000-00-00' else None
                     manhour = row['最初预计'] 
                     status_name = row['任务状态']
-                    status_id = IssueStatus.query.filter_by(name=status_name).one().id
+                    status_id = Status.query.filter_by(name=status_name).one().id
                     requirement_summary = row['相关需求']
                     if requirement_summary:
                         requirement_id = requirement_summary.split('#')[-1].strip(')')
@@ -518,19 +451,7 @@ api.route(IssueSeverityList, 'issue_severity_list', '/api/issue_severity')
 api.route(IssueSeverityDetail, 'issue_severity_detail', '/api/issue_severity/<id>')
 api.route(IssueSeverityRelationship, 'issue_severity_bugs', '/api/issue_severity/<int:id>/relationships/issue_bugs')
 
-#　问题状态
-api.route(IssueStatusList, 'issue_status_list', '/api/issue_status')
-api.route(IssueStatusDetail, 'issue_status_detail', '/api/issue_status/<id>')
-api.route(IssueStatusRelationship, 'issue_status_requirements', '/api/issue_status/<int:id>/relationships/issue_requirements')
-api.route(IssueStatusRelationship, 'issue_status_bugs', '/api/issue_status/<int:id>/relationships/issue_bugs')
-api.route(IssueStatusRelationship, 'issue_status_tasks', '/api/issue_status/<int:id>/relationships/issue_tasks')
 
-# 问题标签
-api.route(IssueTagList, 'issue_tag_list', '/api/issue_tags')
-api.route(IssueTagDetail, 'issue_tag_detail', '/api/issue_tags/<id>')
-api.route(IssueTagRelationship, 'issue_tag_requirements', '/api/issue_tag/<int:id>/relationships/issue_requirements')
-api.route(IssueTagRelationship, 'issue_tag_bugs', '/api/issue_tag/<int:id>/relationships/issue_bugs')
-api.route(IssueTagRelationship, 'issue_tag_tasks', '/api/issue_tag/<int:id>/relationships/issue_tasks')
 
 # 问题优先级
 api.route(IssuePriorityList, 'issue_priority_list', '/api/issue_priority')
@@ -543,20 +464,20 @@ api.route(IssuePriorityRelationship, 'issue_priority_tasks', '/api/issue_priorit
 api.route(IssueRequirementList, 'issue_requirement_list', '/api/issue_requirements')
 api.route(IssueRequirementDetail, 'issue_requirement_detail', '/api/issue_requirements/<id>')
 api.route(IssueRequirementRelationship, 'issue_requirement_tasks', '/api/issue_requirements/<int:id>/relationships/issue_tasks')
-api.route(IssueRequirementRelationship, 'issue_requirement_status', '/api/issue_requirements/<int:id>/relationships/issue_status')
+api.route(IssueRequirementRelationship, 'issue_requirement_status', '/api/issue_requirements/<int:id>/relationships/status')
 api.route(IssueRequirementRelationship, 'issue_requirement_baselines', '/api/issue_requirements/<int:id>/relationships/baselines')
 
 # task
 api.route(IssueTaskList, 'issue_task_list', '/api/issue_tasks')
 api.route(IssueTaskDetail, 'issue_task_detail', '/api/issue_tasks/<id>')
-api.route(IssueTaskRelationship, 'issue_task_status', '/api/issue_tasks/<int:id>/relationships/issue_status')
+api.route(IssueTaskRelationship, 'issue_task_status', '/api/issue_tasks/<int:id>/relationships/status')
 api.route(IssueTaskRelationship, 'issue_task_requirement', '/api/issue_tasks/<int:id>/relationships/issue_requirement')
 api.route(IssueTaskRelationship, 'issue_task_baselines', '/api/issue_tasks/<int:id>/relationships/baselines')
 
 # bug
 api.route(IssueBugList, 'issue_bug_list', '/api/issue_bugs')
 api.route(IssueBugDetail, 'issue_bug_detail', '/api/issue_bugs/<id>')
-api.route(IssueBugRelationship, 'issue_bug_status', '/api/issue_bugs/<int:id>/relationships/issue_status')
+api.route(IssueBugRelationship, 'issue_bug_status', '/api/issue_bugs/<int:id>/relationships/status')
 api.route(IssueRequirementRelationship, 'issue_bug_baselines', '/api/issue_bugs/<int:id>/relationships/baselines')
 
 # issue导入

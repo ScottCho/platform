@@ -23,15 +23,18 @@ from flask_rest_jsonapi.utils import JSONEncoder
 
 from app import db, flask_app
 from app.apis.v2 import api
-from app.models.version import Baseline, Blstatus, Package
+from app.models.baseconfig import Status
+from app.models.version import Baseline, Package
 from app.models.service import App
 
-from app.apis.v2.schemas.vcs import  BaselineSchema, BlstatusSchema, PackageSchema
+from app.apis.v2.schemas.vcs import  BaselineSchema,  PackageSchema
+from app.apis.v2.schemas.baseconfig import StatusSchema
 from app.apis.v2.auth import auth_required
 from app.utils import execute_cmd, fnmatch_file, switch_char
 from app.localemail import send_email
 from app.utils.jenkins import get_jenkins_job
 from app.apis.v2.errors import api_abort
+from app.apis.v2.resources.baseconfig import StatusDetail, StatusDetail
 
 # Create resource managers
 class BaselineList(ResourceList):
@@ -108,29 +111,7 @@ class BaselineRelationship(ResourceRelationship):
     data_layer = {'session': db.session,
                   'model': Baseline}
 
-class BlstatusList(ResourceList):
-    decorators = (auth_required,)
-    schema = BlstatusSchema
-    data_layer = {'session': db.session,
-                  'model': Blstatus}
 
-class BlstatusDetail(ResourceDetail):
-    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
-    # 支持两种方式删除
-    def delete_object(self, kwargs):
-        ids = kwargs.get('id')
-        if ids[0] != '[':
-            obj = self._data_layer.get_object(kwargs)
-            self._data_layer.delete_object(obj, kwargs)
-        else:
-            for id in ids[1:-1].split(','):
-                obj = self._data_layer.get_object({'id':id})
-                self._data_layer.delete_object(obj, {'id':id})
-
-    decorators = (auth_required,)
-    schema = BlstatusSchema
-    data_layer = {'session': db.session,
-                  'model': Blstatus}
 
 #更新包
 class PackageList(ResourceList):
@@ -349,9 +330,7 @@ api.route(BaselineRelationship, 'baseline_package', '/api/baselines/<int:id>/rel
 api.route(BaselineRelationship, 'baseline_bugs', '/api/baselines/<int:id>/relationships/bug')
 api.route(BaselineRelationship, 'baseline_tasks', '/api/baselines/<int:id>/relationships/task')
 api.route(BaselineRelationship, 'baseline_requirements', '/api/baselines/<int:id>/relationships/requirement')
-#基线状态
-api.route(BlstatusList, 'blstatus_list', '/api/blstatus')
-api.route(BlstatusDetail, 'blstatus_detail', '/api/blstatus/<id>')
+
 #更新包
 api.route(PackageList, 'package_list', '/api/packages')
 api.route(PackageDetail, 'package_detail', '/api/packages/<id>')

@@ -41,8 +41,8 @@ class Baseline(db.Model):
     package = db.relationship('Package', back_populates='baselines')
     developer_id = db.Column(db.Integer,db.ForeignKey('users.id'))
     developer = db.relationship('User')
-    status_id = db.Column(db.Integer, db.ForeignKey('blstatus.id'))
-    status = db.relationship('Blstatus')
+    status_id = db.Column(db.Integer, db.ForeignKey('status.id'))
+    status = db.relationship('Status', back_populates='baselines')
     irequirements = db.relationship('IssueRequirement',secondary='requirement_ass_baseline',back_populates='baselines')
     itasks = db.relationship('IssueTask', secondary='task_ass_baseline', back_populates='baselines')
     ibugs= db.relationship('IssueBug', secondary='bug_ass_baseline', back_populates='baselines')
@@ -259,11 +259,6 @@ class Baseline(db.Model):
                'apis/v2/mail/vcs/baseline.html', attachments, baseline=self
                 )
     
-# 基线状态表
-class Blstatus(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.String(20), nullable=False, index=True)
-
 # 更新包表
 class Package(db.Model):
     __tablename__ = 'packages'
