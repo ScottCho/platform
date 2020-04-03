@@ -95,7 +95,7 @@ class IssueRequirement(db.Model):
     manhour = db.Column(db.String(64))    #工时
     sign = db.Column(db.Boolean, default=False)   #是否签字，默认为否
 
-    status_id = db.Column(db.Integer, db.ForeignKey('status.id'),default=1)  # 需求状态
+    status_id = db.Column(db.Integer, db.ForeignKey('status.id'),default=101)  # 需求状态
     status = db.relationship('Status', back_populates='requirements')    
     priority_id = db.Column(db.Integer, db.ForeignKey('issue_priority.id'))   #优先级
     priority = db.relationship('IssuePriority', back_populates='requirements')
@@ -162,7 +162,7 @@ class IssueTask(db.Model):
     deadline = db.Column(db.DateTime())   # 解决期限
     manhour = db.Column(db.String(64))    #工时
 
-    status_id = db.Column(db.Integer, db.ForeignKey('status.id'),default=1)  # 状态
+    status_id = db.Column(db.Integer, db.ForeignKey('status.id'),default=101)  # 状态
     status = db.relationship('Status', back_populates='tasks')    
     requirement_id = db.Column(db.Integer, db.ForeignKey('issue_requirement.id'))   #所属需求
     requirement = db.relationship('IssueRequirement',back_populates='tasks')
