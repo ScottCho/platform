@@ -88,10 +88,6 @@ class User(db.Model):
         db.session.add(self)
         return True
 
-    # can() 方法在请求和赋予角色这两种权限之间进行位与操作。如果角色中包含请求的所有权限位，则返回True
-    def can(self, permissions):
-        return self.role is not None and \
-            (self.role.permissions & permissions) == permissions
 
     #is_active属性为false，flask_login将拒绝用户登录
     @property
@@ -106,8 +102,6 @@ class User(db.Model):
         self.active = True
         db.session.commit()
 
-    def is_administrator(self):
-        return self.can(Permission.administer)
 
     @staticmethod
     def reset_password(token, new_password):
@@ -124,7 +118,7 @@ class User(db.Model):
         return True
 
     def ping(self):
-        self.last_seen = datetime.utcnow()
+        self.last_seen = datetime.now()
         db.session.add(self)
         db.session.commit()
 
@@ -133,60 +127,11 @@ class User(db.Model):
 
 
 
-
-'''
-权限分配：
-更新，重更基线    0b00000001（0x01）
-更新基线状态      0b00000010（0x02）
-删除基线          0b00000100（0x04）
-后台管理          0b00001000（0x08）
-管理员            0b10000000（0x80）
-'''
-
-
-class Permission:
-    update_baseline = 0x01
-    update_baseline_status = 0x02
-    delete_baseline = 0x04
-    backend_manage = 0x08
-    administer = 0x80
-
-
-'''
-角色划分：
-开发
-测试
-协管员
-管理员
-'''
-
-
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
-    default = db.Column(db.Boolean, default=False, index=True)
-    permissions = db.Column(db.Integer)
     users = db.relationship('User',back_populates='role')
-
-    @staticmethod
-    def insert_roles():
-        roles = {
-            'Developer': (Permission.update_baseline, False),
-            'Tester': (Permission.update_baseline_status, False),
-            'Moderator': (Permission.update_baseline |
-                Permission.update_baseline_status |
-                Permission.delete_baseline | Permission.backend_manage, False),
-            'Administrator': (0xff, False)
-        }
-        for r in roles:
-            role = Role.query.filter_by(name=r).first()
-            if role is None:
-                role = Role(name=r)
-            role.permissions = roles[r][0]
-            role.default = roles[r][1]
-            db.session.add(role)
-        db.session.commit()
 
     def __repr__(self):
         return '<Role %r>' % self.name
