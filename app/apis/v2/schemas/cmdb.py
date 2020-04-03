@@ -35,7 +35,7 @@ class CredenceSchema(Schema):
 
     id = fields.Integer(as_string=True, dump_only=True)
     name = fields.Str(required=True)
-    port = fields.Str(required=True)
+    port = fields.Str(allow_none=True)
     username = fields.Str(allow_none=True)
     password = fields.Str(allow_none=True)
     ssh_key = fields.Str(allow_none=True)
