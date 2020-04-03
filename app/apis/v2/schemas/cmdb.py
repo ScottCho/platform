@@ -36,9 +36,9 @@ class CredenceSchema(Schema):
     id = fields.Integer(as_string=True, dump_only=True)
     name = fields.Str(required=True)
     port = fields.Str(required=True)
-    username = fields.Str()
-    password = fields.Str()
-    ssh_key = fields.Str()
+    username = fields.Str(allow_none=True)
+    password = fields.Str(allow_none=True)
+    ssh_key = fields.Str(allow_none=True)
     agreement_id = fields.Integer()
     agreement_name = fields.Function(lambda obj: "{}".format(obj.agreement.name))
     machines = Relationship(self_view='credence_machines',

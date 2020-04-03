@@ -27,7 +27,7 @@ class BaselineSchema(Schema):
     package_id = fields.Integer(allow_none=True)
     developer_id = fields.Integer()
     status_id = fields.Integer()
-    status_name = fields.Function(lambda obj: "{}".format(obj.status.status))
+    status_name = fields.Function(lambda obj: "{}".format(obj.status.name))
     package_name = fields.Function(lambda obj: "{}".format(obj.package.name))
     app_name = fields.Function(lambda obj: "{}".format(obj.app.name))
     developer_username = fields.Function(lambda obj: "{}".format(obj.developer.username))
