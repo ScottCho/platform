@@ -51,8 +51,7 @@ class Credence(db.Model):
     def password(self):
         s = Signer(current_app.config['SECRET_KEY'])
         password = s.unsign(bytes(self.password_hash,encoding='utf-8'))
-        print(password)
-        return password
+        return str(password, encoding="utf-8")
 
     # 将密码加密存储
     @password.setter

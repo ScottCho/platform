@@ -37,7 +37,7 @@ class CredenceSchema(Schema):
     name = fields.Str(required=True)
     port = fields.Str(allow_none=True)
     username = fields.Str(allow_none=True)
-    password = fields.Str(allow_none=True)
+    password = fields.Str(load_only=True,allow_none=True)
     ssh_key = fields.Str(allow_none=True)
     agreement_id = fields.Integer()
     agreement_name = fields.Function(lambda obj: "{}".format(obj.agreement.name))
