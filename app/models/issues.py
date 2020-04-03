@@ -127,7 +127,7 @@ class IssueBug(db.Model):
     enddate = db.Column(db.DateTime())  # 结束日期
     deadline = db.Column(db.DateTime())   # 解决期限
     manhour = db.Column(db.String(64))    #工时
-    status_id = db.Column(db.Integer, db.ForeignKey('status.id'),default=1)  # bug状态
+    status_id = db.Column(db.Integer, db.ForeignKey('status.id'),default=101)  # bug状态
     status = db.relationship('Status', back_populates='bugs')    
     priority_id = db.Column(db.Integer, db.ForeignKey('issue_priority.id'))   #优先级
     priority = db.relationship('IssuePriority', back_populates='bugs')
