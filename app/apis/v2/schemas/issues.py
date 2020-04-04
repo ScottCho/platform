@@ -260,6 +260,8 @@ class IssueTaskSchema(Schema):
     priority = fields.Function(lambda obj: "{}".format(obj.priority.name))  
     assignee_id =  fields.Integer()
     assignee = fields.Function(lambda obj: "{}".format(obj.assignee.username))
+    project_id = fields.Integer()
+    project_name = fields.Function(lambda obj: "{}".format(obj.project.name))
     
 
     baselines = Relationship(self_view='issue_task_baselines',

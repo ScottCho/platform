@@ -231,12 +231,21 @@ class IssuePriorityRelationship(ResourceRelationship):
 class IssueRequirementList(ResourceList):
     
     decorators = (auth_required,)
-    def before_post(self, args, kwargs, data=None):
-        pass
+
+    # 如果登录用户为管理员则显示所有结果，否则只显示参与的项目
+    def query(self, view_kwargs):
+        if g.current_user.role_id == 1:
+            query_ = self.session.query(IssueRequirement)
+        else:
+            projects = g.current_user.projects
+            project_ids = [project.id for project in projects]
+            query_ = self.session.query(IssueRequirement).filter(IssueRequirement.project_id.in_(project_ids))
+        return query_
 
     schema = IssueRequirementSchema
     data_layer = {'session': db.session,
-                  'model': IssueRequirement
+                  'model': IssueRequirement,
+                  'methods': {'query': query}
                 }
 
 class IssueRequirementDetail(ResourceDetail):
@@ -271,9 +280,19 @@ class IssueRequirementRelationship(ResourceRelationship):
 class IssueTaskList(ResourceList):
     
     decorators = (auth_required,)
+    def query(self, view_kwargs):
+        if g.current_user.role_id == 1:
+            query_ = self.session.query(IssueTask)
+        else:
+            projects = g.current_user.projects
+            project_ids = [project.id for project in projects]
+            query_ = self.session.query(IssueTask).filter(IssueTask.project_id.in_(project_ids))
+        return query_
+  
     schema = IssueTaskSchema
     data_layer = {'session': db.session,
-                  'model': IssueTask
+                  'model': IssueTask,
+                  'methods': {'query': query}
                 }
 
 class IssueTaskDetail(ResourceDetail):
@@ -308,9 +327,20 @@ class IssueTaskRelationship(ResourceRelationship):
 class IssueBugList(ResourceList):
     
     decorators = (auth_required,)
+
+    def query(self, view_kwargs):
+        if g.current_user.role_id == 1:
+            query_ = self.session.query(IssueBug)
+        else:
+            projects = g.current_user.projects
+            project_ids = [project.id for project in projects]
+            query_ = self.session.query(IssueBug).filter(IssueBug.project_id.in_(project_ids))
+        return query_
+
     schema =IssueBugSchema
     data_layer = {'session': db.session,
-                  'model': IssueBug
+                  'model': IssueBug,
+                  'methods': {'query': query}
                 }
 
 class IssueBugDetail(ResourceDetail):

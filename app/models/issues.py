@@ -162,6 +162,8 @@ class IssueTask(db.Model):
     deadline = db.Column(db.DateTime())   # 解决期限
     manhour = db.Column(db.String(64))    #工时
 
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'),nullable=False)  #issue所属项目
+    project = db.relationship('Project', back_populates='tasks')
     status_id = db.Column(db.Integer, db.ForeignKey('status.id'),default=101)  # 状态
     status = db.relationship('Status', back_populates='tasks')    
     requirement_id = db.Column(db.Integer, db.ForeignKey('issue_requirement.id'))   #所属需求

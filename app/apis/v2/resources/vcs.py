@@ -39,6 +39,19 @@ from app.apis.v2.resources.baseconfig import StatusDetail, StatusDetail
 # Create resource managers
 class BaselineList(ResourceList):
     decorators = (auth_required,)
+
+    # 如果登录用户为管理员则显示所有结果，否则只显示参与的项目的基线
+    def query(self, view_kwargs):
+        if g.current_user.role_id == 1:
+            query_ = self.session.query(Baseline)
+        else:
+            projects = g.current_user.projects
+            apps = []
+            for project in projects:
+                apps += project.apps
+            app_ids = [app.id for app in apps]
+            query_ = self.session.query(Baseline).filter(Baseline.app_id.in_(app_ids))
+        return query_
     
     #　处理基线的默认内容
     def before_post(self, args, kwargs, data=None):
@@ -64,7 +77,8 @@ class BaselineList(ResourceList):
 
     schema = BaselineSchema
     data_layer = {'session': db.session,
-                  'model': Baseline
+                  'model': Baseline,
+                  'methods': {'query': query}
                 }
 
 class BaselineDetail(ResourceDetail):

@@ -153,7 +153,7 @@ class Project(db.Model):
     packages = db.relationship('Package',back_populates='project')
     requirements = db.relationship('IssueRequirement',back_populates='project')
     bugs = db.relationship('IssueBug',back_populates='project')
-    tasks = db.relationship('IssueBug',back_populates='project')
+    tasks = db.relationship('IssueTask',back_populates='project')
 
 
     def __repr__(self):
