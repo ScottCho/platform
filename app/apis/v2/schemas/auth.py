@@ -44,7 +44,7 @@ class UserSchema(Schema):
     id = fields.Integer(as_string=True, dump_only=True)
     username = fields.Str(required=True)
     email = fields.Email(required=True)
-    password = fields.Str(required=True, load_only=True)
+    password = fields.Str(load_only=True)
     created = fields.DateTime()
     last_seen = fields.DateTime()
     confirmed = fields.Bool()

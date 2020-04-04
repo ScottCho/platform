@@ -262,7 +262,7 @@ class UserList(ResourceList):
         obj = self.create_object(data, kwargs)
         token = obj.generate_confirmation_token()
         send_email([email],'确认您的账户',
-            'apis/v2/confirm.html',user=obj,token=token)
+            'apis/v2/mail/auth/confirm.html',user=obj,token=token)
         result = schema.dump(obj).data
 
         if result['data'].get('links', {}).get('self'):
