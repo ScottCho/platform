@@ -31,6 +31,8 @@ class BaselineSchema(Schema):
     package_name = fields.Function(lambda obj: "{}".format(obj.package.name))
     app_name = fields.Function(lambda obj: "{}".format(obj.app.name))
     developer_username = fields.Function(lambda obj: "{}".format(obj.developer.username))
+    project_name = fields.Function(lambda obj: "{}".format(obj.app.project.name))
+    project_id = fields.Function(lambda obj: "{}".format(obj.app.project.id))
     developer = Relationship(self_view='baseline_developer',
                              self_view_kwargs={'id': '<id>'},
                              related_view='user_detail',
