@@ -39,7 +39,8 @@ class User(db.Model):
 
     @property
     def password(self):
-        raise AttributeError('password is not a readable attribute')
+        return self.password_hash
+        
 
     @password.setter
     def password(self, password):

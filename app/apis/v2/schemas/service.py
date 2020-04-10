@@ -38,12 +38,15 @@ class SchemaSchema(Schema):
     id = fields.Integer(as_string=True, dump_only=True)
     username = fields.Str(required=True)
     password = fields.Str(load_only=True)
+    instance_id = fields.Integer()
+    instance_name = fields.Function(lambda obj: "{}".format(obj.instance.instance))
     instance = Relationship(self_view='schema_database',
                              self_view_kwargs={'id': '<id>'},
                              related_view='database_detail',
                              related_view_kwargs={'id': '<id>'},
                              schema='DatabaseSchema',
                              type_='database')
+
 
 
 class EnvSchema(Schema):

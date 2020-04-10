@@ -90,7 +90,7 @@ from app.models.issues import IssueSource, IssueCategory,  IssueModule, IssueRep
 @flask_app.shell_context_processor
 def make_shell_context():
     return dict(db=db, Project=Project, Database=Database, App=App, Baseline=Baseline,
-        Subsystem=Subsystem,Env=Env,Role=Role,IssueTask=IssueTask,IssueStatus=IssueStatus)
+        Subsystem=Subsystem,Env=Env,Role=Role,IssueTask=IssueTask)
 
 
 
@@ -218,6 +218,3 @@ def uploaded_file(filename):
 def list_file():
     files = os.listdir(flask_app.config['UPLOAD_FOLDER'])
     return render_template('apis/v2/issue/list_file.html',files=files)
-
-
-

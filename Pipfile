@@ -57,6 +57,7 @@ werkzeug = "==1.0.0"
 zipp = "==3.1.0"
 MarkupSafe = "==1.1.1"
 pymysql = "*"
+pycryptodome = "*"
 
 [requires]
 python_version = "3.6"

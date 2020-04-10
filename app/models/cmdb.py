@@ -1,7 +1,5 @@
-from itsdangerous import Signer
-from flask import current_app
-
 from .. import db
+from app.utils.encryp_decrypt import decrypt,encrypt
 
 #机器组和机器的连接表
 machine_machinegroubs = db.Table('machine_ass_groub',
@@ -49,15 +47,14 @@ class Credence(db.Model):
     # 读取密码
     @property
     def password(self):
-        s = Signer(current_app.config['SECRET_KEY'])
-        password = s.unsign(bytes(self.password_hash,encoding='utf-8'))
-        return str(password, encoding="utf-8")
+        password = decrypt(self.password_hash)
+        return str(password)
 
     # 将密码加密存储
     @password.setter
     def password(self, password):
-        s = Signer(current_app.config['SECRET_KEY'])
-        self.password_hash = s.sign(password)
+        s = encrypt(password)
+        self.password_hash = s
     
 		
 
