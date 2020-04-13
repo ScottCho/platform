@@ -10,7 +10,7 @@ class IssueSourceSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'issue_source_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     name = fields.Str()
 
     requirements = Relationship(self_view='issue_source_requirements',
@@ -38,7 +38,7 @@ class IssueModuleSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'issue_module_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     name = fields.Str()
     
     requirements = Relationship(self_view='issue_module_requirements',
@@ -66,7 +66,7 @@ class IssueReproducibilitySchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'issue_reproducibility_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     name = fields.Str()
     
     bugs = Relationship(self_view='issue_reproducibility_bugs',
@@ -85,7 +85,7 @@ class IssuePrioritySchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'issue_priority_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     name = fields.Str()
     
     bugs = Relationship(self_view='issue_priority_bugs',
@@ -119,7 +119,7 @@ class IssueSeveritySchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'issue_severity_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     name = fields.Str()
 
     bugs = Relationship(self_view='issue_severity_bugs',
@@ -139,7 +139,7 @@ class IssueRequirementSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'issue_requirement_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     number = fields.Str()
     reporter = fields.Str()
     summary = fields.Str()
@@ -189,7 +189,7 @@ class IssueBugSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'issue_bug_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     number = fields.Str(allow_none=True)
     reporter = fields.Str(allow_none=True)
     summary = fields.Str()
@@ -242,7 +242,7 @@ class IssueTaskSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'issue_task_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     requirement_id = fields.Integer(allow_none=True)
     number = fields.Str(allow_none=True)
     reporter = fields.Str(allow_none=True)

@@ -12,7 +12,7 @@ class ProjectSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'project_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     name = fields.Str(required=True)
     zh_name = fields.Str(required=True)
     source_dir = fields.Str()
@@ -41,7 +41,7 @@ class UserSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'user_list'
 
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     username = fields.Str(required=True)
     email = fields.Email(required=True)
     password = fields.Str(load_only=True)
@@ -74,7 +74,7 @@ class RoleSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'role_list'
 
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     name = fields.Str(required=True)
     permissions = fields.Integer()
     default = fields.Integer()

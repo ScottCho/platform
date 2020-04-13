@@ -10,7 +10,7 @@ class MachineSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'machine_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     alias = fields.Str()
     hostname = fields.Str(required=True)
     ip = fields.Str(required=True)
@@ -33,7 +33,7 @@ class CredenceSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'credence_list'
 
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     name = fields.Str(required=True)
     port = fields.Str(allow_none=True)
     username = fields.Str(allow_none=True)
@@ -63,7 +63,7 @@ class AgreementSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'agreement_list'
 
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     name = fields.Str(required=True)
 
     credences = Relationship(self_view='agreement_credences',

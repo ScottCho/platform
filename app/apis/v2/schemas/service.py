@@ -11,7 +11,7 @@ class DatabaseSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'database_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     instance = fields.Str(required=True)
     port = fields.Str()
     mark = fields.Str(allow_none=True)
@@ -35,7 +35,7 @@ class SchemaSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'schema_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     username = fields.Str(required=True)
     password = fields.Str(load_only=True)
     instance_id = fields.Integer()
@@ -56,7 +56,7 @@ class EnvSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'env_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     name = fields.Str(required=True)
     # apps = Relationship(self_view='app_schemas',
     #                          self_view_kwargs={'id': '<id>'},
@@ -73,7 +73,7 @@ class SubsystemSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'subsystem_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     en_name = fields.Str(required=True)
     zh_name = fields.Str(required=True)
 
@@ -84,7 +84,7 @@ class AppSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'app_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     log_dir = fields.Str()
     jenkins_job_dir = fields.Str()
     port = fields.Str()

@@ -10,7 +10,7 @@ class StatusSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'status_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     name = fields.Str()
 
     requirements = Relationship(self_view='status_requirements',
@@ -46,7 +46,7 @@ class TagSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'tag_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     name = fields.Str()
 
     requirements = Relationship(self_view='tag_requirements',

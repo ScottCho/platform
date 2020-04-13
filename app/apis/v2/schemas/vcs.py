@@ -11,7 +11,7 @@ class BaselineSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'baseline_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     content = fields.Str()
     sqlno = fields.Str(allow_none=True)
     pckno = fields.Str(allow_none=True)
@@ -91,7 +91,7 @@ class PackageSchema(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'package_list'
         
-    id = fields.Integer(as_string=True, dump_only=True)
+    id = fields.Integer(dump_only=True)
     name = fields.Str()
     rlsdate = fields.Str()
     blineno = fields.Str()
