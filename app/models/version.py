@@ -330,7 +330,7 @@ class Package(db.Model):
                 #更新SVN中的Jenkins中的源码目录
                 l = svn.local.LocalClient(workspace)
                 l.update()
-                #合并
+                # 合并,一个一个的版本合并提交，出现异常回滚
                 source_log = l.run_command('log',[app.source_dir,'-c',version])[3]
                 message = 'Merged revision {} from {}'.format(version,source_dir)
                 current_app.logger.info(message)

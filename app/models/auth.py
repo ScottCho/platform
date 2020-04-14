@@ -155,6 +155,7 @@ class Project(db.Model):
     requirements = db.relationship('IssueRequirement',back_populates='project')
     bugs = db.relationship('IssueBug',back_populates='project')
     tasks = db.relationship('IssueTask',back_populates='project')
+    
 
 
     def __repr__(self):

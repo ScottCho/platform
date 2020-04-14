@@ -12,6 +12,7 @@ class StatusSchema(Schema):
         
     id = fields.Integer(dump_only=True)
     name = fields.Str()
+    attribute = fields.Str()
 
     requirements = Relationship(self_view='status_requirements',
                            self_view_kwargs={'id': '<id>'},
