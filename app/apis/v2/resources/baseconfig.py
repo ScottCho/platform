@@ -6,10 +6,9 @@ from flask_rest_jsonapi import (Api, ResourceDetail, ResourceList,
 
 from app import db
 from app.apis.v2 import api
-from app.models.baseconfig import Status, Tag
-
-from app.apis.v2.schemas.baseconfig import StatusSchema, TagSchema
 from app.apis.v2.auth import auth_required
+from app.apis.v2.schemas.baseconfig import StatusSchema, TagSchema
+from app.models.baseconfig import Status, Tag
 
 
 # 问题状态

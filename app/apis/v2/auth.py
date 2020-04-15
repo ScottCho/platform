@@ -2,12 +2,14 @@
 
 from functools import wraps
 
-from flask import g, current_app, request
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired
+from flask import current_app, g, request
+from flask_rest_jsonapi.exceptions import AccessDenied, JsonApiException
+from itsdangerous import BadSignature, SignatureExpired
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 from app.apis.v2.errors import api_abort, invalid_token, token_missing
 from app.models.auth import User
-from flask_rest_jsonapi.exceptions import AccessDenied, JsonApiException
+
 
 def generate_token(user):
     expiration = 60*60*10   # 10h过期

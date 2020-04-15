@@ -12,7 +12,7 @@ api_v2 = Blueprint('api_v2', __name__)
 #api = Api(flask_app,decorators=(auth_required,))
 api = Api(flask_app)
 api.init_app(flask_app)
-from .resources import auth, cmdb, service, vcs, issues
+from .resources import auth, cmdb, service, vcs, issues, stat
 #　权限控制
 from .resources.baseconfig import StatusList, StatusDetail
 from .resources.auth import ProjectList,ProjectDetail,UserList,UserDetail,RoleList,RoleDetail

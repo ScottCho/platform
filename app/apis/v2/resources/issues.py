@@ -1,49 +1,49 @@
 # -*- coding: utf-8 -*-
 
-from flask_rest_jsonapi import Api, ResourceDetail, ResourceList, ResourceRelationship
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired
-from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
-from werkzeug.wrappers import Response
-from flask import request, url_for, make_response, redirect
-from flask.wrappers import Response as FlaskResponse
+from flask import (current_app, g, jsonify, make_response, redirect, request,
+                   url_for)
 from flask.views import MethodView, MethodViewType
-from marshmallow_jsonapi.exceptions import IncorrectTypeError
-from marshmallow import ValidationError
-
-from flask_rest_jsonapi.pagination import add_pagination_links
-from flask_rest_jsonapi.exceptions import InvalidType, BadRequest, RelationNotFound
-from flask_rest_jsonapi.decorators import check_headers, check_method_requirements, jsonapi_exception_formatter
-from flask_rest_jsonapi.schema import compute_schema, get_relationships, get_model_field
-from flask_rest_jsonapi.data_layers.base import BaseDataLayer
+from flask.wrappers import Response as FlaskResponse
+from flask_rest_jsonapi import (Api, ResourceDetail, ResourceList,
+                                ResourceRelationship)
 from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
+from flask_rest_jsonapi.data_layers.base import BaseDataLayer
+from flask_rest_jsonapi.decorators import (check_headers,
+                                           check_method_requirements,
+                                           jsonapi_exception_formatter)
+from flask_rest_jsonapi.exceptions import (AccessDenied, BadRequest,
+                                           InvalidType, JsonApiException,
+                                           RelationNotFound)
+from flask_rest_jsonapi.pagination import add_pagination_links
+from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
+from flask_rest_jsonapi.schema import (compute_schema, get_model_field,
+                                       get_relationships)
 from flask_rest_jsonapi.utils import JSONEncoder
-
-from  app import flask_app
-from app.models.issues import IssueBug, IssueCategory, IssuePriority, IssueReproducibility, IssueModule, \
-     IssueRequirement, IssueSeverity, IssueSource, IssueTask
-from app.models.baseconfig import Tag, Status
-from app import db
-
-from app.apis.v2 import api
-from app.apis.v2.schemas.issues import IssueBugSchema, IssueModuleSchema, IssuePrioritySchema, IssueReproducibilitySchema, \
-    IssueRequirementSchema, IssueSeveritySchema, IssueSourceSchema, IssueTaskSchema
-
-from app.apis.v2.schemas.baseconfig import StatusSchema, TagSchema
-
-from flask import jsonify, request, current_app, url_for, g
-from flask.views import MethodView
-
-from app.apis.v2 import api_v2
-from app.apis.v2.auth import auth_required, generate_token, get_token
-from app.apis.v2.errors import api_abort, ValidationError
-from app.models.auth import User
-from app.localemail import send_email
-from flask_rest_jsonapi.exceptions import AccessDenied, JsonApiException
-
+from itsdangerous import BadSignature, SignatureExpired
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from marshmallow import ValidationError
+from marshmallow_jsonapi.exceptions import IncorrectTypeError
 from werkzeug.utils import secure_filename
+from werkzeug.wrappers import Response
 
-
-from app.apis.v2.resources.baseconfig import StatusDetail, StatusList, TagDetail, TagList
+from app import db, flask_app
+from app.apis.v2 import api, api_v2
+from app.apis.v2.auth import auth_required, generate_token, get_token
+from app.apis.v2.errors import ValidationError, api_abort
+from app.apis.v2.resources.baseconfig import (StatusDetail, StatusList,
+                                              TagDetail, TagList)
+from app.apis.v2.schemas.baseconfig import StatusSchema, TagSchema
+from app.apis.v2.schemas.issues import (
+    IssueBugSchema, IssueModuleSchema, IssuePrioritySchema,
+    IssueReproducibilitySchema, IssueRequirementSchema, IssueSeveritySchema,
+    IssueSourceSchema, IssueTaskSchema)
+from app.localemail import send_email
+from app.models.auth import User
+from app.models.baseconfig import Status, Tag
+from app.models.issues import (IssueBug, IssueCategory, IssueModule,
+                               IssuePriority, IssueReproducibility,
+                               IssueRequirement, IssueSeverity, IssueSource,
+                               IssueTask)
 
 
 # Create resource managers

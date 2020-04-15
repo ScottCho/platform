@@ -1,40 +1,38 @@
 # -*- coding: utf-8 -*-
 
-from flask_rest_jsonapi import Api, ResourceDetail, ResourceList, ResourceRelationship
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired
-from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
-from werkzeug.wrappers import Response
-from flask import request, url_for, make_response, redirect, jsonify
-from flask.wrappers import Response as FlaskResponse
+from flask import (current_app, g, jsonify, make_response, redirect, request,
+                   url_for)
 from flask.views import MethodView, MethodViewType
-from marshmallow_jsonapi.exceptions import IncorrectTypeError
-from marshmallow import ValidationError
-
-from flask_rest_jsonapi.pagination import add_pagination_links
-from flask_rest_jsonapi.exceptions import InvalidType, BadRequest, RelationNotFound
-from flask_rest_jsonapi.decorators import check_headers, check_method_requirements, jsonapi_exception_formatter
-from flask_rest_jsonapi.schema import compute_schema, get_relationships, get_model_field
-from flask_rest_jsonapi.data_layers.base import BaseDataLayer
+from flask.wrappers import Response as FlaskResponse
+from flask_rest_jsonapi import (Api, ResourceDetail, ResourceList,
+                                ResourceRelationship)
 from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
+from flask_rest_jsonapi.data_layers.base import BaseDataLayer
+from flask_rest_jsonapi.decorators import (check_headers,
+                                           check_method_requirements,
+                                           jsonapi_exception_formatter)
+from flask_rest_jsonapi.exceptions import (AccessDenied, BadRequest,
+                                           InvalidType, JsonApiException,
+                                           RelationNotFound)
+from flask_rest_jsonapi.pagination import add_pagination_links
+from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
+from flask_rest_jsonapi.schema import (compute_schema, get_model_field,
+                                       get_relationships)
 from flask_rest_jsonapi.utils import JSONEncoder
+from itsdangerous import BadSignature, SignatureExpired
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from marshmallow import ValidationError
+from marshmallow_jsonapi.exceptions import IncorrectTypeError
+from werkzeug.wrappers import Response
 
-from  app import flask_app
-from app.models.auth import Project, User, group, Role
-from app import db
-
-from app.apis.v2 import api
-from app.apis.v2.schemas.auth import ProjectSchema, UserSchema, RoleSchema
-
-from flask import jsonify, request, current_app, url_for, g
-from flask.views import MethodView
-
-from app.apis.v2 import api_v2
+from app import db, flask_app
+from app.apis.v2 import api, api_v2
 from app.apis.v2.auth import auth_required, generate_token, get_token
-from app.apis.v2.errors import api_abort, ValidationError
-from app.models.auth import User
+from app.apis.v2.errors import ValidationError, api_abort
+from app.apis.v2.schemas.auth import ProjectSchema, RoleSchema, UserSchema
 from app.localemail import send_email
-from flask_rest_jsonapi.exceptions import AccessDenied, JsonApiException
+from app.models.auth import Project, Role, User, group
+
 
 # 返回登录产生的token
 class AuthTokenAPI(MethodView):
@@ -101,18 +99,6 @@ class ConfirmUserAPI(MethodView):
             return api_abort(400,'链接无效或者过期')
         return redirect('/#/confirm')
             
-
-# # 确认用户
-# class ConfirmUserAPI(MethodView):
-#     def get(self,token):
-#         if g.current_user.confirm(token) or g.current_user.confirmed:
-#             db.session.commit()
-#         else:
-#             return api_abort(400,'链接无效或者过期')
-#         return jsonify(data=[{'status':201, 'detail':'账户已激活'}], jsonapi={"version": "1.0"})
-#         # return redirect('/#/confirm/'+token)
-
-
 # 重置密码请求
 class PasswordResetRequestAPI(MethodView):
     def post(self):

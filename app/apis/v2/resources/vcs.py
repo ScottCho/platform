@@ -1,40 +1,41 @@
 import os
 from datetime import datetime
 
-from flask import request, g
+from flask import g, make_response, request, url_for
+from flask.views import MethodView, MethodViewType
+from flask.wrappers import Response as FlaskResponse
 from flask_rest_jsonapi import (Api, ResourceDetail, ResourceList,
                                 ResourceRelationship)
-
-from werkzeug.wrappers import Response
-from flask import request, url_for, make_response
-from flask.wrappers import Response as FlaskResponse
-from flask.views import MethodView, MethodViewType
-from marshmallow_jsonapi.exceptions import IncorrectTypeError
-from marshmallow import ValidationError
-
-from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
-from flask_rest_jsonapi.pagination import add_pagination_links
-from flask_rest_jsonapi.exceptions import InvalidType, BadRequest, RelationNotFound
-from flask_rest_jsonapi.decorators import check_headers, check_method_requirements, jsonapi_exception_formatter
-from flask_rest_jsonapi.schema import compute_schema, get_relationships, get_model_field
-from flask_rest_jsonapi.data_layers.base import BaseDataLayer
 from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
+from flask_rest_jsonapi.data_layers.base import BaseDataLayer
+from flask_rest_jsonapi.decorators import (check_headers,
+                                           check_method_requirements,
+                                           jsonapi_exception_formatter)
+from flask_rest_jsonapi.exceptions import (BadRequest, InvalidType,
+                                           RelationNotFound)
+from flask_rest_jsonapi.pagination import add_pagination_links
+from flask_rest_jsonapi.querystring import QueryStringManager as QSManager
+from flask_rest_jsonapi.schema import (compute_schema, get_model_field,
+                                       get_relationships)
 from flask_rest_jsonapi.utils import JSONEncoder
+from marshmallow import ValidationError
+from marshmallow_jsonapi.exceptions import IncorrectTypeError
+from werkzeug.wrappers import Response
 
 from app import db, flask_app
 from app.apis.v2 import api
-from app.models.baseconfig import Status
-from app.models.version import Baseline, Package
-from app.models.service import App
-
-from app.apis.v2.schemas.vcs import  BaselineSchema,  PackageSchema
-from app.apis.v2.schemas.baseconfig import StatusSchema
 from app.apis.v2.auth import auth_required
-from app.utils import execute_cmd, fnmatch_file, switch_char
-from app.localemail import send_email
-from app.utils.jenkins import get_jenkins_job
 from app.apis.v2.errors import api_abort
-from app.apis.v2.resources.baseconfig import StatusDetail, StatusDetail
+from app.apis.v2.resources.baseconfig import StatusDetail
+from app.apis.v2.schemas.baseconfig import StatusSchema
+from app.apis.v2.schemas.vcs import BaselineSchema, PackageSchema
+from app.localemail import send_email
+from app.models.baseconfig import Status
+from app.models.service import App
+from app.models.version import Baseline, Package
+from app.utils import execute_cmd, fnmatch_file, switch_char
+from app.utils.jenkins import get_jenkins_job
+
 
 # Create resource managers
 class BaselineList(ResourceList):

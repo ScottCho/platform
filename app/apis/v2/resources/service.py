@@ -1,25 +1,22 @@
 import logging
 
-
 from flask import jsonify
 from flask.views import MethodView, MethodViewType
-from app.apis.v2 import api_v2
+from flask_rest_jsonapi import (Api, ResourceDetail, ResourceList,
+                                ResourceRelationship)
 from marshmallow_jsonapi import fields
-from flask_rest_jsonapi import Api, ResourceDetail, ResourceList, ResourceRelationship
 
-
-from  app import flask_app
-from app.models.service import Database, App, Env, Subsystem
-from app.models.service import Schema as DBSchema
-from app import db
-
-from app.apis.v2 import api
-from app.apis.v2.schemas.service import DatabaseSchema, SchemaSchema, EnvSchema, SubsystemSchema, AppSchema
+from app import db, flask_app
+from app.apis.v2 import api, api_v2
 from app.apis.v2.auth import auth_required
 from app.apis.v2.errors import api_abort
-from app.apis.v2 import api_v2
-
+from app.apis.v2.schemas.service import (AppSchema, DatabaseSchema, EnvSchema,
+                                         SchemaSchema, SubsystemSchema)
+from app.models.service import App, Database, Env
+from app.models.service import Schema as DBSchema
+from app.models.service import Subsystem
 from app.tasks import remote_shell
+
 
 # Create resource managers
 class DatabaseList(ResourceList):

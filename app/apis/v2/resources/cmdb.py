@@ -1,14 +1,13 @@
+from flask_rest_jsonapi import (Api, ResourceDetail, ResourceList,
+                                ResourceRelationship)
 from marshmallow_jsonapi import fields
-from flask_rest_jsonapi import Api, ResourceDetail, ResourceList, ResourceRelationship
 
-
-from  app import flask_app
-from app.models.cmdb import Machine, MachineGroub, Agreement, Credence
-from app import db
-
+from app import db, flask_app
 from app.apis.v2 import api
-from app.apis.v2.schemas.cmdb import MachineSchema, CredenceSchema, AgreementSchema
 from app.apis.v2.auth import auth_required
+from app.apis.v2.schemas.cmdb import (AgreementSchema, CredenceSchema,
+                                      MachineSchema)
+from app.models.cmdb import Agreement, Credence, Machine, MachineGroub
 
 
 # Create resource managers
