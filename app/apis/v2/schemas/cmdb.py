@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2020-04-17 14:54:59
-@LastEditTime: 2020-04-17 15:27:20
+@LastEditTime: 2020-04-17 15:37:01
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: /platform/app/apis/v2/schemas/cmdb.py
@@ -49,13 +49,13 @@ class CredenceSchema(Schema):
     ssh_key = fields.Str(allow_none=True)
     agreement_id = fields.Integer()
     agreement_name = fields.Function(lambda obj: "{}".format(obj.agreement.name))
-    Servers = Relationship(self_view='credence_Servers',
+    Servers = Relationship(self_view='credence_servers',
                            self_view_kwargs={'id': '<id>'},
                            related_view='server_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='ServerSchema',
-                           type_='Server')
+                           type_='server')
     agreement = Relationship(self_view='credence_agreement',
                            self_view_kwargs={'id': '<id>'},
                            related_view='agreement_detail',
