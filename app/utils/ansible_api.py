@@ -1,3 +1,6 @@
+#!/usr/bin/python
+#-*- coding: UTF-8 -*-
+
 import json
 import shutil
 from ansible.module_utils.common.collections import ImmutableDict
@@ -11,8 +14,9 @@ from ansible.executor.playbook_executor import PlaybookExecutor
 from ansible import context
 import ansible.constants as C
 import redis
+from app import redis_cli
 
-redis_cli = redis.StrictRedis(host="192.168.0.12", port=6379, db=0)
+# redis_cli = redis.StrictRedis(host="192.168.0.12", port=6379, db=0)
 
 
 # since the API is constructed for CLI it expects certain options to always be set in the context object
@@ -30,6 +34,7 @@ class ResultCallback(CallbackBase):
         """
         host = result._host
         print(json.dumps({host.name: result._result}, indent=4))
+        return json.dumps({host.name: result._result}, indent=4)
 
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
@@ -42,7 +47,7 @@ class ResultCallback(CallbackBase):
 
     
 class PlayBookResultCallback(CallbackBase):
-
+    
     def __init__(self, redis_key_prefix,  task_id, *args, **kwargs):
         super(PlayBookResultCallback, self).__init__(*args, **kwargs)
         self.task_name = ''
@@ -89,27 +94,21 @@ class PlayBookResultCallback(CallbackBase):
             t = stats.summarize(h)
             redis_cli.append(self.key, '{:20s}: {}\n'.format(h ,t))
 
-
-
-
-
- 
-class AnsibleTask:
-    def __init__(self, sources):
-        #source为以逗号分割的IP或者host配置文件路径
-        self.sources = sources
-        # Takes care of finding and reading yaml, json and ini files
-        self.loader = DataLoader()
-        self.passwords = dict(vault_pass='secret')
+# hosts为单个IP或者数组
+def exec_shell(hosts, module_name, module_args, sources = '/etc/ansible/hosts'):
+        
         # Instantiate our ResultCallback for handling results as they come in. Ansible expects this to be one of its main display outlets
-        self.results_callback = None
-        # create inventory, use path to host config file as source or hosts in a comma separated string
-        self.inventory = InventoryManager(loader=self.loader, sources=self.sources)
-        # variable manager takes care of merging all the different sources to give you a unified view of variables available in each context
-        self.variable_manager = VariableManager(loader=self.loader, inventory=self.inventory)
+        results_callback = ResultCallback()
 
-    def exec_shell(self, hosts, module_name, module_args):
-        self.results_callback = ResultCallback()
+        # Takes care of finding and reading yaml, json and ini files
+        loader = DataLoader()
+
+        # variable manager takes care of merging all the different sources to give you a unified view of variables available in each context
+        inventory = InventoryManager(loader=loader, sources=sources)
+
+        # variable manager takes care of merging all the different sources to give you a unified view of variables available in each context
+        variable_manager = VariableManager(loader=loader, inventory=inventory)
+
     # create data structure that represents our play, including tasks, this is basically what our YAML loader does internally.
         play_source = dict(
             name="Ansible Play",
@@ -122,17 +121,17 @@ class AnsibleTask:
         )
         # Create play object, playbook objects use .load instead of init or new methods,
         # this will also automatically create the task objects from the info provided in play_source
-        play = Play().load(play_source, variable_manager=self.variable_manager, loader=self.loader)
+        play = Play().load(play_source, variable_manager=variable_manager, loader=loader)
 
         # Run it - instantiate task queue manager, which takes care of forking and setting up all objects to iterate over host list and tasks
         tqm = None
         try:
             tqm = TaskQueueManager(
-                inventory=self.inventory,
-                variable_manager=self.variable_manager,
-                loader=self.loader,
-                passwords=self.passwords,
-                stdout_callback=self.results_callback,  # Use our custom callback instead of the ``default`` callback plugin, which prints to stdout
+                inventory=inventory,
+                variable_manager=variable_manager,
+                loader=loader,
+                passwords = dict(vault_pass='secret'),
+                stdout_callback=results_callback,  # Use our custom callback instead of the ``default`` callback plugin, which prints to stdout
             )
             result = tqm.run(play)  # most interesting data for a play is actually sent to the callback's methods
         finally:
@@ -143,28 +142,27 @@ class AnsibleTask:
             # Remove ansible tmpdir
             shutil.rmtree(C.DEFAULT_LOCAL_TMP, True)
 
-    def ansible_playbook(self,redis_key_prefix, task_id, playbook_path,extra_vars=None):
-        self.results_callback = PlayBookResultCallback(redis_key_prefix, task_id)
-        executor = PlaybookExecutor(
-            playbooks = [playbook_path],
-            inventory=self.inventory,
-            variable_manager=self.variable_manager,
-            loader=self.loader,
-            passwords=self.passwords
-            )
 
-        executor._tqm._stdout_callback = self.results_callback
-        C.HOTS_KEY_CHECKING = False
-        result = executor.run()
-        return(result)
-        
+def ansible_playbook(redis_key_prefix,task_id, playbook_path,extra_vars=None,sources = '/etc/ansible/hosts'):
+    results_callback = PlayBookResultCallback(redis_key_prefix, task_id)
+    loader = DataLoader()
+    inventory = InventoryManager(loader=loader, sources=sources)
+    variable_manager = VariableManager(loader=loader, inventory=inventory)
 
+    executor = PlaybookExecutor(
+        playbooks = [playbook_path],
+        inventory=inventory,
+        variable_manager=variable_manager,
+        loader=loader,
+        passwords=dict(vault_pass='secret')
+        )
 
-
+    executor._tqm._stdout_callback = results_callback
+    C.HOTS_KEY_CHECKING = False
+    result = executor.run()
+    
 
 if __name__ == '__main__':
-    tasks = AnsibleTask('192.168.0.12,192.168.0.31')
-    # tasks = AnsibleTask('/etc/ansible/hosts')
-    tasks.exec_shell('192.168.0.31', 'shell', 'ls')
-    #tasks.ansible_playbook('ansible',8,'/etc/ansible/roles/centos7/init.yml')
+    exec_shell(['192.168.0.10','192.168.0.31'], 'shell', 'echo hello')
+    ansible_playbook('ansible',2,'/etc/ansible/playbook/nginx_playbook.yml')
 

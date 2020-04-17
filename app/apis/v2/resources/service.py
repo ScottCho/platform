@@ -163,7 +163,7 @@ class AppManageAPI(MethodView):
             subsystem = app.subsystem.en_name.lower()
             username = app.credence.username
             password = app.credence.password
-            ip = app.machine.ip
+            ip = app.server.ip
             command='sh /usr/local/sbin/weblogic_{}.sh {} {}'.format(env,action,subsystem)
             print(command)
             try:
@@ -184,7 +184,7 @@ class DatabaseManageAPI(MethodView):
             username = db.credence.username
             password = db.credence.password
             instance = db.instance
-            ip = db.machine.ip
+            ip = db.server.ip
             command='sh /usr/local/sbin/restart_oracle.sh {} {}'.format(action,instance)
             logging.info('*'*8+'execute command ' + command + ' on oracle'+'@'+ip+'*'*8)
             try:
@@ -213,7 +213,7 @@ api.route(AppDetail, 'app_detail', '/api/apps/<int:id>')
 api.route(AppRelationship, 'app_project', '/api/apps/<int:id>/relationships/project')
 api.route(AppRelationship, 'app_env', '/api/apps/<int:id>/relationships/env')
 api.route(AppRelationship, 'app_subsystem', '/api/apps/<int:id>/relationships/subsystem')
-api.route(AppRelationship, 'app_machine', '/api/apps/<int:id>/relationships/machine')
+api.route(AppRelationship, 'app_server', '/api/apps/<int:id>/relationships/server')
 api.route(AppRelationship, 'app_schema', '/api/apps/<int:id>/relationships/schema')
 
 # 重启应用端点

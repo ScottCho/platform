@@ -1,3 +1,11 @@
+'''
+@Author: your name
+@Date: 2020-04-16 15:47:06
+@LastEditTime: 2020-04-17 14:51:45
+@LastEditors: Please set LastEditors
+@Description: In User Settings Edit
+@FilePath: /platform/app/apis/v2/schemas/baseconfig.py
+'''
 # -*- coding: utf-8 -*-
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
@@ -65,3 +73,40 @@ class TagSchema(Schema):
                            many=True,
                            schema='IssueBugSchema',
                            type_='issue_bug')  
+
+
+# 软件
+class SoftwareSchema(Schema):
+    class Meta:
+        type_ = 'software'
+        self_view = 'software_detail'
+        self_view_kwargs = {'id': '<id>'}
+        self_view_many = 'software_list'
+        
+    id = fields.Integer(dump_only=True)
+    name = fields.Str()
+    playbook = fields.Str()
+
+
+# 后台任务
+class BgtaskSchema(Schema):
+    class Meta:
+        type_ = 'bgtask'
+        self_view = 'bgtask_detail'
+        self_view_kwargs = {'id': '<id>'}
+        self_view_many = 'bgtask_list'
+        
+    id = fields.Integer(dump_only=True)
+    name = fields.Str()
+    playbook = fields.Str()
+    software_id = fields.Integer()
+    
+
+
+    servers = Relationship(self_view='bgtasks_servers',
+                             self_view_kwargs={'id': '<id>'},
+                             related_view='server_list',
+                             related_view_kwargs={'id': '<id>'},
+                             many=True,
+                             schema='ServerSchema',
+                             type_='server')

@@ -1,14 +1,22 @@
+'''
+@Author: your name
+@Date: 2020-04-17 14:54:59
+@LastEditTime: 2020-04-17 15:27:20
+@LastEditors: Please set LastEditors
+@Description: In User Settings Edit
+@FilePath: /platform/app/apis/v2/schemas/cmdb.py
+'''
 # -*- coding: utf-8 -*-
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
 
 # Create logical data abstraction
-class MachineSchema(Schema):
+class ServerSchema(Schema):
     class Meta:
-        type_ = 'machine'
-        self_view = 'machine_detail'
+        type_ = 'Server'
+        self_view = 'Server_detail'
         self_view_kwargs = {'id': '<id>'}
-        self_view_many = 'machine_list'
+        self_view_many = 'server_list'
         
     id = fields.Integer(dump_only=True)
     alias = fields.Str()
@@ -19,7 +27,7 @@ class MachineSchema(Schema):
     remarks = fields.Str()
     credence_id = fields.Integer()
     credence_name = fields.Function(lambda obj: "{}".format(obj.credence.name))
-    credence = Relationship(self_view='machine_credence',
+    credence = Relationship(self_view='server_credence',
                         self_view_kwargs={'id': '<id>'},
                         related_view='credence_detail',
                         related_view_kwargs={'id': '<id>'},
@@ -41,13 +49,13 @@ class CredenceSchema(Schema):
     ssh_key = fields.Str(allow_none=True)
     agreement_id = fields.Integer()
     agreement_name = fields.Function(lambda obj: "{}".format(obj.agreement.name))
-    machines = Relationship(self_view='credence_machines',
+    Servers = Relationship(self_view='credence_Servers',
                            self_view_kwargs={'id': '<id>'},
-                           related_view='machine_list',
+                           related_view='server_list',
                            related_view_kwargs={'id': '<id>'},
                            many=True,
-                           schema='MachineSchema',
-                           type_='machine')
+                           schema='ServerSchema',
+                           type_='Server')
     agreement = Relationship(self_view='credence_agreement',
                            self_view_kwargs={'id': '<id>'},
                            related_view='agreement_detail',

@@ -18,8 +18,8 @@ class Database(db.Model):
     schemas = db.relationship('Schema',back_populates='instance')
     credence_id = db.Column(db.Integer,db.ForeignKey('credences.id'))
     credence = db.relationship('Credence',back_populates='databases')
-    machine_id = db.Column(db.Integer,db.ForeignKey('machines.id'))
-    machine = db.relationship('Machine')
+    server_id = db.Column(db.Integer,db.ForeignKey('servers.id'))
+    server = db.relationship('Server')
 
 #数据库的Schema
 class Schema(db.Model):
@@ -57,8 +57,8 @@ class App(db.Model):
     subsystem_id = db.Column(db.Integer,db.ForeignKey('subsystems.id'))
     subsystem = db.relationship('Subsystem')
     baselines = db.relationship('app.models.version.Baseline',back_populates='app')
-    machine_id = db.Column(db.Integer,db.ForeignKey('machines.id'))
-    machine = db.relationship('Machine')
+    server_id = db.Column(db.Integer,db.ForeignKey('servers.id'))
+    server = db.relationship('Server')
     schema_id = db.Column(db.Integer,db.ForeignKey('db_schemas.id'))
     schema = db.relationship('Schema')
     credence_id = db.Column(db.Integer,db.ForeignKey('credences.id'))
@@ -76,7 +76,7 @@ class App(db.Model):
             jenkins_job_dir = self.jenkins_job_dir,
             port = self.port,
             alias = self.alias,
-            deploy_host = self.machine.ip,
+            deploy_host = self.server.ip,
             deploy_dir = self.deploy_dir,
             package_dir = self.package_dir
         )

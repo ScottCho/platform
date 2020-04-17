@@ -1,15 +1,23 @@
+'''
+@Author: your name
+@Date: 2020-04-17 10:34:07
+@LastEditTime: 2020-04-17 15:26:38
+@LastEditors: Please set LastEditors
+@Description: In User Settings Edit
+@FilePath: /platform/app/models/cmdb.py
+'''
 from .. import db
 from app.utils.encryp_decrypt import decrypt,encrypt
 
 #机器组和机器的连接表
-machine_machinegroubs = db.Table('machine_ass_groub',
-    db.Column('machine_id', db.Integer, db.ForeignKey('machines.id'), primary_key=True),
-    db.Column('machinegroub_id', db.Integer, db.ForeignKey('machinegroubs.id'), primary_key=True)
+server_servergroubs = db.Table('server_ass_groub',
+    db.Column('server_id', db.Integer, db.ForeignKey('servers.id'), primary_key=True),
+    db.Column('servergroub_id', db.Integer, db.ForeignKey('servergroubs.id'), primary_key=True)
 )
 
 #机器
-class Machine(db.Model):
-    __tablename__ = 'machines'
+class Server(db.Model):
+    __tablename__ = 'servers'
     id = db.Column(db.Integer, primary_key=True)
     alias = db.Column(db.String(80), nullable=False)
     hostname = db.Column(db.String(80), nullable=False)
@@ -18,12 +26,15 @@ class Machine(db.Model):
     credence_id = db.Column(db.Integer,db.ForeignKey('credences.id'))
     os = db.Column(db.String(80))
     remarks =  db.Column(db.Text())
-    credence = db.relationship('Credence',back_populates='machines')
-    machinegroubs = db.relationship('MachineGroub',
-        secondary=machine_machinegroubs,back_populates='machines'
+    credence = db.relationship('Credence',back_populates='servers')
+    
+    servergroubs = db.relationship('ServerGroub',
+        secondary=server_servergroubs,back_populates='servers'
         )
+    bgtasks = db.relationship('BgTask', secondary='bgtask_ass_server', back_populates='servers')
+
     def __repr__(self):
-        return '<Machine.alias %r>' % self.alias
+        return '<Server.alias %r>' % self.alias
 
 #凭证
 class Credence(db.Model):
@@ -39,7 +50,7 @@ class Credence(db.Model):
     # agent_ip = db.Column(db.String(20))
     # agent_port = db.Column(db.String(10))
     # agent_password = db.Column(db.String(80))
-    machines = db.relationship('Machine',back_populates='credence')
+    servers = db.relationship('Server',back_populates='credence')
     apps = db.relationship('App',back_populates='credence')
     databases = db.relationship('Database',back_populates='credence')
 
@@ -71,12 +82,12 @@ class Agreement(db.Model):
         return '<Agreement.name %r>' % self.name
 
 #机器组
-class MachineGroub(db.Model):
-    __tablename__ = 'machinegroubs'
+class ServerGroub(db.Model):
+    __tablename__ = 'servergroubs'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80),nullable=False)
-    machines = db.relationship('Machine',
-        secondary=machine_machinegroubs,back_populates='machinegroubs'
+    servers = db.relationship('Server',
+        secondary=server_servergroubs,back_populates='servergroubs'
         )
 
 

@@ -16,10 +16,10 @@ class DatabaseSchema(Schema):
     port = fields.Str()
     mark = fields.Str(allow_none=True)
     credence_id = fields.Integer()
-    machine_id = fields.Integer()
+    server_id = fields.Integer()
     project_id = fields.Integer()
     project_name = fields.Function(lambda obj: "{}".format(obj.project.name))
-    machine_hostname = fields.Function(lambda obj: "{}".format(obj.machine.hostname))
+    server_hostname = fields.Function(lambda obj: "{}".format(obj.server.hostname))
     schemas = Relationship(self_view='database_schemas',
                              self_view_kwargs={'id': '<id>'},
                              related_view='schema_list',
@@ -92,10 +92,10 @@ class AppSchema(Schema):
     package_dir = fields.Str(allow_none=True)
     alias = fields.Str()
     context = fields.Str(allow_none=True)
-    service_url = fields.Function(lambda obj: "http://{}:{}/{}".format(obj.machine.ip,obj.port,obj.context))
+    service_url = fields.Function(lambda obj: "http://{}:{}/{}".format(obj.server.ip,obj.port,obj.context))
     source_dir = fields.Str()
     project_id = fields.Integer()
-    machine_id = fields.Integer()
+    server_id = fields.Integer()
     schema_id = fields.Integer()
     subsystem_id = fields.Integer()
     credence_id = fields.Integer()
@@ -105,14 +105,14 @@ class AppSchema(Schema):
     project_name = fields.Function(lambda obj: "{}".format(obj.project.name))
     subsystem_name = fields.Function(lambda obj: "{}".format(obj.subsystem.en_name))
     env_name = fields.Function(lambda obj: "{}".format(obj.env.name))
-    machine_hostname = fields.Function(lambda obj: "{}".format(obj.machine.hostname))
+    server_hostname = fields.Function(lambda obj: "{}".format(obj.server.hostname))
 
-    machine = Relationship(self_view='app_machine',
+    server = Relationship(self_view='app_server',
                              self_view_kwargs={'id': '<id>'},
-                             related_view='machine_detail',
-                             related_view_kwargs={'id': '<machine_id>'},
-                             schema='MachineSchema',
-                             type_='machine') 
+                             related_view='server_detail',
+                             related_view_kwargs={'id': '<server_id>'},
+                             schema='serverSchema',
+                             type_='server') 
     project = Relationship(self_view='app_project',
                              self_view_kwargs={'id': '<id>'},
                              related_view='project_detail',

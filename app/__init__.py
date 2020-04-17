@@ -12,8 +12,15 @@ from celery import Celery,platforms
 from config import config
 from flask_socketio import SocketIO,emit
 from flask_cors import CORS, cross_origin
+import redis
 
 
+#  init redis
+redis_cli = redis.StrictRedis(
+    host=os.getenv('REDIS_HOSt','127.0.0.1'),
+    port=os.getenv('REDIS_PORT',6379),
+    db=os.getenv('REDIS_DB',0),
+    )
 
 db = SQLAlchemy()
 mail = Mail()
@@ -82,6 +89,7 @@ from app.models.baseconfig import Status, Tag
 from app.models.service import Database, Schema,App,Subsystem,Env
 from app.models.auth import Project, Role, User
 from app.models.version import Baseline
+from app.models.baseconfig import BgTask
 from app.models.issues import IssueSource, IssueCategory,  IssueModule, IssueReproducibility, \
     IssuePriority, IssueSeverity, IssueRequirement, IssueBug, IssueTask, \
         bug_ass_baseline, requirement_ass_baseline, task_ass_baseline
@@ -90,7 +98,7 @@ from app.models.issues import IssueSource, IssueCategory,  IssueModule, IssueRep
 @flask_app.shell_context_processor
 def make_shell_context():
     return dict(db=db, Project=Project, Database=Database, App=App, Baseline=Baseline,
-        Subsystem=Subsystem,Env=Env,Role=Role,IssueTask=IssueTask)
+        Subsystem=Subsystem,Env=Env,Role=Role,IssueTask=IssueTask,BgTask=BgTask)
 
 
 
@@ -218,3 +226,10 @@ def uploaded_file(filename):
 def list_file():
     files = os.listdir(flask_app.config['UPLOAD_FOLDER'])
     return render_template('apis/v2/issue/list_file.html',files=files)
+
+@flask_app.route('/ansible')
+def ansible():
+    from app.utils.ansible_api import exec_shell,ansible_playbook
+    exec_shell(['192.168.0.10','192.168.0.31'], 'shell', 'echo hello')
+    # ansible_playbook('ansible',2,'/etc/ansible/playbook/nginx_playbook.yml')
+    return 1

@@ -6,18 +6,18 @@ from app import db, flask_app
 from app.apis.v2 import api
 from app.apis.v2.auth import auth_required
 from app.apis.v2.schemas.cmdb import (AgreementSchema, CredenceSchema,
-                                      MachineSchema)
-from app.models.cmdb import Agreement, Credence, Machine, MachineGroub
+                                      ServerSchema)
+from app.models.cmdb import Agreement, Credence, Server, ServerGroub
 
 
 # Create resource managers
-class MachineList(ResourceList):
+class ServerList(ResourceList):
     decorators = (auth_required,)
-    schema = MachineSchema
+    schema = ServerSchema
     data_layer = {'session': db.session,
-                  'model': Machine}
+                  'model': Server}
 
-class MachineDetail(ResourceDetail):
+class ServerDetail(ResourceDetail):
     decorators = (auth_required,)
     # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
     # 支持两种方式删除
@@ -30,15 +30,15 @@ class MachineDetail(ResourceDetail):
             for id in ids[1:-1].split(','):
                 obj = self._data_layer.get_object({'id':id})
                 self._data_layer.delete_object(obj, {'id':id})
-    schema = MachineSchema
+    schema = ServerSchema
     data_layer = {'session': db.session,
-                  'model': Machine}
+                  'model': Server}
 
-class MachineRelationship(ResourceRelationship):
+class ServerRelationship(ResourceRelationship):
     decorators = (auth_required,)
-    schema = MachineSchema
+    schema = ServerSchema
     data_layer = {'session': db.session,
-                  'model': Machine}
+                  'model': Server}
 
 class CredenceList(ResourceList):
     decorators = (auth_required,)
@@ -112,12 +112,12 @@ class AgreementRelationship(ResourceRelationship):
 
        
 # Create endpoints
-api.route(MachineList, 'machine_list', '/api/machines')
-api.route(MachineDetail, 'machine_detail', '/api/machines/<id>')
-api.route(MachineRelationship, 'machine_credence', '/api/machines/<int:id>/relationships/credence')
+api.route(ServerList, 'server_list', '/api/servers')
+api.route(ServerDetail, 'Server_detail', '/api/servers/<id>')
+api.route(ServerRelationship, 'server_credence', '/api/servers/<int:id>/relationships/credence')
 api.route(CredenceList, 'credence_list', '/api/credences')
 api.route(CredenceDetail, 'credence_detail', '/api/credences/<id>')
-api.route(CredenceRelationship, 'credence_machines', '/api/credences/<int:id>/relationships/machines')
+api.route(CredenceRelationship, 'credence_servers', '/api/credences/<int:id>/relationships/servers')
 api.route(CredenceRelationship, 'credence_agreement', '/api/credences/<int:id>/relationships/agreement')
 api.route(AgreementList, 'agreement_list', '/api/agreements')
 api.route(AgreementDetail, 'agreement_detail', '/api/agreements/<id>')

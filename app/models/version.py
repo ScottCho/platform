@@ -102,7 +102,7 @@ class Baseline(db.Model):
         if self.sqlno or self.pckno:
             db_username = self.app.schema.username
             db_password = self.app.schema.password
-            db_host = self.app.schema.instance.machine.ip
+            db_host = self.app.schema.instance.server.ip
             db_port = self.app.schema.instance.port
             db_instance = self.app.schema.instance.instance
             source_dbdir = self.app.project.source_dir

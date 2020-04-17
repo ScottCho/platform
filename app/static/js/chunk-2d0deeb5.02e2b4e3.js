@@ -1,0 +1,1 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d0deeb5"],{8865:function(e,l,a){"use strict";a.r(l);var b=[{key:"a",label:"甲"},{key:"b",label:"乙"},{key:"c",label:"丙",type:"select",options:[{label:"哈哈",value:"haha"},{label:"呵呵",value:"hehe"}]},{label:"丁",key:"d"}];l["default"]=b}}]);
