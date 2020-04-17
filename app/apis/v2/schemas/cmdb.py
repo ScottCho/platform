@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2020-04-17 14:54:59
-@LastEditTime: 2020-04-17 15:44:04
+@LastEditTime: 2020-04-17 16:21:10
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: /platform/app/apis/v2/schemas/cmdb.py
@@ -34,6 +34,35 @@ class ServerSchema(Schema):
                         schema='CredenceSchema',
                         type_='credence')
 
+    groups = Relationship(self_view='server_groups',
+                             self_view_kwargs={'id': '<id>'},
+                             related_view='server_group_list',
+                             related_view_kwargs={'id': '<id>'},
+                             many=True,
+                             schema='ServerGroupSchema',
+                             type_='server_group')   
+
+# 机器分组
+class ServerGroupSchema(Schema):
+    class Meta:
+        type_ = 'server_group'
+        self_view = 'server_group_detail'
+        self_view_kwargs = {'id': '<id>'}
+        self_view_many = 'server_group_list'
+
+    id = fields.Integer(dump_only=True)
+    name = fields.Str(required=True,index=True)
+
+    servers = Relationship(self_view='group_servers',
+                             self_view_kwargs={'id': '<id>'},
+                             related_view='server_list',
+                             related_view_kwargs={'id': '<id>'},
+                             many=True,
+                             schema='ServerSchema',
+                             type_='server')
+    
+
+# 协议
 class CredenceSchema(Schema):
     class Meta:
         type_ = 'credence'
@@ -49,7 +78,7 @@ class CredenceSchema(Schema):
     ssh_key = fields.Str(allow_none=True)
     agreement_id = fields.Integer()
     agreement_name = fields.Function(lambda obj: "{}".format(obj.agreement.name))
-    Servers = Relationship(self_view='credence_servers',
+    servers = Relationship(self_view='credence_servers',
                            self_view_kwargs={'id': '<id>'},
                            related_view='server_list',
                            related_view_kwargs={'id': '<id>'},

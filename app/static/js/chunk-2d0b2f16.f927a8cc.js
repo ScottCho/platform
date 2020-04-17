@@ -1,0 +1,1 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d0b2f16"],{"25eb":function(e,i,n){"use strict";n.r(i);var a=[{label:"Machine_id",key:"machine_id",type:"input"},{label:"Machinegroub_id",key:"machinegroub_id",type:"input"}];i["default"]=a}}]);

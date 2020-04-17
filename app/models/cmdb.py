@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2020-04-17 10:34:07
-@LastEditTime: 2020-04-17 15:39:48
+@LastEditTime: 2020-04-17 16:31:16
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: /platform/app/models/cmdb.py
@@ -10,9 +10,9 @@ from .. import db
 from app.utils.encryp_decrypt import decrypt,encrypt
 
 #机器组和机器的连接表
-server_servergroubs = db.Table('server_ass_groub',
+server_groups = db.Table('server_ass_group',
     db.Column('server_id', db.Integer, db.ForeignKey('servers.id'), primary_key=True),
-    db.Column('servergroub_id', db.Integer, db.ForeignKey('servergroubs.id'), primary_key=True)
+    db.Column('group_id', db.Integer, db.ForeignKey('server_groups.id'), primary_key=True)
 )
 
 #机器
@@ -27,9 +27,10 @@ class Server(db.Model):
     remarks =  db.Column(db.Text())
     credence = db.relationship('Credence',back_populates='servers')
     
-    servergroubs = db.relationship('ServerGroub',
-        secondary=server_servergroubs,back_populates='servers'
+    groups = db.relationship('ServerGroup',
+        secondary=server_groups,back_populates='servers'
         )
+
     bgtasks = db.relationship('BgTask', secondary='bgtask_ass_server', back_populates='servers')
 
     def __repr__(self):
@@ -80,13 +81,13 @@ class Agreement(db.Model):
     def __repr__(self):
         return '<Agreement.name %r>' % self.name
 
-#机器组
-class ServerGroub(db.Model):
-    __tablename__ = 'servergroubs'
+# 机器分组
+class ServerGroup(db.Model):
+    __tablename__ = 'server_groups'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80),nullable=False)
     servers = db.relationship('Server',
-        secondary=server_servergroubs,back_populates='servergroubs'
+        secondary=server_groups,back_populates='groups'
         )
 
 
