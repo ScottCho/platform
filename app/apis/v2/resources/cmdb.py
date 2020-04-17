@@ -113,7 +113,7 @@ class AgreementRelationship(ResourceRelationship):
        
 # Create endpoints
 api.route(ServerList, 'server_list', '/api/servers')
-api.route(ServerDetail, 'Server_detail', '/api/servers/<id>')
+api.route(ServerDetail, 'server_detail', '/api/servers/<id>')
 api.route(ServerRelationship, 'server_credence', '/api/servers/<int:id>/relationships/credence')
 api.route(CredenceList, 'credence_list', '/api/credences')
 api.route(CredenceDetail, 'credence_detail', '/api/credences/<id>')

@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2020-04-17 10:34:07
-@LastEditTime: 2020-04-17 15:26:38
+@LastEditTime: 2020-04-17 15:39:48
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: /platform/app/models/cmdb.py
@@ -22,7 +22,6 @@ class Server(db.Model):
     alias = db.Column(db.String(80), nullable=False)
     hostname = db.Column(db.String(80), nullable=False)
     ip = db.Column(db.String(80), nullable=False)
-    state = db.Column(db.Boolean, default=False)
     credence_id = db.Column(db.Integer,db.ForeignKey('credences.id'))
     os = db.Column(db.String(80))
     remarks =  db.Column(db.Text())
