@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2020-04-17 14:54:59
-@LastEditTime: 2020-04-17 15:37:01
+@LastEditTime: 2020-04-17 15:44:04
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: /platform/app/apis/v2/schemas/cmdb.py
@@ -13,8 +13,8 @@ from marshmallow_jsonapi.flask import Schema, Relationship
 # Create logical data abstraction
 class ServerSchema(Schema):
     class Meta:
-        type_ = 'Server'
-        self_view = 'Server_detail'
+        type_ = 'server'
+        self_view = 'server_detail'
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'server_list'
         
