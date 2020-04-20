@@ -93,6 +93,7 @@ class PackageSchema(Schema):
         
     id = fields.Integer(dump_only=True)
     name = fields.Str()
+    content = fields.Str()
     rlsdate = fields.Str()
     blineno = fields.Str()
     merge_blineno = fields.Str()
@@ -102,6 +103,8 @@ class PackageSchema(Schema):
     package_count = fields.Str()
     project_name = fields.Function(lambda obj: "{}".format(obj.project.name))
     env_name = fields.Function(lambda obj: "{}".format(obj.env.name))
+    status_id = fields.Integer()
+    status_name = fields.Function(lambda obj: "{}".format(obj.status.name))
     project = Relationship(self_view='package_project',
                              self_view_kwargs={'id': '<id>'},
                              related_view='project_detail',

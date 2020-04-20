@@ -21,6 +21,7 @@ from app.utils.trans_path import trans_java
 from .. import db
 
 
+
 class Baseline(db.Model):
     __tablename__ = 'baselines'
     id = db.Column(db.Integer, primary_key=True)
@@ -264,6 +265,7 @@ class Package(db.Model):
     __tablename__ = 'packages'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
+    features = db.Column(db.Text)
     rlsdate = db.Column(db.DateTime(), default=datetime.utcnow)
     blineno = db.Column(db.String(500), nullable=False)
     merge_blineno = db.Column(db.String(128))
@@ -274,6 +276,9 @@ class Package(db.Model):
     baselines = db.relationship('Baseline', back_populates='package')
     project = db.relationship('Project', back_populates='packages')
     env = db.relationship('Env', back_populates='packages')
+    status_id = db.Column(db.Integer, db.ForeignKey('status.id'))
+    status = db.relationship('Status', back_populates='packages')
+
 
     def release_package(self):
         target_dir = self.project.target_dir

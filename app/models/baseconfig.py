@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2020-04-16 11:56:31
-@LastEditTime: 2020-04-17 14:45:05
+@LastEditTime: 2020-04-20 09:50:55
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: /platform/app/models/baseconfig.py
@@ -26,6 +26,7 @@ class Status(db.Model):
     bugs = db.relationship('IssueBug', back_populates='status')
     tasks = db.relationship('IssueTask', back_populates='status')
     baselines = db.relationship('Baseline', back_populates='status')
+    packages = db.relationship('Package', back_populates='status')
     
     def __repr__(self):
         return '<Status.name %r>' % self.name

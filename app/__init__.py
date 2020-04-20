@@ -2,7 +2,6 @@
 #-*- coding: UTF-8 -*-
 import os
 import subprocess
-from threading import Lock
 import logging
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
