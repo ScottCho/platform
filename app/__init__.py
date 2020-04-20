@@ -226,9 +226,19 @@ def list_file():
     files = os.listdir(flask_app.config['UPLOAD_FOLDER'])
     return render_template('apis/v2/issue/list_file.html',files=files)
 
-@flask_app.route('/ansible')
-def ansible():
-    from app.utils.ansible_api import exec_shell,ansible_playbook
-    exec_shell(['192.168.0.10','192.168.0.31'], 'shell', 'echo hello')
-    # ansible_playbook('ansible',2,'/etc/ansible/playbook/nginx_playbook.yml')
-    return 1
+
+
+
+from flask import send_file
+@flask_app.route('/test1')
+def test1_file():
+    # return send_from_directory('/SVN/Update/WLINK/05-packages',
+    #                            filename='WellLink_20200420_01.zip',as_attachment=True,
+    #                            attachment_filename='WellLink_20200420_01.zip')
+    return send_file(
+        '/SVN/Update/WLINK/05-packages/WellLink_20200420_01.zip',
+    as_attachment=True,
+    attachment_filename='WellLink_20200420_01.zip',
+    )
+
+

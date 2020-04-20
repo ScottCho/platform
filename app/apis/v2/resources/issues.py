@@ -36,7 +36,7 @@ from app.apis.v2.schemas.baseconfig import StatusSchema, TagSchema
 from app.apis.v2.schemas.issues import (
     IssueBugSchema, IssueModuleSchema, IssuePrioritySchema,
     IssueReproducibilitySchema, IssueRequirementSchema, IssueSeveritySchema,
-    IssueSourceSchema, IssueTaskSchema)
+    IssueSourceSchema, IssueTaskSchema, IssueCategorySchema)
 from app.localemail import send_email
 from app.models.auth import User
 from app.models.baseconfig import Status, Tag
@@ -226,6 +226,43 @@ class IssuePriorityRelationship(ResourceRelationship):
     data_layer = {'session': db.session,
                   'model': IssuePriority
                   }
+
+#　问题类别
+class IssueCategoryList(ResourceList):
+    
+    decorators = (auth_required,)
+    schema = IssueCategorySchema
+    data_layer = {'session': db.session,
+                  'model': IssueCategory
+                }
+
+class IssueCategoryDetail(ResourceDetail):
+    decorators = (auth_required,)
+
+    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
+    # 支持两种方式删除
+    def delete_object(self, kwargs):
+        ids = kwargs.get('id')
+        if ids[0] != '[':
+            obj = self._data_layer.get_object(kwargs)
+            self._data_layer.delete_object(obj, kwargs)
+        else:
+            for id in ids[1:-1].split(','):
+                obj = self._data_layer.get_object({'id':id})
+                self._data_layer.delete_object(obj, {'id':id})
+
+    schema = IssueCategorySchema
+    data_layer = {'session': db.session,
+                  'model': IssueCategory
+                }
+
+class IssueCategoryRelationship(ResourceRelationship):
+    decorators = (auth_required,)
+    schema = IssueCategorySchema
+    data_layer = {'session': db.session,
+                  'model': IssueCategory
+                  }
+
 
 # 需求
 class IssueRequirementList(ResourceList):
@@ -489,6 +526,11 @@ api.route(IssuePriorityDetail, 'issue_priority_detail', '/api/issue_priority/<id
 api.route(IssuePriorityRelationship, 'issue_priority_requirements', '/api/issue_priority/<int:id>/relationships/issue_requirements')
 api.route(IssuePriorityRelationship, 'issue_priority_bugs', '/api/issue_priority/<int:id>/relationships/issue_bugs')
 api.route(IssuePriorityRelationship, 'issue_priority_tasks', '/api/issue_priority/<int:id>/relationships/issue_tasks')
+
+# 问题类别
+api.route(IssueCategoryList, 'issue_category_list', '/api/issue_category')
+api.route(IssueCategoryDetail, 'issue_category_detail', '/api/issue_category/<id>')
+api.route(IssueCategoryRelationship, 'issue_category_baselines', '/api/issue_category/<int:id>/relationships/baselines')
 
 #　需求
 api.route(IssueRequirementList, 'issue_requirement_list', '/api/issue_requirements')

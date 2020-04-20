@@ -9,6 +9,7 @@ from datetime import datetime
 import svn.local
 import svn.remote
 from flask import current_app, render_template
+from flask import send_from_directory
 
 from app.localemail import send_email
 from app.utils import execute_cmd, fnmatch_file, switch_char
@@ -47,7 +48,8 @@ class Baseline(db.Model):
     irequirements = db.relationship('IssueRequirement',secondary='requirement_ass_baseline',back_populates='baselines')
     itasks = db.relationship('IssueTask', secondary='task_ass_baseline', back_populates='baselines')
     ibugs= db.relationship('IssueBug', secondary='bug_ass_baseline', back_populates='baselines')
-
+    issue_category_id =  db.Column(db.Integer, db.ForeignKey('issue_category.id'))
+    issue_category = db.relationship('IssueCategory', back_populates='baselines')
 
     def update_baseline(self,flag=0,num='01'):
     # flag=0:单条基线更新，flag=1： 合并基线更新
@@ -266,7 +268,7 @@ class Package(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     features = db.Column(db.Text)
-    rlsdate = db.Column(db.DateTime(), default=datetime.utcnow)
+    rlsdate = db.Column(db.DateTime(), default=datetime.now)
     blineno = db.Column(db.String(500), nullable=False)
     merge_blineno = db.Column(db.String(128))
     package_count = db.Column(db.String(64))
@@ -279,7 +281,7 @@ class Package(db.Model):
     status_id = db.Column(db.Integer, db.ForeignKey('status.id'))
     status = db.relationship('Status', back_populates='packages')
 
-
+    
     def release_package(self):
         target_dir = self.project.target_dir
         app_dir = os.path.join(target_dir, 'APP')
@@ -323,6 +325,9 @@ class Package(db.Model):
 
 
     def package_merge(self):
+        '''
+        合并更新包里面的应用版本
+        '''
         merge_blineno = self.merge_blineno
         merge_msg = '开始合并基线....</br>'
         for blineno in merge_blineno.split(','):
@@ -357,8 +362,11 @@ class Package(db.Model):
                     l.run_command('revert',['-R',workspace])
         return merge_msg
 
-    # 部署更新包
+    
     def package_deploy(self):
+        '''
+        部署更新包
+        '''
         package_count = self.package_count
         project = self.project
         # 更新包中的基线状态修改为 '206 预UAT提测'
@@ -377,8 +385,10 @@ class Package(db.Model):
         return deploy_msg
 
 
-    #　发布更新包
     def package_release(self):
+        '''
+        更新包发布
+        '''
         # 更新包中的基线状态修改为 '213 已发布UAT'
         baselines = self.baselines
         for baseline in baselines:
@@ -434,3 +444,15 @@ class Package(db.Model):
                    'mail/version/package.html', attachments)
         
         return '更新包已发布'
+
+    
+    def package_download(self):
+        '''
+        更新包下载
+        '''
+        package_name = self.name+'.zip'
+        package_dir = os.path.join(self.project.source_dir,'05-packages')
+        return send_from_directory(package_dir,
+                               package_name,
+                               as_attachment=True
+                               )

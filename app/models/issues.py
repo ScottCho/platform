@@ -39,6 +39,7 @@ class IssueCategory(db.Model):
     __tablename__ = 'issue_category'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32), nullable=False,unique=True, index=True)
+    baselines = db.relationship('Baseline', back_populates='issue_category')
 
 # 问题模块: 1.再保 2.准备金 3.平台 4.承保 5.产品 6.报表 7.收付 
 # 8.理赔 9.财务 10.销售  11.自动任务 12.数据迁移

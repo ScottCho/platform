@@ -33,6 +33,8 @@ class BaselineSchema(Schema):
     developer_username = fields.Function(lambda obj: "{}".format(obj.developer.username))
     project_name = fields.Function(lambda obj: "{}".format(obj.app.project.name))
     project_id = fields.Function(lambda obj: "{}".format(obj.app.project.id))
+    issue_category_id = fields.Integer()
+    issue_category_name = fields.Function(lambda obj: "{}".format(obj.issue_category.name))
     developer = Relationship(self_view='baseline_developer',
                              self_view_kwargs={'id': '<id>'},
                              related_view='user_detail',
@@ -82,6 +84,13 @@ class BaselineSchema(Schema):
                            many=True,
                            schema='IssueRequirementSchema',
                            type_='issue_requirement')
+
+    issue_category = Relationship(self_view='baseline_issue_category',
+                             self_view_kwargs={'id': '<id>'},
+                             related_view='issue_category_detail',
+                             related_view_kwargs={'id': '<issue_category_id>'},
+                             schema='IssueCategorySchema',
+                             type_='issue_category')
 
 
 class PackageSchema(Schema):

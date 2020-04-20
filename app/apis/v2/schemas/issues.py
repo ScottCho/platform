@@ -131,6 +131,25 @@ class IssueSeveritySchema(Schema):
                            type_='issue_bug')  
 
 
+# 问题类别
+class IssueCategorySchema(Schema):
+    class Meta:
+        type_ = 'issue_category'
+        self_view = 'issue_category_detail'
+        self_view_kwargs = {'id': '<id>'}
+        self_view_many = 'issue_category_list'
+        
+    id = fields.Integer(dump_only=True)
+    name = fields.Str()
+
+    baselines = Relationship(self_view='issue_category_baselines',
+                           self_view_kwargs={'id': '<id>'},
+                           related_view='baseline_list',
+                           related_view_kwargs={'id': '<id>'},
+                           many=True,
+                           schema='BaselineSchema',
+                           type_='baseline')  
+
 # 需求
 class IssueRequirementSchema(Schema):
     class Meta:

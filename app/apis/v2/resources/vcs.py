@@ -23,7 +23,7 @@ from marshmallow_jsonapi.exceptions import IncorrectTypeError
 from werkzeug.wrappers import Response
 
 from app import db, flask_app
-from app.apis.v2 import api
+from app.apis.v2 import api, api_v2
 from app.apis.v2.auth import auth_required
 from app.apis.v2.errors import api_abort
 from app.apis.v2.resources.baseconfig import StatusDetail
@@ -60,7 +60,7 @@ class BaselineList(ResourceList):
         data['developer_id'] = g.current_user.id
         data['updateno'] = 1
         data['status_id'] =203
-        print(data)
+        
 
     def after_post(self, result):
         """Hook to make custom work after post method"""
@@ -143,7 +143,6 @@ class PackageList(ResourceList):
         project_name = Project.query.get(project_id).name
         bdate = data.get('rlsdate',datetime.now().strftime("%Y%m%d")).replace('-','')    # 2020-03-31
         name = "{}_{}_{}".format(project_name, bdate, package_count)
-        print(name)
         #将基线按app分组 {<App 1>: [<Baseline 1>,  <Baseline 2>],<App 2>: [<Baseline 3>]}
         app_dict={}
         merge_list=[]
@@ -334,6 +333,12 @@ class PackageRelease(ResourceDetail):
     data_layer = {'session': db.session,
                   'model': Package}
 
+class PackageDownloadAPI(MethodView):
+    def get(self,package_id):
+        package = Package.query.get(package_id)
+        return package.package_download()
+       
+
 # Create endpoints
 #基线
 api.route(BaselineList, 'baseline_list', '/api/baselines')
@@ -358,3 +363,7 @@ api.route(PackageMerge, 'package_merge', '/api/packages/merge/<int:id>')
 api.route(PackageDeploy, 'package_deploy', '/api/packages/deploy/<int:id>')
 # 发布更新包
 api.route(PackageRelease, 'package_release', '/api/packages/release/<int:id>')
+
+
+# 更新包下载
+api_v2.add_url_rule('/packages/download/<package_id>', view_func=PackageDownloadAPI.as_view('package_download'), methods=['GET',])
