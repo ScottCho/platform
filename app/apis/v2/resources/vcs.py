@@ -350,6 +350,7 @@ api.route(BaselineRelationship, 'baseline_package', '/api/baselines/<int:id>/rel
 api.route(BaselineRelationship, 'baseline_bugs', '/api/baselines/<int:id>/relationships/bug')
 api.route(BaselineRelationship, 'baseline_tasks', '/api/baselines/<int:id>/relationships/task')
 api.route(BaselineRelationship, 'baseline_requirements', '/api/baselines/<int:id>/relationships/requirement')
+api.route(BaselineRelationship, 'baseline_issue_category', '/api/baselines/<int:id>/relationships/isssue_category')
 
 #更新包
 api.route(PackageList, 'package_list', '/api/packages')
