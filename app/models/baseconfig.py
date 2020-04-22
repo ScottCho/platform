@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2020-04-16 11:56:31
-@LastEditTime: 2020-04-20 09:50:55
+@LastEditTime: 2020-04-21 11:40:54
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: /platform/app/models/baseconfig.py
@@ -17,6 +17,11 @@ from app.utils.ansible_api import ansible_playbook, exec_shell
 # 状态表
 #登录协议
 class Status(db.Model):
+    '''
+    Issue状态: 未开始，进行中，已完成，已暂停，已取消，已关闭
+    基线状态： SIT提测，SIT通过，SIT不通过，PUAT提测，PUAT通过，PUAT不通过，作废
+    更新包状态：已上UAT，已上PROD
+    '''
     __tablename__ = 'status'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False, index=True)
@@ -33,8 +38,11 @@ class Status(db.Model):
 
 
 
-# 标签: 1.功能完善 2.待确认 3.新增需求 4.解释性问题 5.重复问题 6.需求变更
+# 标签
 class Tag(db.Model):
+    '''
+    1.功能完善 2.待确认 3.新增需求 4.解释性问题 5.重复问题 6.需求变更
+    '''
     __tablename__ = 'tags'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False,unique=True, index=True)
@@ -58,14 +66,16 @@ bgtask_ass_server = db.Table('bgtask_ass_server',
         'servers.id'), primary_key=True)
 )
 
-'''
-任务id： 10
-name： install nginx
-target_serverr: 192.168.0.10
-'''
+
 
 # 后台任务表
 class BgTask(db.Model):
+
+    '''
+    任务id： 10
+    name： install nginx
+    '''
+
     __tablename__ = 'bgtasks'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True)

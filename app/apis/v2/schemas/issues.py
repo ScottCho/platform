@@ -159,8 +159,8 @@ class IssueRequirementSchema(Schema):
         self_view_many = 'issue_requirement_list'
         
     id = fields.Integer(dump_only=True)
-    number = fields.Str()
-    reporter = fields.Str()
+    number = fields.Str(allow_none=True)
+    reporter = fields.Str(allow_none=True)
     summary = fields.Str()
     description = fields.Str(allow_none=True)
     inputdate = fields.Date(allow_none=True)
@@ -171,17 +171,17 @@ class IssueRequirementSchema(Schema):
     sign = fields.Bool()
     status_id = fields.Integer(default=101)
     status_name = fields.Function(lambda obj: "{}".format(obj.status.name))  
-    priority_id = fields.Integer()
+    priority_id = fields.Integer(allow_none=True)
     priority = fields.Function(lambda obj: "{}".format(obj.priority.name))
-    source_id = fields.Integer()
+    source_id = fields.Integer(allow_none=True)
     source = fields.Function(lambda obj: "{}".format(obj.source.name))
     project_id = fields.Integer()
     project_name = fields.Function(lambda obj: "{}".format(obj.project.name))
-    assignee_id = fields.Integer()
+    assignee_id = fields.Integer(allow_none=True)
     assignee = fields.Function(lambda obj: "{}".format(obj.assignee.username))
-    module_id = fields.Integer()
+    module_id = fields.Integer(allow_none=True)
     module =  fields.Function(lambda obj: "{}".format(obj.module.name))
-    tag_id = fields.Integer()
+    tag_id = fields.Integer(allow_none=True)
     tag = fields.Function(lambda obj: "{}".format(obj.tag.name))
 
     tasks = Relationship(self_view='issue_requirement_tasks',

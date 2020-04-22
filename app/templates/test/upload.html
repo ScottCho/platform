@@ -1,0 +1,13 @@
+<!--
+ * @Author: your name
+ * @Date: 2020-04-21 14:01:40
+ * @LastEditTime: 2020-04-21 14:02:51
+ * @LastEditors: Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: /platform/app/templates/test/upload.html
+ -->
+ <!doctype html>
+ <form method=POST enctype=multipart/form-data action="{{ url_for('upload') }}">
+     <input type=file name=photo>
+     <input type=submit>
+ </form>

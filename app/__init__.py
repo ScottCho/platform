@@ -225,20 +225,3 @@ def uploaded_file(filename):
 def list_file():
     files = os.listdir(flask_app.config['UPLOAD_FOLDER'])
     return render_template('apis/v2/issue/list_file.html',files=files)
-
-
-
-
-from flask import send_file
-@flask_app.route('/test1')
-def test1_file():
-    # return send_from_directory('/SVN/Update/WLINK/05-packages',
-    #                            filename='WellLink_20200420_01.zip',as_attachment=True,
-    #                            attachment_filename='WellLink_20200420_01.zip')
-    return send_file(
-        '/SVN/Update/WLINK/05-packages/WellLink_20200420_01.zip',
-    as_attachment=True,
-    attachment_filename='WellLink_20200420_01.zip',
-    )
-
-
