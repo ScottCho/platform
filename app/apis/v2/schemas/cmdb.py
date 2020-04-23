@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2020-04-17 14:54:59
-@LastEditTime: 2020-04-17 16:21:10
+@LastEditTime: 2020-04-22 14:07:36
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: /platform/app/apis/v2/schemas/cmdb.py
@@ -93,6 +93,7 @@ class CredenceSchema(Schema):
                            schema='AgreementSchema',
                            type_='agreement')
 
+# 登录协议
 class AgreementSchema(Schema):
     class Meta:
         type_ = 'agreement'
@@ -110,3 +111,17 @@ class AgreementSchema(Schema):
                            many=True,
                            schema='CrendenceSchema',
                            type_='credence')
+
+
+# 外部链接
+class LinkSchema(Schema):
+    class Meta:
+        type_ = 'link'
+        self_view = 'link_detail'
+        self_view_kwargs = {'id': '<id>'}
+        self_view_many = 'link_list'
+
+    id = fields.Integer(dump_only=True)
+    name = fields.Str(required=True)
+    url = fields.Str(required=True)
+    category = fields.Str(allow_none=True)

@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2020-04-17 10:34:07
-@LastEditTime: 2020-04-17 16:31:16
+@LastEditTime: 2020-04-22 14:11:21
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: /platform/app/models/cmdb.py
@@ -89,5 +89,13 @@ class ServerGroup(db.Model):
     servers = db.relationship('Server',
         secondary=server_groups,back_populates='groups'
         )
+
+
+class Link(db.Model):
+    __tablename__ = 'links'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(256),nullable=False)
+    url = db.Column(db.String(256),nullable=False)
+    category = db.Column(db.String(128))
 
 
