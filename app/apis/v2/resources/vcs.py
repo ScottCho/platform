@@ -54,7 +54,8 @@ class BaselineList(ResourceList):
             query_ = self.session.query(Baseline).filter(Baseline.app_id.in_(app_ids))
         return query_
     
-    #　处理基线的默认内容
+    #　处理基线的默认内容,基线的默认状态为 “SIT提测”
+    #  更新次数为1
     def before_post(self, args, kwargs, data=None):
         """Hook to make custom work before post method"""
         data['developer_id'] = g.current_user.id
@@ -62,19 +63,19 @@ class BaselineList(ResourceList):
         data['status_id'] =203
         
 
-    def after_post(self, result):
-        """Hook to make custom work after post method"""
-        obj = self._data_layer.get_object({'id':result[0]['data']['id']})
-        try:
-            message = obj.update_baseline()
-        except Exception as e:
-            return api_abort(400,detail=str(e))
-        else:
-            # 发送邮件
-            obj.baseline_email()
-            # 更新结果返回
-            result[0].update({'detail': message})
-            return result
+    # def after_post(self, result):
+    #     """Hook to make custom work after post method"""
+    #     obj = self._data_layer.get_object({'id':result[0]['data']['id']})
+    #     try:
+    #         message = obj.update_baseline()
+    #     except Exception as e:
+    #         return api_abort(400,detail=str(e))
+    #     else:
+    #         # 发送邮件
+    #         obj.baseline_email()
+    #         # 更新结果返回
+    #         result[0].update({'detail': message})
+    #         return result
 
     schema = BaselineSchema
     data_layer = {'session': db.session,
@@ -86,22 +87,22 @@ class BaselineDetail(ResourceDetail):
     decorators = (auth_required,)
     def before_patch(self, args, kwargs, data=None):
         """Hook to make custom work before patch method"""
-        obj = Baseline.query.get_or_404(kwargs['id'])
+        obj = self._data_layer.get_object({'id':kwargs['id']})
         data['updateno'] = obj.updateno+1
     
-    def after_patch(self, result):
-        """Hook to make custom work after patch method"""
-        obj = self._data_layer.get_object({'id':result['data']['id']})
-        try:
-            message = obj.update_baseline()
-        except Exception as e:
-            return api_abort(400,detail=str(e))
-        else:
-            # 发送邮件
-            obj.baseline_email()
-            # 更新结果返回
-            result.update({'detail': message})
-            return result
+    # def after_patch(self, result):
+    #     """Hook to make custom work after patch method"""
+    #     obj = self._data_layer.get_object({'id':result['data']['id']})
+    #     try:
+    #         message = obj.update_baseline()
+    #     except Exception as e:
+    #         return api_abort(400,detail=str(e))
+    #     else:
+    #         # 发送邮件
+    #         obj.baseline_email()
+    #         # 更新结果返回
+    #         result.update({'detail': message})
+    #         return result
 
     # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
     # 支持两种方式删除
@@ -339,6 +340,26 @@ class PackageDownloadAPI(MethodView):
         return package.package_download()
        
 
+class BaselineUpdate(ResourceDetail):
+    decorators = (auth_required,)
+
+    def after_get(self, result):
+        obj = self._data_layer.get_object({'id':result['data']['id']})
+        try:
+            message = obj.update_baseline()
+        except Exception as e:
+            return api_abort(400,detail=str(e))
+        else:
+            # 发送邮件
+            obj.baseline_email()
+            # 更新结果返回
+            result.update({'detail': message})
+        return result
+    schema = BaselineSchema
+    data_layer = {'session': db.session,
+                  'model': Baseline  
+                }
+
 # Create endpoints
 #基线
 api.route(BaselineList, 'baseline_list', '/api/baselines')
@@ -364,6 +385,8 @@ api.route(PackageMerge, 'package_merge', '/api/packages/merge/<int:id>')
 api.route(PackageDeploy, 'package_deploy', '/api/packages/deploy/<int:id>')
 # 发布更新包
 api.route(PackageRelease, 'package_release', '/api/packages/release/<int:id>')
+# 更新基线,只提供GET方法
+api.route(BaselineUpdate, 'baseline_update', '/api/baseline/update/<id>',url_rule_options={'methods':['GET',]})
 
 
 # 更新包下载
