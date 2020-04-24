@@ -161,26 +161,26 @@ class Project(db.Model):
     def __repr__(self):
         return '<Project.name %r>' % self.name
 
-    #重建打包的目录
-    def rebuild_relase_directory(self):
-        target_dir = self.target_dir
-        APP_dir=os.path.join(target_dir,'APP')
-        DB_dir=os.path.join(target_dir,'DB')
-        log_dir=os.path.join(target_dir,'LOG')
-        target_sqldir = os.path.join(DB_dir, 'SQL')
-        target_pckdir = os.path.join(DB_dir, 'PCK')
-        target_rollbackdir = os.path.join(DB_dir, 'ROLLBACK')
-        try:
-            if os.path.exists(DB_dir):
-                shutil.rmtree(DB_dir)
-            os.makedirs(target_sqldir)
-            os.mkdir(target_pckdir)
-            os.mkdir(target_rollbackdir)
-            if os.path.exists(log_dir):
-                shutil.rmtree(log_dir)
-            os.mkdir(log_dir)
-            if os.path.exists(APP_dir):
-                shutil.rmtree(APP_dir)
-            os.mkdir(APP_dir)
-        except OSError:
-            pass
+    # #重建打包的目录
+    # def rebuild_relase_directory(self):
+    #     target_dir = self.target_dir
+    #     APP_dir=os.path.join(target_dir,'APP')
+    #     DB_dir=os.path.join(target_dir,'DB')
+    #     log_dir=os.path.join(target_dir,'LOG')
+    #     target_sqldir = os.path.join(DB_dir, 'SQL')
+    #     target_pckdir = os.path.join(DB_dir, 'PCK')
+    #     target_rollbackdir = os.path.join(DB_dir, 'ROLLBACK')
+    #     try:
+    #         if os.path.exists(DB_dir):
+    #             shutil.rmtree(DB_dir)
+    #         os.makedirs(target_sqldir)
+    #         os.mkdir(target_pckdir)
+    #         os.mkdir(target_rollbackdir)
+    #         if os.path.exists(log_dir):
+    #             shutil.rmtree(log_dir)
+    #         os.mkdir(log_dir)
+    #         if os.path.exists(APP_dir):
+    #             shutil.rmtree(APP_dir)
+    #         os.mkdir(APP_dir)
+    #     except OSError:
+    #         pass

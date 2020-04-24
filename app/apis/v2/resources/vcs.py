@@ -63,20 +63,6 @@ class BaselineList(ResourceList):
         data['status_id'] =203
         
 
-    # def after_post(self, result):
-    #     """Hook to make custom work after post method"""
-    #     obj = self._data_layer.get_object({'id':result[0]['data']['id']})
-    #     try:
-    #         message = obj.update_baseline()
-    #     except Exception as e:
-    #         return api_abort(400,detail=str(e))
-    #     else:
-    #         # 发送邮件
-    #         obj.baseline_email()
-    #         # 更新结果返回
-    #         result[0].update({'detail': message})
-    #         return result
-
     schema = BaselineSchema
     data_layer = {'session': db.session,
                   'model': Baseline,
@@ -85,25 +71,7 @@ class BaselineList(ResourceList):
 
 class BaselineDetail(ResourceDetail):
     decorators = (auth_required,)
-    def before_patch(self, args, kwargs, data=None):
-        """Hook to make custom work before patch method"""
-        obj = self._data_layer.get_object({'id':kwargs['id']})
-        data['updateno'] = obj.updateno+1
-    
-    # def after_patch(self, result):
-    #     """Hook to make custom work after patch method"""
-    #     obj = self._data_layer.get_object({'id':result['data']['id']})
-    #     try:
-    #         message = obj.update_baseline()
-    #     except Exception as e:
-    #         return api_abort(400,detail=str(e))
-    #     else:
-    #         # 发送邮件
-    #         obj.baseline_email()
-    #         # 更新结果返回
-    #         result.update({'detail': message})
-    #         return result
-
+  
     # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
     # 支持两种方式删除
     def delete_object(self, kwargs):
@@ -133,9 +101,12 @@ class BaselineRelationship(ResourceRelationship):
 class PackageList(ResourceList):
     decorators = (auth_required,)
 
-    #　处理更新包的默认内容
+    
     def before_post(self, args, kwargs, data=None):
-        """Hook to make custom work before post method""" 
+        """Hook to make custom work before post method
+            将更新包里的baseline按照app分成不同的merge_baseline，记录在package中
+            根据提供的项目、日期、和次数生成更新包的名字  WellLink_20200423_01
+        """ 
         blineno = data['blineno']
         bdate  = data['rlsdate']
         env_id = data['env_id']
@@ -191,8 +162,8 @@ class PackageList(ResourceList):
             db.session.commit()
             merge_list.append(merge_baseline)
         merge_blineno = ','.join(str(bline.id) for bline in merge_list)
-        data['merge_blineno'] = merge_blineno      # 更新包合并出来的基线
-        data['name'] = name      # 根据日期和发布次数决定更新包的名字
+        data['merge_blineno'] = merge_blineno      # 更新包的merge_blineno
+        data['name'] = name      # 更新包名字
         
 
     schema = PackageSchema
@@ -345,6 +316,9 @@ class BaselineUpdate(ResourceDetail):
 
     def after_get(self, result):
         obj = self._data_layer.get_object({'id':result['data']['id']})
+        obj.updateno += 1
+        db.session.add(obj)
+        db.session.commit()
         try:
             message = obj.update_baseline()
         except Exception as e:

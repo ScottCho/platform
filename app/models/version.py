@@ -51,17 +51,48 @@ class Baseline(db.Model):
     issue_category_id =  db.Column(db.Integer, db.ForeignKey('issue_category.id'))
     issue_category = db.relationship('IssueCategory', back_populates='baselines')
 
+
+
+   # Jnekins编译后执行得打包脚本
+    def  render_package_script(self,flag=0):
+        # jenkins_ip = os.getenv(JENKINS_URL)  # http://192.168.0.80:8080/jenkins
+        if flag == 1:
+            package_dir = os.path.join(self.app.project.target_dir,self.package.name,'APP')
+        else:
+            package_dir = os.path.join(self.app.project.target_dir,'APP_SIT')
+        shell_script = render_template('apis/v2/service/package.sh',
+            jenkins_job_dir = self.app.jenkins_job_dir,
+            port = self.app.port,
+            alias = self.app.alias,
+            deploy_host = self.app.server.ip,
+            deploy_dir = self.app.deploy_dir,
+            package_dir = package_dir
+        )
+        # jenkin的workspace不存在package.sh,则重新创建
+        package_script = os.path.join(self.app.jenkins_job_dir,'package.sh')
+        if not os.path.exists(package_script):
+            with open(package_script, 'w') as f:
+                f.write(shell_script)
+
+
+              
     def update_baseline(self,flag=0,num='01'):
-    # flag=0:单条基线更新，flag=1： 合并基线更新
-    # num: 当天发布更新包的个数
+
+        '''
+        flag=0:单条基线更新，flag=1： 合并基线更新
+        num: 项目当天发布更新包的次数
+        '''
+    
         message = '*****开始更新基线*****\n'
-        job_name = ''
+        jenkins_job_name = self.app.jenkins_job_name
+
         if self.versionno:
             version_list = self.versionno.split(',')
             compile_file_list = []  # 构建文件集
             for version in version_list:
                 # SVN源代码的变更集
                 source_files = diff_summary_files(self.app.source_dir, int(version)-1, int(version))
+
                 # 构建后的变更集
                 compile_file_list += [trans_java(self.app.subsystem.en_name,
                                              self.app.source_dir, f) for f in source_files]
@@ -81,13 +112,9 @@ class Baseline(db.Model):
                     fw.write('"'+line+'"'+'\n')
 
             #　判断前一次是否构建成功
-            jenkins_job_dir = self.app.jenkins_job_dir
-            dir_list = jenkins_job_dir.split('/')
-            job_name_index = dir_list.index('jobs')+1
-            job_name = dir_list[job_name_index]
-            job = get_jenkins_job(job_name)
+            job = get_jenkins_job(jenkins_job_name)
             jenkins_last_build = job.get_last_build().is_good()
-            message += '开始构建程序.....'+job_name+'\n'
+            message += '开始构建程序.....'+jenkins_job_name+'\n'
             if jenkins_last_build:
                 message += '该系统上一次构建结果： 成功\n'
             else:
@@ -98,8 +125,10 @@ class Baseline(db.Model):
                 str(jenkins_build_number)+'/console'+'\n'
             print(message)
 
+
             # 判断是否存在打包脚本，不存在则创建
-            self.app.package_script()
+            self.render_package_script(flag=flag)
+ 
 
         # DB更新
         if self.sqlno or self.pckno:
@@ -114,8 +143,9 @@ class Baseline(db.Model):
             source_rollbackdir = os.path.join(source_dbdir, '03-rollbackup')
             target_dir = self.app.project.target_dir
             if flag == 1:
-                base_dir = os.path.join(target_dir, 'DB')
-                log_dir = os.path.join(target_dir, 'LOG')
+                # pck从puat文件中读取
+                # base_dir = os.path.join(target_dir, 'DB')
+                # log_dir = os.path.join(target_dir, 'LOG')
                 source_pckdir = os.path.join(source_dbdir, '02-pck','puat')
             else:
                 base_dir = os.path.join(target_dir, 'DB'+'_'+str(self.id))
@@ -123,28 +153,36 @@ class Baseline(db.Model):
             target_sqldir = os.path.join(base_dir, 'SQL')
             target_pckdir = os.path.join(base_dir, 'PCK')
             target_rollbackdir = os.path.join(base_dir, 'ROLLBACK')
-            # 重建更新包的DB和日志的目录,flag==1时在view重建
-            if flag == 0:
-                try:
-                    if os.path.exists(base_dir):
-                        shutil.rmtree(base_dir)
-                    os.makedirs(target_sqldir)
-                    os.mkdir(target_pckdir)
-                    os.mkdir(target_rollbackdir)
-                    if os.path.exists(log_dir):
-                        shutil.rmtree(log_dir)
-                    os.mkdir(log_dir)
-                except OSError:
-                    pass
+
+            # 建立DB和日志的目录，如果存在则删除重建
+            # 目录名字为DB_{baseline_id},LOG_{baseline_id}
+            try:
+                if os.path.exists(base_dir):
+                    shutil.rmtree(base_dir)
+                os.makedirs(target_sqldir)
+                os.mkdir(target_pckdir)
+                os.mkdir(target_rollbackdir)
+                if os.path.exists(log_dir):
+                    shutil.rmtree(log_dir)
+                os.mkdir(log_dir)
+            except OSError:
+                pass
+
             # 更新SVN中的DB
             r = svn.local.LocalClient(self.app.project.source_dir)
             r.update()
-            # $base_DIR/HXUSER_20180409_01_ALL.sql
+
+            # ALL脚本路径
+            # /update/PICCHK/DB_2001/HXUSER_20180409_01_ALL.sql
             DB_SCRIPT = os.path.join(base_dir, db_username.upper(
                     )+'_'+self.created.strftime("%Y%m%d")+'_'+num+'_ALL.sql')
+            
+            #　回滚ALL脚本路径
+            # /update/PICCHK/DB_2001/ROLLBACK/YLPROD_20191122_ALL_ROLLBACK_01.sql
             ROLLBACK_SCRIPT = os.path.join(target_rollbackdir, db_username.upper(
                     )+'_'+self.created.strftime("%Y%m%d")+'_'+'ALL_ROLLBACK_'+num+'.sql')
-            # 将sql文件复制到base_dir，,并将路径加到ALL.sql
+
+            # 将sql文件复制到DB_{baseline_id},并将路径加到ALL.sql
             if self.sqlno:
                 for sql in self.sqlno.split(','):
                     # 找出匹配的SQL路径，/SVN/../423_HZJ_JSUSER_20180326.sql
@@ -164,6 +202,7 @@ class Baseline(db.Model):
                     else:
                         current_app.logger.error('存在多个相同的sql文件')
                         raise Exception(sql+'存在多个相同的sql文件!') 
+
             # 将pck文件复制到base_dir,并将路径加到ALL.sql
             if self.pckno:
                 for pck in self.pckno.split(','):
@@ -234,7 +273,7 @@ class Baseline(db.Model):
 
         # 根据基线的id触发Jenkins参数构建,先更新DB，再更新应用
         if self.versionno:
-            build_with_parameters(job_name,baseline_id=self.id)
+            build_with_parameters(jenkins_job_name,baseline_id=self.id)
         return   message     
 
     # 发送基线更新邮件
@@ -282,6 +321,27 @@ class Package(db.Model):
     status = db.relationship('Status', back_populates='packages')
 
     
+
+    def create_package_dir(self):
+        '''
+        创建空目录的更新包
+        '''
+
+        target_dir = self.project.target_dir
+        package_dir = os.path.join(target_dir, self.name)
+        app_dir = os.path.join(package_dir, 'APP')
+        db_dir = os.path.join(package_dir, 'DB')
+        # log_dir = os.path.join(target_dir, 'LOG')
+        
+
+        if os.path.exists(package_dir):
+            shutil.rmtree(package_dir)
+        os.mkdir(package_dir)
+        os.mkdir(app_dir)
+        os.mkdir(db_dir)
+     
+
+    
     def release_package(self):
         target_dir = self.project.target_dir
         app_dir = os.path.join(target_dir, 'APP')
@@ -326,7 +386,7 @@ class Package(db.Model):
 
     def package_merge(self):
         '''
-        合并更新包里面的应用版本
+        合并更新包里面的应用版本到SVN
         '''
         merge_blineno = self.merge_blineno
         merge_msg = '开始合并基线....</br>'
@@ -365,7 +425,7 @@ class Package(db.Model):
     
     def package_deploy(self):
         '''
-        部署更新包
+        部署更新包,更新包中的merge_blineno代表的基线将会被更新
         '''
         package_count = self.package_count
         project = self.project
@@ -375,9 +435,9 @@ class Package(db.Model):
             baseline.status_id = 206
             db.session.add(baseline)
             db.session.commit()
-        deploy_msg = ''
+        deploy_msg = '开始部署更新包'
         # 合并发布之前重建APP和DB目录
-        project.rebuild_relase_directory()
+        self.create_package_dir()
         merge_blineno = self.merge_blineno.split(',')
         for nu in merge_blineno:
             merge_baseline = Baseline.query.get_or_404(nu)
@@ -404,18 +464,8 @@ class Package(db.Model):
             db.session.commit()
 
         target_dir = self.project.target_dir
-        app_dir = os.path.join(target_dir, 'APP')
-        db_dir = os.path.join(target_dir, 'DB')
+    
         log_dir = os.path.join(target_dir, 'LOG')
-        package_dir = os.path.join(target_dir, self.name)
-
-        if os.path.exists(package_dir):
-            shutil.rmtree(package_dir)
-        os.mkdir(package_dir)
-        if os.path.exists(app_dir) and os.listdir(app_dir):
-            shutil.copytree(app_dir, os.path.join(package_dir, 'APP'))
-        if os.path.exists(db_dir) and os.listdir(db_dir):
-            shutil.copytree(db_dir, os.path.join(package_dir, 'DB'))
         returncode, output = execute_cmd.execute_cmd(
             'sh '+target_dir+'/relase_package.sh '+self.name)
         package_path = ''
@@ -456,3 +506,4 @@ class Package(db.Model):
                                package_name,
                                as_attachment=True
                                )
+

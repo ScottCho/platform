@@ -1,3 +1,11 @@
+'''
+@Author: your name
+@Date: 2020-04-24 11:37:22
+@LastEditTime: 2020-04-24 15:24:43
+@LastEditors: Please set LastEditors
+@Description: In User Settings Edit
+@FilePath: /platform/app/utils/jenkins.py
+'''
 import requests
 import os
 
@@ -30,5 +38,6 @@ def build_with_parameters(job_name,**kw):
     global url,username,password,token
     kw.update({'token':token})
     build_url =  url+'/job/'+job_name+'/buildWithParameters'
+    print(build_url,kw)
     r = requests.post(build_url,data=kw)
     return r.ok

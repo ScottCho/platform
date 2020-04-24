@@ -89,7 +89,7 @@ class AppSchema(Schema):
     jenkins_job_dir = fields.Str()
     port = fields.Str()
     deploy_dir = fields.Str(allow_none=True)
-    package_dir = fields.Str(allow_none=True)
+    jenkins_job_name = fields.Str(allow_none=True)
     alias = fields.Str()
     context = fields.Str(allow_none=True)
     service_url = fields.Function(lambda obj: "http://{}:{}/{}".format(obj.server.ip,obj.port,obj.context))

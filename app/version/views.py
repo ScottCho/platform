@@ -57,10 +57,8 @@ def update_baseline(project_id,subsystem_id,env_id):
         content = form.content.data
         mark = form.mark.data
         updateno = 1
-        dir_list = app.jenkins_job_dir.split('/')
-        job_name_index = dir_list.index('jobs')+1
-        job_name = dir_list[job_name_index]
-        job = get_jenkins_job(job_name)
+        jenkins_job_name = app.jenkins_job_name
+        job = get_jenkins_job(jenkins_job_name)
         jenkins_last_build = job.get_last_build().is_good()
         jenkins_build_number = job.get_next_build_number() 
 
@@ -229,8 +227,7 @@ def edit_baseline(id):
         baseline.updateno = int(baseline.updateno) + 1
         baseline.status_id = 203
         dir_list = app.jenkins_job_dir.split('/')
-        job_name_index = dir_list.index('jobs')+1
-        job_name = dir_list[job_name_index]
+        job_name = app.jenkins_job_name
         job = get_jenkins_job(job_name)
         jenkins_last_build = job.get_last_build().is_good()
         baseline.jenkins_last_build = jenkins_last_build
@@ -333,9 +330,7 @@ def merge_baseline():
             subsystem_id = app_key.subsystem_id
             project_id = app_key.project_id
             merge_app = App.query.filter_by(project_id=project_id,subsystem_id=subsystem_id,env_id=env_id).first()
-            dir_list = merge_app.jenkins_job_dir.split('/')
-            job_name_index = dir_list.index('jobs')+1
-            job_name = dir_list[job_name_index]
+            job_name = merge_app.jenkins_job_name
             job = get_jenkins_job(job_name)
             merge_baseline = Baseline(
                 sqlno=sqlnos.strip(','),
