@@ -152,29 +152,29 @@ def test():
 
 
 
-from app.utils.execute_cmd import remote_socket_shell,socket_shell
+# from app.utils.execute_cmd import remote_socket_shell,socket_shell
 
-def ack():
-    print('message was received!')
+# def ack():
+#     print('message was received!')
 
-#处理接收到的客户端信息
-@socketio.on('connect event',namespace='/task')
-def handle_my_custom_event(json):
-    print('received json: ' + str(json))
-    emit('event2',str(json),namespace='/task',callback=ack)
+# #处理接收到的客户端信息
+# @socketio.on('connect event',namespace='/task')
+# def handle_my_custom_event(json):
+#     print('received json: ' + str(json))
+#     emit('event2',str(json),namespace='/task',callback=ack)
 
 
 
-@flask_app.route('/task')
-def start_background_task():
-    # remote_socket_shell()
-    socket_shell('ping -c5 qq.com')
-    return 'Started'
+# @flask_app.route('/task')
+# def start_background_task():
+#     # remote_socket_shell()
+#     socket_shell('ping -c5 qq.com')
+#     return 'Started'
 
-@flask_app.route('/socket')
-@cross_origin(allow_headers=['Content-Type'])
-def socket():
-        return render_template('apis/v2/socketio.html')
+# @flask_app.route('/socket')
+# @cross_origin(allow_headers=['Content-Type'])
+# def socket():
+#         return render_template('apis/v2/socketio.html')
 
 
 ### 测试文件上传

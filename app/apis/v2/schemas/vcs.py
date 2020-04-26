@@ -33,7 +33,7 @@ class BaselineSchema(Schema):
     developer_username = fields.Function(lambda obj: "{}".format(obj.developer.username))
     project_name = fields.Function(lambda obj: "{}".format(obj.app.project.name))
     project_id = fields.Function(lambda obj: "{}".format(obj.app.project.id))
-    issue_category_id = fields.Integer()
+    issue_category_id = fields.Integer(allow_none=True)
     issue_category_name = fields.Function(lambda obj: "{}".format(obj.issue_category.name))
     developer = Relationship(self_view='baseline_developer',
                              self_view_kwargs={'id': '<id>'},

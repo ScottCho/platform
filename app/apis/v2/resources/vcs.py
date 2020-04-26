@@ -103,68 +103,31 @@ class PackageList(ResourceList):
 
     
     def before_post(self, args, kwargs, data=None):
+
         """Hook to make custom work before post method
-            将更新包里的baseline按照app分成不同的merge_baseline，记录在package中
             根据提供的项目、日期、和次数生成更新包的名字  WellLink_20200423_01
         """ 
-        blineno = data['blineno']
         bdate  = data['rlsdate']
-        env_id = data['env_id']
         package_count = data.get('package_count'.zfill(2),'01')
         project_id = data.get('project_id')
         project_name = Project.query.get(project_id).name
         bdate = data.get('rlsdate',datetime.now().strftime("%Y%m%d")).replace('-','')    # 2020-03-31
         name = "{}_{}_{}".format(project_name, bdate, package_count)
-        #将基线按app分组 {<App 1>: [<Baseline 1>,  <Baseline 2>],<App 2>: [<Baseline 3>]}
-        app_dict={}
-        merge_list=[]
-        for bid in blineno.split(','):
-            baseline = Baseline.query.filter_by(id=int(bid)).first()
-            app = baseline.app
-            if app not in app_dict.keys():
-                app_dict.update({app:[baseline]})
-            else:
-                app_dict[app].append(baseline)
-
-        #将相同的app合并成一条基线
-        for app_key, baseline_list in app_dict.items():
-            versionnos = '' 
-            sqlnos = ''
-            pcknos = ''
-            rollbacknos = ''
-            for baseline in baseline_list:
-                if baseline.sqlno:
-                    sqlnos = '{},{}'.format(sqlnos,baseline.sqlno)
-                if baseline.versionno:
-                    versionnos = '{},{}'.format(versionnos,baseline.versionno)
-                if baseline.pckno:
-                    pcknos = '{},{}'.format(pcknos,baseline.pckno)
-                if baseline.rollbackno:
-                    rollbacknos = '{},{}'.format(rollbacknos,baseline.rollbackno)
-               
-            # 将多条基线合并到同一条
-            subsystem_id = app_key.subsystem_id
-            project_id = app_key.project_id
-            merge_app = App.query.filter_by(project_id=project_id,subsystem_id=subsystem_id,env_id=env_id).first()
-            merge_baseline = Baseline(
-                sqlno=sqlnos.strip(','),
-                versionno=versionnos.strip(','),
-                pckno=pcknos.strip(','),
-                rollbackno=rollbacknos.strip(','),
-                created=bdate,
-                app_id=merge_app.id,
-                content='合并发布',
-                developer_id=g.current_user.id,
-                updateno=1,
-                status_id=203
-            )
-            db.session.add(merge_baseline)    
-            db.session.commit()
-            merge_list.append(merge_baseline)
-        merge_blineno = ','.join(str(bline.id) for bline in merge_list)
-        data['merge_blineno'] = merge_blineno      # 更新包的merge_blineno
         data['name'] = name      # 更新包名字
         
+
+    def after_post(self, result):
+        """Hook to make custom work after post method
+        根据更新包中的合并基线，将其按照app分组合并
+        并添加合并基线
+        """
+      
+        obj = self._data_layer.get_object({'id':result[0]['data']['id']})
+        merge_blineno = obj.baseline_group_merge()
+        obj.merge_blineno = merge_blineno
+        db.session.add(obj)
+        db.session.commit()
+        return result
 
     schema = PackageSchema
     data_layer = {'session': db.session,
@@ -175,73 +138,8 @@ class PackageDetail(ResourceDetail):
 
     def before_patch(self, args, kwargs, data=None):
         """Hook to make custom work before patch method"""
-        env_id=data['env_id']
-        rlsdate=data['rlsdate']
-        project_id=data['project_id']
-        merge_blineno = data['merge_blineno']
-        original_merge_bline_list = merge_blineno.split(',')
-        merge_list = []
-        blineno = data['blineno']
-        change_blineno_list = blineno.split(',')
-
-        #删除原始的合并的基线
-        for no in original_merge_bline_list:
-            baseline = Baseline.query.filter_by(id=no).first()
-            if baseline:
-                db.session.delete(baseline)
-                db.session.commit()
-
-        #将相同的app合并成一条基线
-        #{<App 1>: [<Baseline 1>,  <Baseline 2>],<App 2>: [<Baseline 3>]}
-        app_dict={}
-        for no in  change_blineno_list:
-            baseline = Baseline.query.get_or_404(no)
-            app = baseline.app
-            if app not in app_dict.keys():
-                app_dict.update({app:[baseline]})
-            else:
-                app_dict[app].append(baseline)
-        for app_key in app_dict.keys():
-            versionnos = '' 
-            sqlnos = ''
-            pcknos = ''
-            rollbacknos = ''
-            baseline_list = app_dict[app_key]
-            for baseline in baseline_list:
-                bsqlno = baseline.sqlno
-                bversionno = baseline.versionno
-                bpckno = baseline.pckno
-                brollbackno = baseline.rollbackno
-                # 拼接基线
-                if bsqlno:
-                    sqlnos = (str(bsqlno) + ',' + sqlnos).strip(',')
-                if bversionno:
-                    versionnos = (str(bversionno) + ',' + versionnos).strip(',')
-                if bpckno:
-                    pcknos = (str(bpckno) + ',' + pcknos).strip(',')
-                if brollbackno:
-                    rollbacknos = (str(brollbackno) + ',' + rollbacknos).strip(',')
-
-            # 将多条基线合并到同一条
-            subsystem_id = app_key.subsystem_id
-            merge_app = App.query.filter_by(project_id=project_id,env_id=env_id,subsystem_id=subsystem_id).first()
-            merge_baseline = Baseline(sqlno=sqlnos,
-                                  versionno=versionnos,
-                                  pckno=pcknos,
-                                  rollbackno=rollbacknos,
-                                  created=rlsdate,
-                                  app_id=merge_app.id,
-                                  content='合并发布',
-                                  developer_id=g.current_user.id,
-                                  updateno=1,
-                                  status_id=213
-                                  )
-            db.session.add(merge_baseline)    
-            db.session.commit()
-            merge_list.append(merge_baseline)
-
-        #  设置package中的merge_blineno的值
-        merge_blineno = ','.join(str(bline.id) for bline in merge_list)
+        obj = self._data_layer.get_object({'id':kwargs['id']})
+        merge_blineno = obj.baseline_group_merge()
         data['merge_blineno'] = merge_blineno
 
     # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
@@ -272,6 +170,7 @@ class PackageMerge(ResourceDetail):
     def after_get(self, result):
         package = self._data_layer.get_object({'id':result['data']['id']})
         detail = package.package_merge()
+        print(detail)
         result.update({'detail': detail})
         return result
 
@@ -285,6 +184,7 @@ class PackageDeploy(ResourceDetail):
     def after_get(self, result):
         package = self._data_layer.get_object({'id':result['data']['id']})
         detail = package.package_deploy()
+        print('detail:' + detail)
         result.update({'detail': detail})
         return result
 
@@ -293,6 +193,9 @@ class PackageDeploy(ResourceDetail):
                   'model': Package}
 
 class PackageRelease(ResourceDetail):
+    '''
+    基线打包
+    '''
     decorators = (auth_required,)
 
     def after_get(self, result):
@@ -306,12 +209,18 @@ class PackageRelease(ResourceDetail):
                   'model': Package}
 
 class PackageDownloadAPI(MethodView):
+    '''
+    更新包下载
+    '''
     def get(self,package_id):
         package = Package.query.get(package_id)
         return package.package_download()
        
 
 class BaselineUpdate(ResourceDetail):
+    '''
+    基线更新
+    '''
     decorators = (auth_required,)
 
     def after_get(self, result):
@@ -319,13 +228,17 @@ class BaselineUpdate(ResourceDetail):
         obj.updateno += 1
         db.session.add(obj)
         db.session.commit()
+        message = '*****开始更新基线*****\n'
         try:
-            message = obj.update_baseline()
+            if obj.sqlno or obj.pckno:
+                message += obj.update_db()
+            if obj.versionno:
+                message += obj.update_app()
         except Exception as e:
             return api_abort(400,detail=str(e))
         else:
             # 发送邮件
-            obj.baseline_email()
+            obj.send_baseline_email()
             # 更新结果返回
             result.update({'detail': message})
         return result
@@ -354,9 +267,9 @@ api.route(PackageRelationship, 'package_project', '/api/packages/<int:id>/relati
 api.route(PackageRelationship, 'package_env', '/api/packages/<int:id>/relationships/env')
 api.route(PackageRelationship, 'package_baselines', '/api/packages/<int:id>/relationships/baselines')
 # 合并基线
-api.route(PackageMerge, 'package_merge', '/api/packages/merge/<int:id>')
+api.route(PackageMerge, 'package_merge', '/api/packages/merge/<int:id>',url_rule_options={'methods':['GET',]})
 # 部署更新包
-api.route(PackageDeploy, 'package_deploy', '/api/packages/deploy/<int:id>')
+api.route(PackageDeploy, 'package_deploy', '/api/packages/deploy/<int:id>',url_rule_options={'methods':['GET',]})
 # 发布更新包
 api.route(PackageRelease, 'package_release', '/api/packages/release/<int:id>')
 # 更新基线,只提供GET方法
