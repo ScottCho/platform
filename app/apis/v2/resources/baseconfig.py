@@ -14,6 +14,8 @@ from app.apis.v2.errors import api_abort
 from app.models.baseconfig import Status, Tag, Software, BgTask 
 from app.utils.ansible_api import exec_shell,ansible_playbook
 
+from . import BaseResourceDetail
+
 
 # 问题状态
 class StatusList(ResourceList):
@@ -24,20 +26,8 @@ class StatusList(ResourceList):
                   'model': Status
                 }
 
-class StatusDetail(ResourceDetail):
+class StatusDetail(BaseResourceDetail):
     decorators = (auth_required,)
-
-    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
-    # 支持两种方式删除
-    def delete_object(self, kwargs):
-        ids = kwargs.get('id')
-        if ids[0] != '[':
-            obj = self._data_layer.get_object(kwargs)
-            self._data_layer.delete_object(obj, kwargs)
-        else:
-            for id in ids[1:-1].split(','):
-                obj = self._data_layer.get_object({'id':id})
-                self._data_layer.delete_object(obj, {'id':id})
 
     schema = StatusSchema
     data_layer = {'session': db.session,
@@ -59,20 +49,8 @@ class TagList(ResourceList):
                   'model': Tag
                 }
 
-class TagDetail(ResourceDetail):
+class TagDetail(BaseResourceDetail):
     decorators = (auth_required,)
-
-    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
-    # 支持两种方式删除
-    def delete_object(self, kwargs):
-        ids = kwargs.get('id')
-        if ids[0] != '[':
-            obj = self._data_layer.get_object(kwargs)
-            self._data_layer.delete_object(obj, kwargs)
-        else:
-            for id in ids[1:-1].split(','):
-                obj = self._data_layer.get_object({'id':id})
-                self._data_layer.delete_object(obj, {'id':id})
 
     schema = TagSchema
     data_layer = {'session': db.session,
@@ -95,20 +73,8 @@ class SoftwareList(ResourceList):
                   'model': Software
                 }
 
-class SoftwareDetail(ResourceDetail):
+class SoftwareDetail(BaseResourceDetail):
     decorators = (auth_required,)
-
-    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
-    # 支持两种方式删除
-    def delete_object(self, kwargs):
-        ids = kwargs.get('id')
-        if ids[0] != '[':
-            obj = self._data_layer.get_object(kwargs)
-            self._data_layer.delete_object(obj, kwargs)
-        else:
-            for id in ids[1:-1].split(','):
-                obj = self._data_layer.get_object({'id':id})
-                self._data_layer.delete_object(obj, {'id':id})
 
     schema = SoftwareSchema
     data_layer = {'session': db.session,
@@ -140,20 +106,8 @@ class BgtaskList(ResourceList):
                 }
 
 
-class BgtaskDetail(ResourceDetail):
+class BgtaskDetail(BaseResourceDetail):
     decorators = (auth_required,)
-
-    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
-    # 支持两种方式删除
-    def delete_object(self, kwargs):
-        ids = kwargs.get('id')
-        if ids[0] != '[':
-            obj = self._data_layer.get_object(kwargs)
-            self._data_layer.delete_object(obj, kwargs)
-        else:
-            for id in ids[1:-1].split(','):
-                obj = self._data_layer.get_object({'id':id})
-                self._data_layer.delete_object(obj, {'id':id})
 
     schema = BgtaskSchema
     data_layer = {'session': db.session,

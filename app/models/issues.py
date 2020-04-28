@@ -111,7 +111,7 @@ class IssueRequirement(db.Model):
     tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'))   #模块
     tag = db.relationship('Tag', back_populates='requirements')      # 标签
     
-    baselines= db.relationship('Baseline', secondary='requirement_ass_baseline', back_populates='irequirements')  #关联基线
+    baselines= db.relationship('Baseline', secondary='requirement_ass_baseline', back_populates='issue_requirements')  #关联基线
     tasks = db.relationship('IssueTask', back_populates='requirement')  # 需求分解的任务
     
 
@@ -146,7 +146,7 @@ class IssueBug(db.Model):
     module =  db.relationship('IssueModule', back_populates='bugs')   # 所属模块
     tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'))   #模块
     tag = db.relationship('Tag') # 标签
-    baselines= db.relationship('Baseline', secondary='bug_ass_baseline', back_populates='ibugs')
+    baselines= db.relationship('Baseline', secondary='bug_ass_baseline', back_populates='issue_bugs')
    
 
 
@@ -173,4 +173,4 @@ class IssueTask(db.Model):
     assignee = db.relationship('User',back_populates='tasks')
     priority_id = db.Column(db.Integer, db.ForeignKey('issue_priority.id'))   #优先级
     priority = db.relationship('IssuePriority', back_populates='tasks')
-    baselines= db.relationship('Baseline', secondary='task_ass_baseline', back_populates='itasks')  
+    baselines= db.relationship('Baseline', secondary='task_ass_baseline', back_populates='issue_tasks')  

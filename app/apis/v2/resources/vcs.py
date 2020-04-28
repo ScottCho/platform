@@ -30,12 +30,15 @@ from app.apis.v2.resources.baseconfig import StatusDetail
 from app.apis.v2.schemas.baseconfig import StatusSchema
 from app.apis.v2.schemas.vcs import BaselineSchema, PackageSchema
 from app.localemail import send_email
+from app.models.auth import Project
 from app.models.baseconfig import Status
 from app.models.service import App
 from app.models.version import Baseline, Package
 from app.utils import execute_cmd, fnmatch_file, switch_char
 from app.utils.jenkins import get_jenkins_job
-from app.models.auth import Project
+
+from . import BaseResourceDetail
+
 
 # Create resource managers
 class BaselineList(ResourceList):
@@ -44,46 +47,29 @@ class BaselineList(ResourceList):
     # 如果登录用户为管理员则显示所有结果，否则只显示参与的项目的基线
     def query(self, view_kwargs):
         if g.current_user.role_id == 1:
-            query_ = self.session.query(Baseline)
+            query_ = self.session.query(Baseline).order_by(Baseline.id.desc())
         else:
             projects = g.current_user.projects
             apps = []
             for project in projects:
                 apps += project.apps
             app_ids = [app.id for app in apps]
-            query_ = self.session.query(Baseline).filter(Baseline.app_id.in_(app_ids))
+            query_ = self.session.query(Baseline).filter(Baseline.app_id.in_(app_ids)).order_by(Baseline.id.desc())
         return query_
     
-    #　处理基线的默认内容,基线的默认状态为 “SIT提测”
-    #  更新次数为1
+    #　处理基线的默认内容,开发者为当前登录用户
     def before_post(self, args, kwargs, data=None):
         """Hook to make custom work before post method"""
         data['developer_id'] = g.current_user.id
-        data['updateno'] = 1
-        data['status_id'] =203
         
-
     schema = BaselineSchema
     data_layer = {'session': db.session,
                   'model': Baseline,
                   'methods': {'query': query}
                 }
 
-class BaselineDetail(ResourceDetail):
+class BaselineDetail(BaseResourceDetail):
     decorators = (auth_required,)
-  
-    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
-    # 支持两种方式删除
-    def delete_object(self, kwargs):
-        ids = kwargs.get('id')
-        if ids[0] != '[':
-            obj = self._data_layer.get_object(kwargs)
-            self._data_layer.delete_object(obj, kwargs)
-        else:
-            for id in ids[1:-1].split(','):
-                obj = self._data_layer.get_object({'id':id})
-                self._data_layer.delete_object(obj, {'id':id})
-
     schema = BaselineSchema
     data_layer = {'session': db.session,
                   'model': Baseline  
@@ -100,6 +86,11 @@ class BaselineRelationship(ResourceRelationship):
 #更新包
 class PackageList(ResourceList):
     decorators = (auth_required,)
+
+    # 如果登录用户为管理员则显示所有结果，否则只显示参与的项目的基线
+    def query(self, view_kwargs):
+        query_ = self.session.query(Package).order_by(Package.id.desc())
+        return query_
 
     
     def before_post(self, args, kwargs, data=None):
@@ -123,7 +114,8 @@ class PackageList(ResourceList):
         """
       
         obj = self._data_layer.get_object({'id':result[0]['data']['id']})
-        merge_blineno = obj.baseline_group_merge()
+        # 提交更新包后的处理
+        merge_blineno = obj.package_after_post()
         obj.merge_blineno = merge_blineno
         db.session.add(obj)
         db.session.commit()
@@ -131,28 +123,19 @@ class PackageList(ResourceList):
 
     schema = PackageSchema
     data_layer = {'session': db.session,
-                  'model': Package}
+                  'model': Package,
+                  'methods': {'query': query}
+                  }
 
-class PackageDetail(ResourceDetail):
+class PackageDetail(BaseResourceDetail):
     decorators = (auth_required,)
 
     def before_patch(self, args, kwargs, data=None):
         """Hook to make custom work before patch method"""
         obj = self._data_layer.get_object({'id':kwargs['id']})
-        merge_blineno = obj.baseline_group_merge()
+        merge_blineno = obj.package_after_post()
         data['merge_blineno'] = merge_blineno
 
-    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
-    # 支持两种方式删除
-    def delete_object(self, kwargs):
-        ids = kwargs.get('id')
-        if ids[0] != '[':
-            obj = self._data_layer.get_object(kwargs)
-            self._data_layer.delete_object(obj, kwargs)
-        else:
-            for id in ids[1:-1].split(','):
-                obj = self._data_layer.get_object({'id':id})
-                self._data_layer.delete_object(obj, {'id':id})
 
     schema = PackageSchema
     data_layer = {'session': db.session,
@@ -179,12 +162,14 @@ class PackageMerge(ResourceDetail):
                   'model': Package}
 
 class PackageDeploy(ResourceDetail):
+    '''
+    更新包部署
+    '''
     decorators = (auth_required,)
 
     def after_get(self, result):
         package = self._data_layer.get_object({'id':result['data']['id']})
         detail = package.package_deploy()
-        print('detail:' + detail)
         result.update({'detail': detail})
         return result
 
@@ -197,10 +182,13 @@ class PackageRelease(ResourceDetail):
     基线打包
     '''
     decorators = (auth_required,)
-
     def after_get(self, result):
         package = self._data_layer.get_object({'id':result['data']['id']})
-        detail = package.package_release()
+        detail = ''
+        if package.status_id == 211:
+            detail = '更新包状态为已交付，请重新编辑后再发布' 
+        else:
+            detail = package.package_release()
         result.update({'detail': detail})
         return result
 

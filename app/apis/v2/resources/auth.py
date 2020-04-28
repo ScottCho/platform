@@ -33,6 +33,7 @@ from app.apis.v2.schemas.auth import ProjectSchema, RoleSchema, UserSchema
 from app.localemail import send_email
 from app.models.auth import Project, Role, User, group
 
+from . import BaseResourceDetail
 
 # 返回登录产生的token
 class AuthTokenAPI(MethodView):
@@ -172,23 +173,8 @@ class ProjectList(ResourceList):
                   'model': Project}
 
 
-class ProjectDetail(ResourceDetail):
+class ProjectDetail(BaseResourceDetail):
     decorators = (auth_required,)
-
-    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
-    # 支持两种方式删除
-    def delete_object(self, kwargs):
-        ids = kwargs.get('id')
-        if ids[0] != '[':
-            obj = self._data_layer.get_object(kwargs)
-            self._data_layer.delete_object(obj, kwargs)
-        else:
-            for id in ids[1:-1].split(','):
-                obj = self._data_layer.get_object({'id':id})
-                self._data_layer.delete_object(obj, {'id':id})
-    schema = ProjectSchema
-    data_layer = {'session': db.session,
-                  'model': Project}
 
     schema = ProjectSchema
     data_layer = {'session': db.session,
@@ -264,19 +250,9 @@ class UserList(ResourceList):
     data_layer = {'session': db.session,
                   'model': User}
 
-class UserDetail(ResourceDetail):
+class UserDetail(BaseResourceDetail):
     decorators = (auth_required,)
-    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
-    # 支持两种方式删除
-    def delete_object(self, kwargs):
-        ids = kwargs.get('id')
-        if ids[0] != '[':
-            obj = self._data_layer.get_object(kwargs)
-            self._data_layer.delete_object(obj, kwargs)
-        else:
-            for id in ids[1:-1].split(','):
-                obj = self._data_layer.get_object({'id':id})
-                self._data_layer.delete_object(obj, {'id':id})
+    
     schema = UserSchema
     data_layer = {'session': db.session,
                   'model': User}
@@ -294,7 +270,7 @@ class RoleList(ResourceList):
     data_layer = {'session': db.session,
                   'model': Role}
 
-class RoleDetail(ResourceDetail):
+class RoleDetail(BaseResourceDetail):
     decorators = (auth_required,)
     schema = RoleSchema
     data_layer = {'session': db.session,

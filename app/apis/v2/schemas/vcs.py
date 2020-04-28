@@ -66,7 +66,7 @@ class BaselineSchema(Schema):
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueBugSchema',
-                           type_='ibug')
+                           type_='issue_bug')
                            
 
     issue_tasks = Relationship(self_view='baseline_tasks',
@@ -75,7 +75,7 @@ class BaselineSchema(Schema):
                            related_view_kwargs={'id': '<id>'},
                            many=True,
                            schema='IssueTaskSchema',
-                           type_='itask')
+                           type_='issue_task')
 
     issue_requirements = Relationship(self_view='baseline_requirements',
                            self_view_kwargs={'id': '<id>'},
@@ -106,7 +106,7 @@ class PackageSchema(Schema):
     rlsdate = fields.Str()
     blineno = fields.Str()
     merge_blineno = fields.Str()
-    remark = fields.Str()
+    remark = fields.Str(allow_none=True)
     project_id = fields.Integer()
     env_id = fields.Integer()
     package_count = fields.Str()

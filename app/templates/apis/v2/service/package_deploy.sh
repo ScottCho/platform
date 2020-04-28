@@ -1,11 +1,3 @@
-###
- # @Author: your name
- # @Date: 2020-04-26 11:04:49
- # @LastEditTime: 2020-04-26 11:04:49
- # @LastEditors: your name
- # @Description: In User Settings Edit
- # @FilePath: /platform/app/templates/apis/v2/service/package_deploy.sh
- ###
 # /bin/bash
 
 #　模板参数：　
@@ -14,7 +6,7 @@
 # alias = INS
 # deploy_host = 192.168.0.12
 # deploy_dir = /wls/webapps/8002
-# package_dir    merge： /update/WINGLUNG/APP_12    single： /update/WINGLUNG/APP_SIT
+# target_dir    merge： /update/WINGLUNG  single： /update/WINGLUNG
 
 cd {{ jenkins_job_dir }}
 find {{ jenkins_job_dir }} -maxdepth 1 -name *jar -print0|xargs -0 rm -rf
@@ -38,6 +30,9 @@ APP_DATE=$(echo $BASE_APP_LIST|awk -F'[_.]' '{print $2}')
 APP_NU=$(echo $BASE_APP_LIST|awk -F'[_.]' '{print $3}')
 PACKAGE_JAR={{ alias }}_{{ port }}_${APP_DATE}_${APP_NU}.jar
 PACKAGE_MD5={{ alias }}_{{ port }}_${APP_DATE}_${APP_NU}.md5
+
+
+set -x
 cat ${APP_LIST}|xargs md5sum >${PACKAGE_MD5}
 jar -cvfM  ${PACKAGE_JAR} @$APP_LIST
 if [[ $? -ne 0 ]];then
@@ -49,17 +44,19 @@ echo "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}" "{{ deploy_host }}:{{ deploy_dir }
 #scp  "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}" "{{ deploy_host }}:{{ deploy_dir }}"
 #scp  "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}"  "{{ deploy_host }}:{{ deploy_dir }}"
 
-if [[ ! -d {{ package_dir }} ]];then
-    mkdir {{ package_dir }}
-fi 
 
+{% if flag == 1 %}
+ 	mv "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  "{{ target_dir }}"APP_${baseline_id}
+    mv "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}" "{{ target_dir }}"APP_${baseline_id}
+{% elif flag == 0 %}
+  	mv "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  "{{ target_dir }}"APP_SIT
+    mv "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}" "{{ target_dir }}"APP_SIT 
+{% endif %}
 
-mv "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  "{{ package_dir }}"
-mv "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}" "{{ package_dir }}"
 
 echo ssh {{ deploy_host }} "sh {{ deploy_dir }}/update.sh"
 #ssh {{ deploy_host }} "sh {{ deploy_dir }}/update.sh"
 
 rm -rf $APP_LIST
-
+set +x
 exit

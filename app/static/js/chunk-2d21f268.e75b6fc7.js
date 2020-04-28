@@ -1,1 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["chunk-2d21f268"],{d930:function(e,i,p){"use strict";p.r(i);var d=[{label:"Proj_id",key:"proj_id",type:"input"},{label:"User_id",key:"user_id",type:"input"}];i["default"]=d}}]);
