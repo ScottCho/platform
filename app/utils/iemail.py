@@ -1,5 +1,7 @@
- #!/usr/bin/python
-#-*- coding: UTF-8 -*-
+# -*- coding:UTF-8 -*-
+# AUTHOR: Zhao Yong
+# FILE: /Code/githup/platform/app/utils/iemail.py
+# DATE: 2020/04/30 Thu
 
 from __future__ import unicode_literals
 import os
@@ -30,6 +32,7 @@ def _format_addr(s):
     name, addr = parseaddr(s)
     return formataddr((Header(name), addr))
 
+
 # nick_from发件人昵称，默认为发件人邮箱
 # nick_to收件人昵称
 def gen_msg(to_addrs, content, subject, nick_to,nick_from=None, attachments=None):
@@ -51,9 +54,9 @@ def gen_msg(to_addrs, content, subject, nick_to,nick_from=None, attachments=None
     return msg
 
 
-def send_email(to_addrs,content, subject,nick_to,attachments=None, nick_from=None):
-    msg = gen_msg(to_addrs,content, subject, attachments, nick_from)
-    server = smtplib.SMTP_SSL(MAIL_SERVER,SMTP_PORT)
+def send_email(to_addrs, content, subject, nick_to, attachments=None, nick_from=None):
+    msg = gen_msg(to_addrs, content, subject, attachments, nick_from)
+    server = smtplib.SMTP_SSL(MAIL_SERVER, SMTP_PORT)
     server.login(MAIL_USERNAME, MAIL_PASSWORD)
     server.sendmail(MAIL_USERNAME, TO_ADDRS, msg.as_string())
     server.quit()

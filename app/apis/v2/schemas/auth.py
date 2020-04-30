@@ -3,6 +3,7 @@
 from marshmallow_jsonapi.flask import Relationship, Schema
 from marshmallow_jsonapi import fields
 
+
 # Create logical data abstraction
 # 项目
 class ProjectSchema(Schema):
@@ -11,7 +12,7 @@ class ProjectSchema(Schema):
         self_view = 'project_detail'
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'project_list'
-        
+
     id = fields.Integer(dump_only=True)
     name = fields.Str(required=True)
     zh_name = fields.Str(required=True)
@@ -19,19 +20,20 @@ class ProjectSchema(Schema):
     target_dir = fields.Str()
     switch = fields.Bool()
     users = Relationship(self_view='project_users',
-                             self_view_kwargs={'id': '<id>'},
-                             related_view='user_list',
-                             related_view_kwargs={'id': '<id>'},
-                             many=True,
-                             schema='UserSchema',
-                             type_='user')
+                         self_view_kwargs={'id': '<id>'},
+                         related_view='user_list',
+                         related_view_kwargs={'id': '<id>'},
+                         many=True,
+                         schema='UserSchema',
+                         type_='user')
     apps = Relationship(self_view='project_apps',
-                             self_view_kwargs={'id': '<id>'},
-                             related_view='app_list',
-                             related_view_kwargs={'id': '<id>'},
-                             many=True,
-                             schema='AppSchema',
-                             type_='app')
+                        self_view_kwargs={'id': '<id>'},
+                        related_view='app_list',
+                        related_view_kwargs={'id': '<id>'},
+                        many=True,
+                        schema='AppSchema',
+                        type_='app')
+
 
 # 用户
 class UserSchema(Schema):
@@ -53,18 +55,19 @@ class UserSchema(Schema):
     role_name = fields.Function(lambda obj: "{}".format(obj.role.name))
 
     projects = Relationship(self_view='user_projects',
-                           self_view_kwargs={'id': '<id>'},
-                           related_view='project_list',
-                           related_view_kwargs={'id': '<id>'},
-                           many=True,
-                           schema='ProjectSchema',
-                           type_='project')                     
+                            self_view_kwargs={'id': '<id>'},
+                            related_view='project_list',
+                            related_view_kwargs={'id': '<id>'},
+                            many=True,
+                            schema='ProjectSchema',
+                            type_='project')
     role = Relationship(self_view='user_role',
                         self_view_kwargs={'id': '<id>'},
                         related_view='role_detail',
                         related_view_kwargs={'id': '<role_id>'},
                         schema='RoleSchema',
                         type_='role')
+
 
 # 角色
 class RoleSchema(Schema):
@@ -79,11 +82,9 @@ class RoleSchema(Schema):
     permissions = fields.Integer()
     default = fields.Integer()
     users = Relationship(self_view='role_users',
-                        self_view_kwargs={'id': '<id>'},
-                        related_view='user_list',
-                        related_view_kwargs={'id': '<id>'},
-                        many=True,
-                        schema='UserSchema', 
-                        type_ = 'user'     
-    )
-
+                         self_view_kwargs={'id': '<id>'},
+                         related_view='user_list',
+                         related_view_kwargs={'id': '<id>'},
+                         many=True,
+                         schema='UserSchema',
+                         type_='user')

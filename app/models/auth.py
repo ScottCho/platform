@@ -1,4 +1,7 @@
-import os,shutil
+# -*- coding:UTF-8 -*-
+# AUTHOR: Zhao Yong
+# FILE: /Code/githup/platform/app/models/auth.py
+# DATE: 2020/04/30 Thu
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -7,12 +10,16 @@ from flask import current_app
 
 from .. import db
 
-group = db.Table('group',
-    db.Column('proj_id', db.Integer, db.ForeignKey(
-        'projects.id'), primary_key=True),
-    db.Column('user_id', db.Integer, db.ForeignKey(
-        'users.id'), primary_key=True)
-)
+group = db.Table(
+    'group',
+    db.Column('proj_id',
+              db.Integer,
+              db.ForeignKey('projects.id'),
+              primary_key=True),
+    db.Column('user_id',
+              db.Integer,
+              db.ForeignKey('users.id'),
+              primary_key=True))
 
 
 class User(db.Model):
@@ -26,21 +33,21 @@ class User(db.Model):
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     confirmed = db.Column(db.Boolean, default=False)
     active = db.Column(db.Boolean, default=True)
-    role = db.relationship('Role',back_populates='users')
-    projects = db.relationship(
-        'Project', secondary='group', back_populates='users')
-    requirements = db.relationship('IssueRequirement',back_populates='assignee')
-    bugs = db.relationship('IssueBug',back_populates='assignee')
-    tasks = db.relationship('IssueTask',back_populates='assignee')
-    
-    
+    role = db.relationship('Role', back_populates='users')
+    projects = db.relationship('Project',
+                               secondary='group',
+                               back_populates='users')
+    requirements = db.relationship('IssueRequirement',
+                                   back_populates='assignee')
+    bugs = db.relationship('IssueBug', back_populates='assignee')
+    tasks = db.relationship('IssueTask', back_populates='assignee')
+
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
     @property
     def password(self):
         return self.password_hash
-        
 
     @password.setter
     def password(self, password):
@@ -55,7 +62,7 @@ class User(db.Model):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token.encode('utf-8'))
-        except:
+        except Exception:
             return False
         if data.get('confirm') != self.id:
             return False
@@ -69,14 +76,16 @@ class User(db.Model):
 
     def generate_email_change_token(self, new_email, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps(
-            {'change_email': self.id, 'new_email': new_email}).decode('utf-8')
+        return s.dumps({
+            'change_email': self.id,
+            'new_email': new_email
+        }).decode('utf-8')
 
     def change_email(self, token):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token.encode('utf-8'))
-        except:
+        except Exception:
             return False
         if data.get('change_email') != self.id:
             return False
@@ -89,8 +98,7 @@ class User(db.Model):
         db.session.add(self)
         return True
 
-
-    #is_active属性为false，flask_login将拒绝用户登录
+    # is_active属性为false，flask_login将拒绝用户登录
     @property
     def is_active(self):
         return self.active
@@ -103,13 +111,12 @@ class User(db.Model):
         self.active = True
         db.session.commit()
 
-
     @staticmethod
     def reset_password(token, new_password):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token.encode('utf-8'))
-        except:
+        except Exception:
             return False
         user = User.query.get(data.get('reset'))
         if user is None:
@@ -124,21 +131,17 @@ class User(db.Model):
         db.session.commit()
 
     def __repr__(self):
-      return '<User %r>' % self.username
-
+        return '<User %r>' % self.username
 
 
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
-    users = db.relationship('User',back_populates='role')
+    users = db.relationship('User', back_populates='role')
 
     def __repr__(self):
         return '<Role %r>' % self.name
-
-
-
 
 
 class Project(db.Model):
@@ -149,14 +152,15 @@ class Project(db.Model):
     source_dir = db.Column(db.String(80))
     target_dir = db.Column(db.String(80))
     switch = db.Column(db.Boolean, default=True)
-    apps = db.relationship('App',back_populates='project')
-    users = db.relationship('User',secondary='group',back_populates='projects')
-    packages = db.relationship('Package',back_populates='project')
-    requirements = db.relationship('IssueRequirement',back_populates='project')
-    bugs = db.relationship('IssueBug',back_populates='project')
-    tasks = db.relationship('IssueTask',back_populates='project')
-    
-
+    apps = db.relationship('App', back_populates='project')
+    users = db.relationship('User',
+                            secondary='group',
+                            back_populates='projects')
+    packages = db.relationship('Package', back_populates='project')
+    requirements = db.relationship('IssueRequirement',
+                                   back_populates='project')
+    bugs = db.relationship('IssueBug', back_populates='project')
+    tasks = db.relationship('IssueTask', back_populates='project')
 
     def __repr__(self):
         return '<Project.name %r>' % self.name

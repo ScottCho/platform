@@ -1,15 +1,15 @@
-from flask_rest_jsonapi import (Api, ResourceDetail, ResourceList,
-                                ResourceRelationship)
-from marshmallow_jsonapi import fields
+from flask_rest_jsonapi import ResourceList, ResourceRelationship
 
-from app import db, flask_app
+from app import db
 from app.apis.v2 import api
 from app.apis.v2.auth import auth_required
 from app.apis.v2.schemas.cmdb import (AgreementSchema, CredenceSchema,
-                                      ServerSchema, ServerGroupSchema,LinkSchema)
-from app.models.cmdb import Agreement, Credence, Server, ServerGroup, Link
+                                      LinkSchema, ServerGroupSchema,
+                                      ServerSchema)
+from app.models.cmdb import Agreement, Credence, Link, Server, ServerGroup
 
 from . import BaseResourceDetail
+
 
 # Create resource managers
 class ServerList(ResourceList):
@@ -18,18 +18,20 @@ class ServerList(ResourceList):
     data_layer = {'session': db.session,
                   'model': Server}
 
+
 class ServerDetail(BaseResourceDetail):
     decorators = (auth_required,)
-    
     schema = ServerSchema
     data_layer = {'session': db.session,
                   'model': Server}
+
 
 class ServerRelationship(ResourceRelationship):
     decorators = (auth_required,)
     schema = ServerSchema
     data_layer = {'session': db.session,
                   'model': Server}
+
 
 #　服务器分组
 class ServerGroupList(ResourceList):
@@ -38,18 +40,20 @@ class ServerGroupList(ResourceList):
     data_layer = {'session': db.session,
                   'model': ServerGroup}
 
+
 class ServerGroupDetail(BaseResourceDetail):
     decorators = (auth_required,)
-   
     schema = ServerGroupSchema
     data_layer = {'session': db.session,
                   'model': ServerGroup}
+
 
 class ServerGroupRelationship(ResourceRelationship):
     decorators = (auth_required,)
     schema = ServerGroupSchema
     data_layer = {'session': db.session,
                   'model': ServerGroup}
+
 
 # 凭证
 class CredenceList(ResourceList):
@@ -58,12 +62,13 @@ class CredenceList(ResourceList):
     data_layer = {'session': db.session,
                   'model': Credence}
 
+
 class CredenceDetail(BaseResourceDetail):
     decorators = (auth_required,)
-   
     schema = CredenceSchema
     data_layer = {'session': db.session,
                   'model': Credence}
+
 
 class CredenceRelationship(ResourceRelationship):
     decorators = (auth_required,)
@@ -73,28 +78,17 @@ class CredenceRelationship(ResourceRelationship):
 
 
 class AgreementList(ResourceList):
-    decorators = (auth_required,)
-    # 改写成批量删除，kwargs={'id':'[1,2,3]'}或者 kwargs={'id':1}
-    # 支持两种方式删除
-    def delete_object(self, kwargs):
-        ids = kwargs.get('id')
-        if ids[0] != '[':
-            obj = self._data_layer.get_object(kwargs)
-            self._data_layer.delete_object(obj, kwargs)
-        else:
-            for id in ids[1:-1].split(','):
-                obj = self._data_layer.get_object({'id':id})
-                self._data_layer.delete_object(obj, {'id':id})
     schema = AgreementSchema
     data_layer = {'session': db.session,
                   'model': Agreement}
 
+
 class AgreementDetail(BaseResourceDetail):
     decorators = (auth_required,)
-   
     schema = AgreementSchema
     data_layer = {'session': db.session,
                   'model': Agreement}
+
 
 class AgreementRelationship(ResourceRelationship):
     decorators = (auth_required,)
@@ -110,15 +104,17 @@ class LinkList(ResourceList):
     data_layer = {'session': db.session,
                   'model': Link}
 
+
 class LinkDetail(BaseResourceDetail):
     decorators = (auth_required,)
-   
     schema = CredenceSchema
     data_layer = {'session': db.session,
                   'model': Link}
 
 # Create endpoints
 # 服务器
+
+
 api.route(ServerList, 'server_list', '/api/servers')
 api.route(ServerDetail, 'server_detail', '/api/servers/<id>')
 api.route(ServerRelationship, 'server_credence', '/api/servers/<int:id>/relationships/credence')

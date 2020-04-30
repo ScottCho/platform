@@ -1,6 +1,13 @@
-from decimal import Decimal
+#!/usr/bin/env python
+# -*- coding:UTF-8 -*-
+# AUTHOR: Zhao Yong
+# FILE: /Code/githup/platform/app/apis/v2/resources/stat.py
+# DATE: 2020/04/29 Wed
+# TIME: 19:05:31
 
-from flask import jsonify, request
+# DESCRIPTION:
+
+from flask import jsonify
 from flask.views import MethodView
 
 from app import db

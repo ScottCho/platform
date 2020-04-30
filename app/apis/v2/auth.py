@@ -3,7 +3,6 @@
 from functools import wraps
 
 from flask import current_app, g, request
-from flask_rest_jsonapi.exceptions import AccessDenied, JsonApiException
 from itsdangerous import BadSignature, SignatureExpired
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
