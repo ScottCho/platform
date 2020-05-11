@@ -84,31 +84,31 @@ flask_app.register_blueprint(api_v2, url_prefix='/api')
 def index():
     return render_template('index.html')
 
+
+# 每次请求前验证token，并将user和projet存储到g中
 from app.apis.v2.auth import get_token, validate_token
 @flask_app.before_request
 def get_project():
-    print('zzzzzzzzzzzzzzzzzzzzzzzzz')
     token_type, token = get_token()
     if token:
         if validate_token(token):
-            print(g.current_user)
             key = g.current_user.email.split('@')[0] + ':project'
             project_id = redis_cli.get(key).decode('utf-8')
             project = Project.query.get(int(project_id))
             g.current_project = project
-            print(g.current_project)
         else:
             g.current_project = None
     else:
-        print('No Token')
+        print('Token不存在')
 
 from app.models.baseconfig import Status, Tag, BgTask
 from app.models.service import Database, Schema, App, Subsystem, Env
 from app.models.auth import Project, Role, User
 from app.models.version import Baseline
-from app.models.issues import IssueSource, IssueCategory,  IssueModule, IssueReproducibility, \
-    IssuePriority, IssueSeverity, IssueRequirement, IssueBug, IssueTask, \
-        bug_ass_baseline, requirement_ass_baseline, task_ass_baseline
+from app.models.issues import IssueSource, IssueCategory,  IssueModule, \
+                              IssueReproducibility, IssuePriority, IssueSeverity, \
+                              IssueRequirement, IssueBug, IssueTask, \
+                              bug_ass_baseline, requirement_ass_baseline, task_ass_baseline
 
 
 @flask_app.shell_context_processor

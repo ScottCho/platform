@@ -48,6 +48,7 @@ def get_token():
 def auth_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        print('ha'*100)
         token_type, token = get_token()
 
         # Flask normally handles OPTIONS requests on its own, but in the
