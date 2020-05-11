@@ -93,12 +93,13 @@ def get_project():
     if token:
         if validate_token(token):
             key = g.current_user.email.split('@')[0] + ':project'
-            project_id = redis_cli.get(key)
-            if project_id:
-                project = Project.query.get(int(project_id.decode('utf-8')))
-                g.current_project = project
-            else:
+            try:
+                project_id = redis_cli.get(key).decode('utf-8')
+            except AttributeError:
                 g.current_project = None
+            else:
+                project = Project.query.get(int(project_id))
+                g.current_project = project
         else:
             g.current_project = None
     else:
