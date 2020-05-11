@@ -150,7 +150,11 @@ def token_user():
         return api_abort(status=400, detail='The token expired or invalid.')
     user = User.query.get(data['id'])
     key = user.email.split('@')[0] + ':project'
-    current_project = redis_cli.get(key).decode('utf-8')
+    try:
+        current_project = redis_cli.get(key).decode('utf-8')
+    except AttributeError as e:
+        current_project = None
+    
     response = jsonify({
         'id': user.id,
         'username': user.username,
@@ -168,17 +172,6 @@ def token_user():
 # 项目
 class ProjectList(ResourceList):
     decorators = (auth_required, )
-
-    # def before_get(self, args, kwargs):
-    #     """
-    #     设置选择项目的全局变量
-    #     储存在redis中，key为zhaoysz:project, value为项目id
-    #     """
-    #     current_project = request.args.get('select')
-    #     if current_project:
-    #         g.current_project = current_project
-    #         key = g.current_user.email.split('@')[0]+':project'
-    #         redis_cli.set(key, g.current_project)
     schema = ProjectSchema
     data_layer = {'session': db.session, 'model': Project}
 
