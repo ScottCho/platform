@@ -99,7 +99,7 @@ def get_project():
                 g.current_project = None
             else:
                 project = Project.query.get(int(project_id))
-            g.current_project = project
+                g.current_project = project
         else:
             g.current_project = None
     else:
