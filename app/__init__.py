@@ -1,24 +1,24 @@
- #!/usr/bin/python
-#-*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
+
 import os
-import subprocess
 import logging
-from flask import Flask, render_template
+from flask import Flask, render_template, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_mail import Mail
-from celery import Celery,platforms
+from celery import Celery, platforms
 from config import config
-from flask_socketio import SocketIO,emit
+from flask_socketio import SocketIO, emit
 from flask_cors import CORS, cross_origin
 import redis
 
 
+
 #  init redis
 redis_cli = redis.StrictRedis(
-    host=os.getenv('REDIS_HOSt','127.0.0.1'),
-    port=os.getenv('REDIS_PORT',6379),
-    db=os.getenv('REDIS_DB',0),
+    host=os.getenv('REDIS_HOSt', '127.0.0.1'),
+    port=os.getenv('REDIS_PORT', 6379),
+    db=os.getenv('REDIS_DB', 0),
     )
 
 db = SQLAlchemy()
@@ -84,11 +84,28 @@ flask_app.register_blueprint(api_v2, url_prefix='/api')
 def index():
     return render_template('index.html')
 
-from app.models.baseconfig import Status, Tag
-from app.models.service import Database, Schema,App,Subsystem,Env
+from app.apis.v2.auth import get_token, validate_token
+@flask_app.before_request
+def get_project():
+    print('zzzzzzzzzzzzzzzzzzzzzzzzz')
+    token_type, token = get_token()
+    if token:
+        if validate_token(token):
+            print(g.current_user)
+            key = g.current_user.email.split('@')[0] + ':project'
+            project_id = redis_cli.get(key).decode('utf-8')
+            project = Project.query.get(int(project_id))
+            g.current_project = project
+            print(g.current_project)
+        else:
+            g.current_project = None
+    else:
+        print('No Token')
+
+from app.models.baseconfig import Status, Tag, BgTask
+from app.models.service import Database, Schema, App, Subsystem, Env
 from app.models.auth import Project, Role, User
 from app.models.version import Baseline
-from app.models.baseconfig import BgTask
 from app.models.issues import IssueSource, IssueCategory,  IssueModule, IssueReproducibility, \
     IssuePriority, IssueSeverity, IssueRequirement, IssueBug, IssueTask, \
         bug_ass_baseline, requirement_ass_baseline, task_ass_baseline
@@ -96,8 +113,10 @@ from app.models.issues import IssueSource, IssueCategory,  IssueModule, IssueRep
 
 @flask_app.shell_context_processor
 def make_shell_context():
-    return dict(db=db, Project=Project, Database=Database, App=App, Baseline=Baseline,
-        Subsystem=Subsystem,Env=Env,Role=Role,IssueTask=IssueTask,BgTask=BgTask)
+    return dict(db=db, Project=Project, Database=Database, App=App,
+                Baseline=Baseline, Subsystem=Subsystem, Env=Env,
+                Role=Role, IssueTask=IssueTask, BgTask=BgTask, Status=Status
+                )
 
 
 

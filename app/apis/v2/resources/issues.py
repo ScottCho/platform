@@ -17,7 +17,7 @@ from app.apis.v2.schemas.issues import (IssueBugSchema, IssueCategorySchema,
                                         IssueRequirementSchema,
                                         IssueSeveritySchema, IssueSourceSchema,
                                         IssueTaskSchema)
-from app.models.auth import User, Project
+from app.models.auth import User
 from app.models.baseconfig import Status
 from app.models.issues import (IssueBug, IssueCategory, IssueModule,
                                IssuePriority, IssueReproducibility,
@@ -160,15 +160,11 @@ class IssueRequirementList(ResourceList):
 
     decorators = (auth_required, )
 
-    # 如果登录用户为管理员则显示所有结果，否则只显示参与的项目
+     # 返回当前用户登录的项目相关结果
     def query(self, view_kwargs):
-        if g.current_user.role_id == 1:
-            query_ = self.session.query(IssueRequirement)
-        else:
-            projects = g.current_user.projects
-            project_ids = [project.id for project in projects]
-            query_ = self.session.query(IssueRequirement).filter(
-                IssueRequirement.project_id.in_(project_ids))
+        current_project_id = g.current_project.id
+        query_ = self.session.query(IssueRequirement).filter_by(
+                project_id=current_project_id).order_by(IssueRequirement.id.desc())
         return query_
 
     schema = IssueRequirementSchema
@@ -199,14 +195,11 @@ class IssueTaskList(ResourceList):
 
     decorators = (auth_required, )
 
+    # 返回当前用户登录的项目相关结果
     def query(self, view_kwargs):
-        if g.current_user.role_id == 1:
-            query_ = self.session.query(IssueTask)
-        else:
-            projects = g.current_user.projects
-            project_ids = [project.id for project in projects]
-            query_ = self.session.query(IssueTask).filter(
-                IssueTask.project_id.in_(project_ids))
+        current_project_id = g.current_project.id
+        query_ = self.session.query(IssueTask).filter_by(
+                project_id=current_project_id).order_by(IssueTask.id.desc())
         return query_
 
     schema = IssueTaskSchema
@@ -237,14 +230,11 @@ class IssueBugList(ResourceList):
 
     decorators = (auth_required, )
 
+    # 返回当前用户登录的项目相关结果
     def query(self, view_kwargs):
-        if g.current_user.role_id == 1:
-            query_ = self.session.query(IssueBug)
-        else:
-            projects = g.current_user.projects
-            project_ids = [project.id for project in projects]
-            query_ = self.session.query(IssueBug).filter(
-                IssueBug.project_id.in_(project_ids))
+        current_project_id = g.current_project.id
+        query_ = self.session.query(IssueBug).filter_by(
+                project_id=current_project_id).order_by(IssueBug.id.desc())
         return query_
 
     schema = IssueBugSchema
@@ -271,6 +261,8 @@ class IssueBugRelationship(ResourceRelationship):
 
 
 class UploadIssueAPI(MethodView):
+    decorators = [auth_required]
+
     def allowed_file(self, filename):
         ALLOWED_EXTENSIONS = {'xls', 'csv'}
         return '.' in filename and filename.rsplit(
@@ -295,34 +287,33 @@ class UploadIssueAPI(MethodView):
                 csv_reader = csv.DictReader(csvfile)
                 for row in csv_reader:
                     print(row)
-                    number = row['编号']
-                    summary = row['任务名称']
-                    description = row['任务描述']
-                    startdate = row[
-                        '实际开始'] if row['实际开始'] != '0000-00-00' else None
-                    enddate = row[
-                        '完成时间'] if row['完成时间'] != '0000-00-00' else None
-                    deadline = row[
-                        '截止日期'] if row['截止日期'] != '0000-00-00' else None
-                    manhour = row['最初预计']
-                    status_name = row['任务状态']
-                    status_id = Status.query.filter_by(
-                        name=status_name).one().id
-                    project_name = row['所属项目'].split('(')[0]
-                    project_id = Project.query.filter_by(
-                        name=project_name).one().id
-                    requirement_summary = row['相关需求']
-                    if requirement_summary:
-                        requirement_id = requirement_summary.split(
-                            '#')[-1].strip(')')
-                    else:
-                        requirement_id = None
-                    assignee_name = row['指派给']
-                    assignee_id = User.query.filter_by(
-                        username=assignee_name).one().id
-                    priority_id = row['优先级'] if row['优先级'] != '' else None
-
                     if issue == 'issue_task':
+                        number = row['编号']
+                        summary = row['任务名称']
+                        description = row['任务描述']
+                        startdate = row[
+                            '实际开始'] if row['实际开始'] != '0000-00-00' else None
+                        enddate = row[
+                            '完成时间'] if row['完成时间'] != '0000-00-00' else None
+                        deadline = row[
+                            '截止日期'] if row['截止日期'] != '0000-00-00' else None
+                        manhour = row['最初预计']
+                        status_name = row['任务状态']
+                        status_id = Status.query.filter_by(
+                            name=status_name).one().id
+                        requirement_summary = row['相关需求']
+                        requirement_id = None
+                        if requirement_summary:
+                            org_requirement_id = requirement_summary.split(
+                                '#')[-1].strip(')')
+                            requirement_id = IssueRequirement.query.filter_by(
+                                number=org_requirement_id).one().id
+                        assignee_name = row['指派给']
+                        assignee_id = None
+                        if assignee_name:
+                            assignee_id = User.query.filter_by(
+                                username=assignee_name).one().id
+                        priority_id = row['优先级'] if row['优先级'] != '' else None
                         itask = IssueTask(number=number,
                                           summary=summary,
                                           description=description,
@@ -334,35 +325,73 @@ class UploadIssueAPI(MethodView):
                                           requirement_id=requirement_id,
                                           assignee_id=assignee_id,
                                           priority_id=priority_id,
-                                          project_id=project_id)
+                                          project_id=g.current_project.id)
                         db.session.add(itask)
-                        db.session.commit()
                     elif issue == 'issue_requirement':
+                        number = row['编号']
+                        summary = row['需求名称']
+                        description = row['需求描述']
+                        manhour = row['预计工时']
+                        status_name = row['当前状态']
+                        status_id = Status.query.filter_by(
+                            name=status_name).one().id
+                        requirement_summary = row['相关需求']
+                        if requirement_summary:
+                            requirement_id = requirement_summary.split(
+                                '#')[-1].strip(')')
+                        else:
+                            requirement_id = None
+                        assignee_name = row['指派给']
+                        assignee_id = None
+                        if assignee_name:
+                            assignee_id = User.query.filter_by(
+                                username=assignee_name).first().id
+                        priority_id = row['优先级'] if row['优先级'] != '' else None
                         requirement = IssueRequirement(number=number,
                                                        summary=summary,
                                                        description=description,
-                                                       startdate=startdate,
-                                                       enddate=enddate,
-                                                       deadline=deadline,
                                                        manhour=manhour,
                                                        status_id=status_id,
                                                        assignee_id=assignee_id,
+                                                       project_id=g.current_project.id,
                                                        priority_id=priority_id)
                         db.session.add(requirement)
-                        db.session.commit()
                     elif issue == 'issue_bug':
+                        number = row['Bug编号']
+                        summary = row['Bug标题']
+                        description = row['重现步骤']
+                        startdate = row[
+                            '指派日期'] if row['指派日期'] != '0000-00-00' else None
+                        enddate = row[
+                            '解决日期'] if row['解决日期'] != '0000-00-00' else None
+                        status_name = row['Bug状态']
+                        status_id = Status.query.filter_by(
+                            name=status_name, attribute='issue').one().id
+                        requirement_id = None
+                        requirement_summary = row['相关需求']
+                        if requirement_summary != '0':
+                            org_requirement_id = requirement_summary.split(
+                                '#')[-1].strip(')')
+                            requirement_id = IssueRequirement.query.filter_by(
+                                number=org_requirement_id).one().id
+                        assignee_name = row['指派给']
+                        assignee_id = None
+                        if assignee_name and assignee_name != 'Closed':
+                            print('指派给'*5+assignee_name)
+                            assignee_id = User.query.filter_by(
+                                username=assignee_name).one().id
+                        priority_id = row['优先级'] if row['优先级'] != '' else None
                         bug = IssueBug(number=number,
                                        summary=summary,
                                        description=description,
                                        startdate=startdate,
                                        enddate=enddate,
-                                       deadline=deadline,
-                                       manhour=manhour,
                                        status_id=status_id,
                                        assignee_id=assignee_id,
+                                       project_id=g.current_project.id,
                                        priority_id=priority_id)
                         db.session.add(bug)
-                        db.session.commit()
+            db.session.commit()
             return jsonify(data=[{'status': 200, 'detail': '导入成功'}])
 
 

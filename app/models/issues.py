@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-
+from app.models.baseconfig import Status
+from app.models.auth import Project, User
 from .. import db
 
 bug_ass_baseline = db.Table(
@@ -182,6 +183,37 @@ class IssueBug(db.Model):
                                 secondary='bug_ass_baseline',
                                 back_populates='issue_bugs')
 
+    # 上传处理
+    def upload_issue(self, csv_reader):
+        for row in csv_reader:
+            number = row['Bug编号']
+            summary = row['Bug标题']
+            description = row['重现步骤']
+            startdate = row['指派日期'] if row['指派日期'] != '0000-00-00' else None
+            enddate = row['解决日期'] if row['解决日期'] != '0000-00-00' else None
+            status_name = row['Bug状态']
+            status_id = Status.query.filter_by(name=status_name,
+                                               attribute='issue').one().id
+            project_name = row['所属项目'].split('(')[0]
+            project_id = Project.query.filter_by(name=project_name).one().id
+            assignee_name = row['指派给']
+            assignee_id = None
+            if assignee_name and assignee_name != 'Closed':
+                assignee_id = User.query.filter_by(
+                    username=assignee_name).one().id
+                priority_id = row['优先级'] if row['优先级'] != '' else None
+            self.number = number
+            self.summary = summary
+            self.description = description
+            self.startdate = startdate
+            self.enddate = enddate
+            self.status_id = status_id
+            self.assignee_id = assignee_id
+            self.project_id = project_id
+            self.priority_id = priority_id
+            db.session.add(self)
+        db.session.commit()
+
 
 # 任务表,任务为需求的分解
 class IssueTask(db.Model):
@@ -206,9 +238,7 @@ class IssueTask(db.Model):
     requirement_id = db.Column(db.Integer,
                                db.ForeignKey('issue_requirement.id'))  # 所属需求
     requirement = db.relationship('IssueRequirement', back_populates='tasks')
-    assignee_id = db.Column(db.Integer,
-                            db.ForeignKey('users.id'),
-                            nullable=False)  # 分配到任务的人
+    assignee_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # 分配到任务的人
     assignee = db.relationship('User', back_populates='tasks')
     priority_id = db.Column(db.Integer,
                             db.ForeignKey('issue_priority.id'))  # 优先级

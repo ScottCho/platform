@@ -10,7 +10,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from marshmallow import ValidationError
 from marshmallow_jsonapi.exceptions import IncorrectTypeError
 
-from app import db
+from app import db, redis_cli
 from app.apis.v2 import api, api_v2
 from app.apis.v2.auth import auth_required, generate_token, get_token
 from app.apis.v2.errors import api_abort
@@ -149,6 +149,8 @@ def token_user():
     except (BadSignature, SignatureExpired):
         return api_abort(status=400, detail='The token expired or invalid.')
     user = User.query.get(data['id'])
+    key = user.email.split('@')[0] + ':project'
+    current_project = redis_cli.get(key).decode('utf-8')
     response = jsonify({
         'id': user.id,
         'username': user.username,
@@ -156,7 +158,8 @@ def token_user():
         'projects': [project.name for project in user.projects],
         'created': user.created,
         'last_seen': user.last_seen,
-        'role': user.role.name
+        'role': user.role.name,
+        'current_project': current_project,
     })
     return response
 
@@ -165,12 +168,36 @@ def token_user():
 # 项目
 class ProjectList(ResourceList):
     decorators = (auth_required, )
+
+    # def before_get(self, args, kwargs):
+    #     """
+    #     设置选择项目的全局变量
+    #     储存在redis中，key为zhaoysz:project, value为项目id
+    #     """
+    #     current_project = request.args.get('select')
+    #     if current_project:
+    #         g.current_project = current_project
+    #         key = g.current_user.email.split('@')[0]+':project'
+    #         redis_cli.set(key, g.current_project)
     schema = ProjectSchema
     data_layer = {'session': db.session, 'model': Project}
 
 
 class ProjectDetail(BaseResourceDetail):
     decorators = (auth_required, )
+
+    def after_get(self, result):
+        """
+        设置选择项目的全局变量
+        储存在redis中，key为zhaoysz:project, value为项目id
+        """
+        obj = self._data_layer.get_object({'id': result['data']['id']})
+        select = request.args.get('select')
+        if select == 'true':
+            g.current_project = obj
+            key = g.current_user.email.split('@')[0] + ':project'
+            redis_cli.set(key, obj.id)
+        return result
 
     schema = ProjectSchema
     data_layer = {'session': db.session, 'model': Project}
@@ -260,6 +287,13 @@ class UserDetail(BaseResourceDetail):
 
 class UserRelationship(ResourceRelationship):
     decorators = (auth_required, )
+
+    # 将id转换成str类型
+    def before_delete(self, args, kwargs, json_data=None):
+        """Hook to make custom work before delete method"""
+        id = json_data['data'][0]['id']
+        json_data['data'][0]['id'] = str(id)
+
     schema = UserSchema
     data_layer = {'session': db.session, 'model': User}
 
@@ -308,7 +342,9 @@ api.route(RoleRelationship, 'role_users',
 # 生成token端点
 api_v2.add_url_rule('/oauth/token',
                     view_func=AuthTokenAPI.as_view('token'),
-                    methods=['POST', ])
+                    methods=[
+                        'POST',
+                    ])
 # 注册用户
 api_v2.add_url_rule('/register/user',
                     view_func=RegisterAPI.as_view('register_user'),
@@ -316,16 +352,22 @@ api_v2.add_url_rule('/register/user',
 # 确认用户端点
 api_v2.add_url_rule('/confirm/user/<token>',
                     view_func=ConfirmUserAPI.as_view('confirm_user'),
-                    methods=['GET', ])
+                    methods=[
+                        'GET',
+                    ])
 # 重置密码
 api_v2.add_url_rule(
     '/password/reset',
     view_func=PasswordResetRequestAPI.as_view('password_reset_request'),
-    methods=['POST', ])
+    methods=[
+        'POST',
+    ])
 api_v2.add_url_rule('/password/reset/<token>',
                     view_func=PasswordResetAPI.as_view('password_reset'),
                     methods=['POST', 'GET'])
 # 更新密码
 api_v2.add_url_rule('/password/change',
                     view_func=PasswordChangeAPI.as_view('password_change'),
-                    methods=['POST', ])
+                    methods=[
+                        'POST',
+                    ])

@@ -21,16 +21,25 @@ class BaselineList(ResourceList):
     decorators = (auth_required, )
 
     # 如果登录用户为管理员则显示所有结果，否则只显示参与的项目的基线
+    # def query(self, view_kwargs):
+    #     if g.current_user.role_id == 1:
+    #         query_ = self.session.query(Baseline).order_by(Baseline.id.desc())
+    #     else:
+    #         projects = g.current_user.projects
+    #         apps = []
+    #         for project in projects:
+    #             apps += project.apps
+    #         app_ids = [app.id for app in apps]
+    #         query_ = self.session.query(Baseline).filter(
+    #             Baseline.app_id.in_(app_ids)).order_by(Baseline.id.desc())
+    #     return query_
+
+    # 返回当前用户登录的项目相关结果
     def query(self, view_kwargs):
-        if g.current_user.role_id == 1:
-            query_ = self.session.query(Baseline).order_by(Baseline.id.desc())
-        else:
-            projects = g.current_user.projects
-            apps = []
-            for project in projects:
-                apps += project.apps
-            app_ids = [app.id for app in apps]
-            query_ = self.session.query(Baseline).filter(
+        current_project = g.current_project
+        apps = current_project.apps
+        app_ids = [app.id for app in apps]
+        query_ = self.session.query(Baseline).filter(
                 Baseline.app_id.in_(app_ids)).order_by(Baseline.id.desc())
         return query_
 
@@ -65,9 +74,11 @@ class BaselineRelationship(ResourceRelationship):
 class PackageList(ResourceList):
     decorators = (auth_required, )
 
-    # 如果登录用户为管理员则显示所有结果，否则只显示参与的项目的基线
+    # 返回当前用户登录的项目相关结果
     def query(self, view_kwargs):
-        query_ = self.session.query(Package).order_by(Package.id.desc())
+        current_project_id = g.current_project.id
+        query_ = self.session.query(Package).filter_by(
+                project_id=current_project_id).order_by(Package.id.desc())
         return query_
 
     def before_post(self, args, kwargs, data=None):
