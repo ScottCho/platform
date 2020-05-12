@@ -36,9 +36,13 @@ class BaselineList(ResourceList):
 
     # 返回当前用户登录的项目相关结果
     def query(self, view_kwargs):
-        current_project = g.current_project
-        apps = current_project.apps
-        app_ids = [app.id for app in apps]
+        app_ids = []
+        if g.current_project:
+            current_project = g.current_project
+            apps = current_project.apps
+            app_ids = [app.id for app in apps]
+        else:
+            app_ids = []
         query_ = self.session.query(Baseline).filter(
                 Baseline.app_id.in_(app_ids)).order_by(Baseline.id.desc())
         return query_
@@ -76,7 +80,7 @@ class PackageList(ResourceList):
 
     # 返回当前用户登录的项目相关结果
     def query(self, view_kwargs):
-        current_project_id = g.current_project.id
+        current_project_id = g.current_project.id if g.current_project else None
         query_ = self.session.query(Package).filter_by(
                 project_id=current_project_id).order_by(Package.id.desc())
         return query_

@@ -61,6 +61,7 @@ MarkupSafe = "==1.1.1"
 pymysql = "*"
 pycryptodome = "*"
 ansible = "==2.9.1"
+pyecharts = "*"
 
 [requires]
 python_version = "3.6"

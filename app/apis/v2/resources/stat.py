@@ -12,6 +12,35 @@ from flask.views import MethodView
 
 from app import db
 from app.apis.v2 import api_v2
+from app.apis.v2.auth import auth_required
+
+from random import randrange
+from pyecharts import options as opts
+from pyecharts.charts import Bar
+def bar_base() -> Bar:
+    # 每个项目更新基线总的次数及总的基线数
+    project_relase_stmt = db.text("SELECT project_name,sum( updateno ) AS proejct_relase_total,count( baseline_id ) FROM (SELECT projects.id AS project_id,projects.NAME AS project_name,apps.id AS app_id FROM apps,projects WHERE apps.project_id = projects.id ) t1 JOIN ( SELECT id AS baseline_id,app_id,updateno FROM baselines ) t2 ON t1.app_id = t2.app_id GROUP BY project_id")
+
+    # 执行sql
+    project_relase_result = db.session.execute(project_relase_stmt).fetchall()
+    db.session.close()
+
+    # 项目每条基线的平均发布次数
+    project_releases_per_baseline = [(project, round(int(update_total)/baseline_toatl, 2))
+                                        for project, update_total, baseline_toatl in project_relase_result]
+    c = (
+        Bar()
+        .add_xaxis(list(dict(project_releases_per_baseline).keys()))
+        .add_yaxis("项目",list(dict(project_releases_per_baseline).values()))
+        .set_global_opts(title_opts=opts.TitleOpts(title="基线平均发布次数", subtitle="项目"))
+    )
+    return c
+
+@api_v2.route("/echarts")
+def get_bar_chart():
+    c = bar_base()
+    return c.dump_options_with_quotes()
+
 
 
 class StatAPI(MethodView):

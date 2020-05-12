@@ -162,7 +162,7 @@ class IssueRequirementList(ResourceList):
 
      # 返回当前用户登录的项目相关结果
     def query(self, view_kwargs):
-        current_project_id = g.current_project.id
+        current_project_id = g.current_project.id if g.current_project else None
         query_ = self.session.query(IssueRequirement).filter_by(
                 project_id=current_project_id).order_by(IssueRequirement.id.desc())
         return query_
@@ -197,7 +197,7 @@ class IssueTaskList(ResourceList):
 
     # 返回当前用户登录的项目相关结果
     def query(self, view_kwargs):
-        current_project_id = g.current_project.id
+        current_project_id = g.current_project.id if g.current_project else None
         query_ = self.session.query(IssueTask).filter_by(
                 project_id=current_project_id).order_by(IssueTask.id.desc())
         return query_
@@ -232,7 +232,7 @@ class IssueBugList(ResourceList):
 
     # 返回当前用户登录的项目相关结果
     def query(self, view_kwargs):
-        current_project_id = g.current_project.id
+        current_project_id = g.current_project.id if g.current_project else None
         query_ = self.session.query(IssueBug).filter_by(
                 project_id=current_project_id).order_by(IssueBug.id.desc())
         return query_

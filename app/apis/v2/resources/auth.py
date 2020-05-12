@@ -149,12 +149,12 @@ def token_user():
     except (BadSignature, SignatureExpired):
         return api_abort(status=400, detail='The token expired or invalid.')
     user = User.query.get(data['id'])
-    key = user.email.split('@')[0] + ':project'
+    key = f'user:{user.id}'
     try:
-        current_project = redis_cli.get(key).decode('utf-8')
-    except AttributeError as e:
+        print(key, 'project_id')
+        current_project = redis_cli.hmget(key, 'project_id')[0].decode('utf-8')
+    except AttributeError:
         current_project = None
-    
     response = jsonify({
         'id': user.id,
         'username': user.username,
@@ -182,14 +182,17 @@ class ProjectDetail(BaseResourceDetail):
     def after_get(self, result):
         """
         设置选择项目的全局变量
-        储存在redis中，key为zhaoysz:project, value为项目id
+        储存在redis中，key为user:user_id, value为项目id
         """
         obj = self._data_layer.get_object({'id': result['data']['id']})
         select = request.args.get('select')
         if select == 'true':
-            g.current_project = obj
-            key = g.current_user.email.split('@')[0] + ':project'
-            redis_cli.set(key, obj.id)
+            # g.current_project = obj
+            # key = g.current_user.email.split('@')[0] + ':project'
+            # redis_cli.set(key, obj.id)
+            key = f'user:{g.current_user.id}'
+            value = {'project_id':obj.id}
+            redis_cli.hmset(key,value)
         return result
 
     schema = ProjectSchema
