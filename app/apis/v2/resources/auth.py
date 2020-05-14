@@ -34,6 +34,8 @@ class AuthTokenAPI(MethodView):
         user = User.query.filter_by(email=email).first()
         if user is None or not user.verify_password(password):
             return api_abort(400, 'Either the email or password was invalid.')
+        else:
+            redis_cli.lpush('frog_list', user.username+'登录系统了')
 
         token, expiration = generate_token(user)
 
@@ -70,6 +72,7 @@ class RegisterAPI(MethodView):
                    'apis/v2/mail/auth/confirm.html',
                    user=user,
                    token=token)
+        redis_cli.lpush('frog_list', user.username+'注册了')
         return jsonify(data=[{'status': 200, 'detail': '请在邮箱中的链接确认用户'}])
 
 
@@ -84,6 +87,7 @@ class ConfirmUserAPI(MethodView):
             user.confirmed = True
             db.session.add(user)
             db.session.commit()
+            redis_cli.lpush('frog_list', user.username+'用户确认了邮箱')
         except Exception:
             return api_abort(400, '链接无效或者过期')
         return redirect('/#/confirm')

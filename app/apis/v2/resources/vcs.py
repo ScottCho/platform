@@ -5,7 +5,7 @@ from flask.views import MethodView
 from flask_rest_jsonapi import (ResourceDetail, ResourceList,
                                 ResourceRelationship)
 
-from app import db
+from app import db, redis_cli
 from app.apis.v2 import api, api_v2
 from app.apis.v2.auth import auth_required
 from app.apis.v2.errors import api_abort
@@ -44,13 +44,20 @@ class BaselineList(ResourceList):
         else:
             app_ids = []
         query_ = self.session.query(Baseline).filter(
-                Baseline.app_id.in_(app_ids)).order_by(Baseline.id.desc())
+            Baseline.app_id.in_(app_ids)).order_by(Baseline.id.desc())
         return query_
 
     # 处理基线的默认内容,开发者为当前登录用户
     def before_post(self, args, kwargs, data=None):
         """Hook to make custom work before post method"""
         data['developer_id'] = g.current_user.id
+
+    def after_post(self, result):
+        """提交后，将动态提交到redis中"""
+        redis_cli.lpush(
+            'frog_list',
+            g.current_user.username + '发布' + g.current_project.name + '基线')
+        return result
 
     schema = BaselineSchema
     data_layer = {
@@ -64,6 +71,14 @@ class BaselineList(ResourceList):
 
 class BaselineDetail(BaseResourceDetail):
     decorators = (auth_required, )
+
+    def after_patch(self, result):
+        """Hook to make custom work after patch method"""
+        redis_cli.lpush(
+            'frog_list',
+            g.current_user.username + '重新发布' + g.current_project.name + '基线')
+        return result
+
     schema = BaselineSchema
     data_layer = {'session': db.session, 'model': Baseline}
 
@@ -82,7 +97,7 @@ class PackageList(ResourceList):
     def query(self, view_kwargs):
         current_project_id = g.current_project.id if g.current_project else None
         query_ = self.session.query(Package).filter_by(
-                project_id=current_project_id).order_by(Package.id.desc())
+            project_id=current_project_id).order_by(Package.id.desc())
         return query_
 
     def before_post(self, args, kwargs, data=None):
@@ -110,6 +125,10 @@ class PackageList(ResourceList):
         obj.merge_blineno = merge_blineno
         db.session.add(obj)
         db.session.commit()
+        redis_cli.lpush(
+            'frog_list',
+            g.current_user.username + '发布' + g.current_project.name + '更新包')
+        return result
         return result
 
     schema = PackageSchema
@@ -130,6 +149,13 @@ class PackageDetail(BaseResourceDetail):
         obj = self._data_layer.get_object({'id': kwargs['id']})
         merge_blineno = obj.package_after_post()
         data['merge_blineno'] = merge_blineno
+
+    def after_patch(self, result):
+        """Hook to make custom work after patch method"""
+        redis_cli.lpush(
+            'frog_list',
+            g.current_user.username + '重新发布' + g.current_project.name + '更新包')
+        return result
 
     schema = PackageSchema
     data_layer = {'session': db.session, 'model': Package}

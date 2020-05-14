@@ -19,6 +19,7 @@ redis_cli = redis.StrictRedis(
     host=os.getenv('REDIS_HOSt', '127.0.0.1'),
     port=os.getenv('REDIS_PORT', 6379),
     db=os.getenv('REDIS_DB', 0),
+    decode_responses=True
     )
 
 db = SQLAlchemy()
@@ -89,12 +90,13 @@ def index():
 from app.apis.v2.auth import get_token, validate_token
 @flask_app.before_request
 def get_project():
+    print(request.url_rule)
     token_type, token = get_token()
     if token:
         if validate_token(token):
             key = f'user:{g.current_user.id}'
             try:
-                project_id = redis_cli.hmget(key, 'project_id')[0].decode('utf-8')
+                project_id = redis_cli.hmget(key, 'project_id')[0]
             except AttributeError:
                 g.current_project = None
             else:
@@ -102,6 +104,8 @@ def get_project():
                 g.current_project = project
         else:
             g.current_project = None
+    elif request.url_rule == '/api/oauth/token':
+        g.current_project = None
     else:
         print('Token不存在')
 

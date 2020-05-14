@@ -7,7 +7,7 @@ from flask import g, jsonify, request
 from flask.views import MethodView
 from flask_rest_jsonapi import ResourceList, ResourceRelationship
 
-from app import db
+from app import db, redis_cli
 from app.apis.v2 import api, api_v2
 from app.apis.v2.auth import auth_required
 from app.apis.v2.errors import api_abort
@@ -167,6 +167,13 @@ class IssueRequirementList(ResourceList):
                 project_id=current_project_id).order_by(IssueRequirement.id.desc())
         return query_
 
+    def after_post(self, result):
+        """提交后，将动态提交到redis中"""
+        redis_cli.lpush(
+            'frog_list',
+            g.current_user.username + '发布' + g.current_project.name + '需求')
+        return result
+
     schema = IssueRequirementSchema
     data_layer = {
         'session': db.session,
@@ -202,6 +209,13 @@ class IssueTaskList(ResourceList):
                 project_id=current_project_id).order_by(IssueTask.id.desc())
         return query_
 
+    def after_post(self, result):
+        """提交后，将动态提交到redis中"""
+        redis_cli.lpush(
+            'frog_list',
+            g.current_user.username + '发布' + g.current_project.name + '任务')
+        return result
+
     schema = IssueTaskSchema
     data_layer = {
         'session': db.session,
@@ -236,6 +250,13 @@ class IssueBugList(ResourceList):
         query_ = self.session.query(IssueBug).filter_by(
                 project_id=current_project_id).order_by(IssueBug.id.desc())
         return query_
+
+    def after_post(self, result):
+        """提交后，将动态提交到redis中"""
+        redis_cli.lpush(
+            'frog_list',
+            g.current_user.username + '发布' + g.current_project.name + '任务')
+        return result
 
     schema = IssueBugSchema
     data_layer = {
@@ -392,6 +413,9 @@ class UploadIssueAPI(MethodView):
                                        priority_id=priority_id)
                         db.session.add(bug)
             db.session.commit()
+            redis_cli.lpush(
+                'frog_list',
+                g.current_user.username + '导入了issues')
             return jsonify(data=[{'status': 200, 'detail': '导入成功'}])
 
 

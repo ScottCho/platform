@@ -1,6 +1,6 @@
 import logging
 
-from flask import jsonify
+from flask import jsonify, g
 from flask.views import MethodView
 from flask_rest_jsonapi import ResourceList, ResourceRelationship
 from app import db
@@ -84,8 +84,22 @@ class SubsystemDetail(BaseResourceDetail):
 
 class AppList(ResourceList):
     decorators = (auth_required, )
+
+    # 返回当前用户登录的项目相关结果
+    def query(self, view_kwargs):
+        current_project_id = g.current_project.id if g.current_project else None
+        query_ = self.session.query(App).filter_by(
+            project_id=current_project_id).order_by(App.id.desc())
+        return query_
+
     schema = AppSchema
-    data_layer = {'session': db.session, 'model': App}
+    data_layer = {
+        'session': db.session,
+        'model': App,
+        'methods': {
+            'query': query
+        }
+    }
 
 
 class AppDetail(BaseResourceDetail):
@@ -191,5 +205,6 @@ api_v2.add_url_rule('/apps/<action>/<int:app_id>',
 #　数据库实例的重启和关闭端点
 api_v2.add_url_rule('/databases/<action>/<int:database_id>',
                     view_func=DatabaseManageAPI.as_view('database_manage'),
-                    methods=['GET', ]
-                    )
+                    methods=[
+                        'GET',
+                    ])
