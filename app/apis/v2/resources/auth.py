@@ -155,8 +155,7 @@ def token_user():
     user = User.query.get(data['id'])
     key = f'user:{user.id}'
     try:
-        print(key, 'project_id')
-        current_project = redis_cli.hmget(key, 'project_id')[0].decode('utf-8')
+        current_project = redis_cli.hmget(key, 'project_id')[0]
     except AttributeError:
         current_project = None
     response = jsonify({
@@ -167,7 +166,7 @@ def token_user():
         'created': user.created,
         'last_seen': user.last_seen,
         'role': user.role.name,
-        'current_project': current_project,
+        'current_project': current_project
     })
     return response
 

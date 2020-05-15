@@ -20,8 +20,22 @@ from . import BaseResourceDetail
 # Create resource managers
 class DatabaseList(ResourceList):
     decorators = (auth_required, )
+    
+    # 返回当前用户登录的项目相关结果
+    def query(self, view_kwargs):
+        current_project_id = g.current_project.id if g.current_project else None
+        query_ = self.session.query(Database).filter_by(
+            project_id=current_project_id).order_by(Database.id.desc())
+        return query_
+
     schema = DatabaseSchema
-    data_layer = {'session': db.session, 'model': Database}
+    data_layer = {
+        'session': db.session,
+        'model': Database,
+        'methods': {
+            'query': query
+        }
+    }
 
 
 class DatabaseDetail(BaseResourceDetail):
