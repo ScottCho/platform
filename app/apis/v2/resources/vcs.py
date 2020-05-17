@@ -235,6 +235,7 @@ class BaselineUpdate(ResourceDetail):
     def after_get(self, result):
         obj = self._data_layer.get_object({'id': result['data']['id']})
         obj.updateno += 1
+        obj.status_id = 203
         db.session.add(obj)
         db.session.commit()
         message = '*****开始更新基线*****\n'
@@ -303,6 +304,7 @@ api.route(PackageDeploy,
           ]})
 # 发布更新包
 api.route(PackageRelease, 'package_release', '/api/packages/release/<int:id>')
+
 # 更新基线,只提供GET方法
 api.route(BaselineUpdate,
           'baseline_update',

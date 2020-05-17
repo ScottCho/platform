@@ -41,21 +41,21 @@ if [[ $? -ne 0 ]];then
 fi
 
 echo "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}" "{{ deploy_host }}:{{ deploy_dir }}"
-#scp  "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}" "{{ deploy_host }}:{{ deploy_dir }}"
-#scp  "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}"  "{{ deploy_host }}:{{ deploy_dir }}"
+scp  "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}" "{{ deploy_host }}:{{ deploy_dir }}"
+scp  "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}"  "{{ deploy_host }}:{{ deploy_dir }}"
 
 
 {% if flag == 1 %}
- 	mv "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  "{{ target_dir }}"APP_${baseline_id}
-    mv "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}" "{{ target_dir }}"APP_${baseline_id}
+mv "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  "{{ target_dir }}"APP_${baseline_id}
+mv "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}" "{{ target_dir }}"APP_${baseline_id}
 {% elif flag == 0 %}
-  	mv "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  "{{ target_dir }}"APP_SIT
-    mv "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}" "{{ target_dir }}"APP_SIT 
+mv "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  "{{ target_dir }}"APP_SIT
+mv "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}" "{{ target_dir }}"APP_SIT 
 {% endif %}
 
 
 echo ssh {{ deploy_host }} "sh {{ deploy_dir }}/update.sh"
-#ssh {{ deploy_host }} "sh {{ deploy_dir }}/update.sh"
+ssh {{ deploy_host }} "sh {{ deploy_dir }}/update.sh"
 
 rm -rf $APP_LIST
 set +x

@@ -27,5 +27,5 @@ md5sum "$1".tar >"$1".md5
 cp "$1".7z {{ source_dir }}05-packages
 mv "$1".7z {{ target_dir }}
 cd {{ source_dir }}05-packages
-# /usr/bin/svn add "$1".7z
-# /usr/bin/svn ci -m "'add package' $1" "$1".7z
+/usr/bin/svn add "$1".7z
+/usr/bin/svn ci -m "'add package' $1" "$1".7z

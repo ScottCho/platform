@@ -23,9 +23,9 @@ def trans_java(subsystem, source_dir, file):
             replace('component/resources','webapps/WEB-INF/classes/resources'). \
             replace('component', 'webapps/WEB-INF/classes')
 
-    elif subsystem == 'reserver':
+    elif subsystem == 'reserve':
         file = file.replace('.java', '.class'). \
-            replace(source_dir+'/',''). \
+            replace(source_dir+'/', ''). \
             replace('src/com', 'reserve/WEB-INF/classes/com'). \
             replace('src/resources','reserve/WEB-INF/classes/resources')
 
