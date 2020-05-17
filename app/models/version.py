@@ -346,7 +346,7 @@ class Baseline(db.Model):
                                'LOG' + '_' + str(self.id))
         attachments = fnmatch_file.find_specific_files(log_dir, '*log')
         # 发送邮件
-        send_email(['zhaoysz@sinosoft.com.cn'],
+        send_email(recipients,
                    mailtheme,
                    'apis/v2/mail/vcs/baseline.html',
                    attachments,
@@ -612,11 +612,11 @@ class Package(db.Model):
             package_path = package_7z[0]
 
         # 更新包接受者
-        recipients = ['zhaoysz@sinosoft.com.cn']
+        recipients = []
         # users = self.project.users
-        # for user in users:
-        #     if user.is_active and user.role.id in (1,3,5):
-        #         recipients.append(user.email)
+        for user in users:
+            if user.is_active and user.role.id in (1,3,5):
+                recipients.append(user.email)
         # 邮件主题
         mailtheme = self.project.name + '今日发包'
 
