@@ -90,6 +90,7 @@ class Baseline(db.Model):
             deploy_host=self.app.server.ip,
             deploy_dir=self.app.deploy_dir,
             target_dir=self.app.project.target_dir,
+            username=self.app.credence.username,
             flag=flag)
 
         # jenkin的workspace不存在package.sh,则重新创建
