@@ -40,9 +40,9 @@ if [[ $? -ne 0 ]];then
     exit 2
 fi
 
-echo "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  "{{ username }}"@"{{ deploy_host }}:{{ deploy_dir }}"
-scp  "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  "{{ username }}"@"{{ deploy_host }}:{{ deploy_dir }}"
-scp  "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}"  "{{ username }}"@"{{ deploy_host }}:{{ deploy_dir }}"
+echo "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  {{ username }}@{{ deploy_host }}:{{ deploy_dir }}
+scp  "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  {{ username }}@{{ deploy_host }}:{{ deploy_dir }}
+scp  "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}"  {{ username }}@{{ deploy_host }}:{{ deploy_dir }}
 
 
 {% if flag == 1 %}
