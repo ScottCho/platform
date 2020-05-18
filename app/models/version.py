@@ -35,7 +35,7 @@ class Baseline(db.Model):
     pckno = db.Column(db.String(1024))
     rollbackno = db.Column(db.String(1024))
     created = db.Column(db.DateTime(), default=datetime.utcnow)
-    updateno = db.Column(db.Integer, default=1)
+    updateno = db.Column(db.Integer, default=0)
     mantisno = db.Column(db.String(256))
     jenkins_last_build = db.Column(db.Boolean)
     jenkins_build_number = db.Column(db.Integer)
