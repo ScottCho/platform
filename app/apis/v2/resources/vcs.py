@@ -147,6 +147,7 @@ class PackageDetail(BaseResourceDetail):
     def before_patch(self, args, kwargs, data=None):
         """Hook to make custom work before patch method"""
         obj = self._data_layer.get_object({'id': kwargs['id']})
+        obj.status_id = 216
         merge_blineno = obj.package_after_post()
         data['merge_blineno'] = merge_blineno
 
