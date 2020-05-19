@@ -614,7 +614,7 @@ class Package(db.Model):
 
         # 更新包接受者
         recipients = []
-        # users = self.project.users
+        users = self.project.users
         for user in users:
             if user.is_active and user.role.id in (1,3,5):
                 recipients.append(user.email)

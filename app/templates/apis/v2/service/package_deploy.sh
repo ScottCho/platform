@@ -54,8 +54,8 @@ mv "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}" "{{ target_dir }}"APP_SIT
 {% endif %}
 
 
-echo ssh {{ deploy_host }} "sh {{ deploy_dir }}/update.sh"
-ssh {{ deploy_host }} "sh {{ deploy_dir }}/update.sh"
+echo ssh {{ username }}@{{ deploy_host }} "sh {{ deploy_dir }}/update.sh"
+ssh {{ username }}@{{ deploy_host }} "sh {{ deploy_dir }}/update.sh"
 
 rm -rf $APP_LIST
 set +x
