@@ -199,7 +199,7 @@ api.route(EnvDetail, 'env_detail', '/api/envs/<int:id>')
 api.route(SubsystemList, 'subsystem_list', '/api/subsystems')
 api.route(SubsystemDetail, 'subsystem_detail', '/api/subsystems/<int:id>')
 api.route(AppList, 'app_list', '/api/apps')
-api.route(AppDetail, 'app_detail', '/api/apps/<int:id>')
+api.route(AppDetail, 'app_detail', '/api/apps/<id>')
 api.route(AppRelationship, 'app_project',
           '/api/apps/<int:id>/relationships/project')
 api.route(AppRelationship, 'app_env', '/api/apps/<int:id>/relationships/env')
