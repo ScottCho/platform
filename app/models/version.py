@@ -11,6 +11,8 @@ import glob
 import os
 import shutil
 from datetime import datetime
+import urllib
+
 
 import svn.local
 import svn.remote
@@ -119,7 +121,7 @@ class Baseline(db.Model):
 
             # 构建后的变更集
             compile_file_list += [
-                trans_java(self.app.subsystem.en_name, self.app.source_dir, f)
+                trans_java(self.app.subsystem.en_name, self.app.source_dir, urllib.request.unquote(f))
                 for f in source_files
             ]
 
