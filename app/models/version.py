@@ -408,7 +408,7 @@ class Package(db.Model):
         sql_dir = os.path.join(db_dir, 'SQL')
         pck_dir = os.path.join(db_dir, 'PCK')
         rollback_dir = os.path.join(db_dir, 'ROLLBACK')
-        log_dir = os.path.join(target_dir, 'LOG_' + self.id)
+        log_dir = os.path.join(target_dir, 'LOG_' + str(self.id))
 
         # 如果target_dir下存在更新包，则删除重建
         if os.path.exists(package_dir):

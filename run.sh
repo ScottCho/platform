@@ -1,0 +1,1 @@
+pipenv run gunicorn app:flask_app -b 0.0.0.0:5555 -w 3 -D -p /tmp/app5555.pid --log-file /tmp/app5555.log -t 500
