@@ -4,6 +4,7 @@
 # DATE: 2020/04/29 Wed
 
 import os
+import threading
 
 from flask import render_template
 
@@ -96,5 +97,9 @@ class BgTask(db.Model):
         playbook_path = os.path.join('/etc/ansible/playbook', playbook)
         with open(playbook_path, 'w') as f:
             f.write(playbook_template)
-        ansible_playbook('playbook', task_id, playbook_path)
+        # 任务结果将储存在Redis中，key为' playbook::bgtask_id '
+        thread = threading.Thread(target=ansible_playbook,
+                                  args=('playbook', task_id, playbook_path))
+        thread.start()
+        # ansible_playbook('playbook', task_id, playbook_path)
         return '任务ID: ' + str(task_id)

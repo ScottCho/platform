@@ -13,7 +13,6 @@ import shutil
 from datetime import datetime
 import urllib
 
-
 import svn.local
 import svn.remote
 from flask import current_app, g, render_template, send_from_directory
@@ -121,8 +120,8 @@ class Baseline(db.Model):
 
             # 构建后的变更集
             compile_file_list += [
-                trans_java(self.app.subsystem.en_name, self.app.source_dir, urllib.request.unquote(f))
-                for f in source_files
+                trans_java(self.app.subsystem.en_name, self.app.source_dir,
+                           urllib.request.unquote(f)) for f in source_files
             ]
 
         # 删除原有相同基线序号的变更文本
@@ -409,7 +408,7 @@ class Package(db.Model):
         sql_dir = os.path.join(db_dir, 'SQL')
         pck_dir = os.path.join(db_dir, 'PCK')
         rollback_dir = os.path.join(db_dir, 'ROLLBACK')
-        log_dir = os.path.join(target_dir, 'LOG')
+        log_dir = os.path.join(target_dir, 'LOG_' + self.id)
 
         # 如果target_dir下存在更新包，则删除重建
         if os.path.exists(package_dir):
@@ -444,14 +443,12 @@ class Package(db.Model):
             if version_list:
                 for version in version_list:
                     # 更新SVN中的Jenkins中的源码目录
-                    workcopy = svn.local.LocalClient(workspace)  
+                    workcopy = svn.local.LocalClient(workspace)
                     try:
                         workcopy.update()
                     except SvnException:
                         merge_msg = 'SVN 工作目录更新异常'
                     # 合并,一个一个的版本合并提交，出现异常回滚
-                    # workcopy.run_command('log', [app.source_dir, '-c', version])[3]
-
                     message = f'Merged revision {version} from {source_dir}\n'
                     current_app.logger.info(message)
 
@@ -543,34 +540,25 @@ class Package(db.Model):
         app_dir = os.path.join(
             package_dir, 'APP')  # /update/WINGLUNG/WingLung_20200426_02/APP
         # /update/WINGLUNG/WingLung_20200426_02/DB
-        db_dir = os.path.join(package_dir, 'DB')  
+        db_dir = os.path.join(package_dir, 'DB')
         # /update/WINGLUNG/WingLung_20200426_02/ROLLBACK
-        rollback_dir = os.path.join(package_dir, 'ROLLBACK')  
+        rollback_dir = os.path.join(package_dir, 'ROLLBACK')
         sql_dir = os.path.join(db_dir, 'SQL')
         pck_dir = os.path.join(db_dir, 'PCK')
-        log_dir = os.path.join(target_dir, 'LOG')  # /update/WINGLUNG/LOG
 
         merge_blineno = self.merge_blineno
         logs = []  # DB 日志文件
         for no in merge_blineno.split(','):
-            source_app_dir = os.path.join(target_dir, 'APP_' +
-                                          no)  # /update/WINGLUNG/APP_12
-            source_db_dir = os.path.join(target_dir,
-                                         'DB_' + no)  # /update/WINGLUNG/DB_12
-            source_log_dir = os.path.join(target_dir, 'LOG_' +
-                                          no)  # /update/WINGLUNG/LOG_12
+            # /update/WINGLUNG/APP_12
+            source_app_dir = os.path.join(target_dir, 'APP_' + no)
+            # /update/WINGLUNG/DB_12
+            source_db_dir = os.path.join(target_dir, 'DB_' + no)
+            # /update/WINGLUNG/LOG_12
+            log_dir = os.path.join(target_dir, 'LOG_' + no)
             source_sql_dir = os.path.join(source_db_dir, 'SQL')
             source_pck_dir = os.path.join(source_db_dir, 'PCK')
             source_rollback_dir = os.path.join(source_db_dir, 'ROLLBACK')
-
-            #　将db log移到LOG中,并将新的路径放到logs
-            new_log_path = os.path.join(log_dir, 'LOG_' + no)
-            if os.path.exists(new_log_path):
-                shutil.rmtree(new_log_path)
-
-            shutil.move(source_log_dir, log_dir)
-
-            logs += glob.glob(new_log_path + '/*ALL.log')
+            logs += glob.glob(log_dir + '/*ALL.log')
 
             # 移动MD5和jar文件到更新包目录中
             if os.path.exists(source_app_dir):
@@ -592,10 +580,6 @@ class Package(db.Model):
                 for pck_file in pck_file_list:
                     shutil.move(os.path.join(source_pck_dir, pck_file),
                                 pck_dir)
-                os.rmdir(source_sql_dir)
-                os.rmdir(source_pck_dir)
-                os.rmdir(source_rollback_dir)
-                os.rmdir(source_db_dir)
 
         script_path = self.render_package_script()
         returncode, output = execute_cmd.execute_cmd('sh ' + script_path +
@@ -618,7 +602,7 @@ class Package(db.Model):
         recipients = []
         users = self.project.users
         for user in users:
-            if user.is_active and user.role.id in (1,3,5):
+            if user.is_active and user.role.id in (1, 3, 5):
                 recipients.append(user.email)
         # 邮件主题
         mailtheme = self.project.name + '今日发包'
