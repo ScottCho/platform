@@ -24,6 +24,7 @@ from app.utils import execute_cmd, fnmatch_file, switch_char
 from app.utils.jenkins import build_with_parameters, get_jenkins_job
 from app.utils.svn import diff_summary_files
 from app.utils.trans_path import trans_java
+from app.utils.mypath import dir_remake
 
 from .. import db
 
@@ -67,22 +68,8 @@ class Baseline(db.Model):
     def render_package_script(self, flag=0):
         '''
         Jnekins编译后执行得打包脚本
-        SIT发布jar存放目录为: '/update/WINGLUNG/APP_SIT'
-        合并发布jar包存放目录为: '/update/WINGLUNG/APP_12'
-
+        jar包存放目录为: '/update/WINGLUNG/{baseline_id}/APP'
         '''
-
-        if flag == 1:
-            package_dir = os.path.join(self.app.project.target_dir,
-                                       'APP_' + str(self.id))
-        else:
-            package_dir = os.path.join(self.app.project.target_dir, 'APP_SIT')
-
-        # 建立jar包存放目录
-        print(package_dir)
-        if not os.path.exists(package_dir):
-            os.makedirs(package_dir)
-
         shell_script = render_template(
             'apis/v2/service/package_deploy.sh',
             jenkins_job_dir=self.app.jenkins_job_dir,
@@ -155,6 +142,10 @@ class Baseline(db.Model):
             str(jenkins_build_number)+'/console'+'\n'
         print(message)
 
+        # 建立jar包存放目录
+        jar_dir = os.path.join(self.app.project.target_dir,str(self.id),'APP')
+        dir_remake(jar_dir)
+
         # 判断是否存在打包脚本，不存在则创建
         self.render_package_script(flag=flag)
 
@@ -181,9 +172,8 @@ class Baseline(db.Model):
         if flag == 1:
             # pck从puat文件中读取
             source_pckdir = os.path.join(source_dbdir, '02-pck', 'puat')
-            print(source_pckdir)
-        base_dir = os.path.join(target_dir, 'DB' + '_' + str(self.id))
-        log_dir = os.path.join(target_dir, 'LOG' + '_' + str(self.id))
+        base_dir = os.path.join(target_dir, str(self.id), 'DB')
+        log_dir = os.path.join(target_dir, str(self.id), 'LOG')
         target_sqldir = os.path.join(base_dir, 'SQL')
         target_pckdir = os.path.join(base_dir, 'PCK')
         target_rollbackdir = os.path.join(base_dir, 'ROLLBACK')
@@ -344,8 +334,8 @@ class Baseline(db.Model):
             if user.is_active:
                 recipients.append(user.email)
         # 附件，DB的更新日志
-        log_dir = os.path.join(str(self.app.project.target_dir),
-                               'LOG' + '_' + str(self.id))
+        log_dir = os.path.join(str(self.app.project.target_dir), str(self.id),
+                               'LOG')
         attachments = fnmatch_file.find_specific_files(log_dir, '*log')
         # 发送邮件
         send_email(recipients,
@@ -408,16 +398,13 @@ class Package(db.Model):
         sql_dir = os.path.join(db_dir, 'SQL')
         pck_dir = os.path.join(db_dir, 'PCK')
         rollback_dir = os.path.join(db_dir, 'ROLLBACK')
-        log_dir = os.path.join(target_dir, 'LOG_' + str(self.id))
+     
 
         # 如果target_dir下存在更新包，则删除重建
         if os.path.exists(package_dir):
             shutil.rmtree(package_dir)
         os.mkdir(package_dir)
-        # 创建总的日志目录
-        if not os.path.exists(log_dir):
-            os.mkdir(log_dir)
-
+        
         os.mkdir(app_dir)
         os.mkdir(db_dir)
         os.mkdir(sql_dir)
@@ -497,6 +484,8 @@ class Package(db.Model):
             merge_baseline = Baseline.query.filter_by(id=nu).one()
             print('更新合并基线：' + nu)
             try:
+                update_dir = os.path.join(merge_baseline.app.project.target_dir, str(merge_baseline.id))
+                dir_remake(update_dir)
                 if merge_baseline.sqlno or merge_baseline.pckno:
                     deploy_msg += merge_baseline.update_db(flag=1,
                                                            num=package_count)
@@ -541,20 +530,20 @@ class Package(db.Model):
             package_dir, 'APP')  # /update/WINGLUNG/WingLung_20200426_02/APP
         # /update/WINGLUNG/WingLung_20200426_02/DB
         db_dir = os.path.join(package_dir, 'DB')
-        # /update/WINGLUNG/WingLung_20200426_02/ROLLBACK
-        rollback_dir = os.path.join(package_dir, 'ROLLBACK')
+        # /update/WINGLUNG/WingLung_20200426_02/DB/ROLLBACK
+        rollback_dir = os.path.join(db_dir, 'ROLLBACK')
         sql_dir = os.path.join(db_dir, 'SQL')
         pck_dir = os.path.join(db_dir, 'PCK')
 
         merge_blineno = self.merge_blineno
         logs = []  # DB 日志文件
         for no in merge_blineno.split(','):
-            # /update/WINGLUNG/APP_12
-            source_app_dir = os.path.join(target_dir, 'APP_' + no)
-            # /update/WINGLUNG/DB_12
-            source_db_dir = os.path.join(target_dir, 'DB_' + no)
-            # /update/WINGLUNG/LOG_12
-            log_dir = os.path.join(target_dir, 'LOG_' + no)
+            # /update/WINGLUNG/12/APP
+            source_app_dir = os.path.join(target_dir, no, 'APP')
+            # /update/WINGLUNG/12/DB
+            source_db_dir = os.path.join(target_dir, no, 'DB')
+            # /update/WINGLUNG/12/LOG
+            log_dir = os.path.join(target_dir, no, 'LOG')
             source_sql_dir = os.path.join(source_db_dir, 'SQL')
             source_pck_dir = os.path.join(source_db_dir, 'PCK')
             source_rollback_dir = os.path.join(source_db_dir, 'ROLLBACK')
@@ -565,21 +554,24 @@ class Package(db.Model):
                 app_md5_list = os.listdir(source_app_dir)
                 for file in app_md5_list:
                     shutil.move(os.path.join(source_app_dir, file), app_dir)
-                os.rmdir(source_app_dir)
-
+                
             # 移动数据库文件到更新包目录中
             if os.path.exists(source_db_dir):
                 sql_file_list = os.listdir(source_sql_dir)
                 pck_file_list = os.listdir(source_pck_dir)
+                rollback_file_list = os.listdir(source_rollback_dir)
                 all_sql_list = glob.glob(source_db_dir + '/*ALL.sql')
                 for all_sql in all_sql_list:
-                    shutil.move(all_sql, db_dir)
+                    shutil.copy(all_sql, db_dir)
                 for sql_file in sql_file_list:
-                    shutil.move(os.path.join(source_sql_dir, sql_file),
+                    shutil.copy(os.path.join(source_sql_dir, sql_file),
                                 sql_dir)
                 for pck_file in pck_file_list:
-                    shutil.move(os.path.join(source_pck_dir, pck_file),
+                    shutil.copy(os.path.join(source_pck_dir, pck_file),
                                 pck_dir)
+                for rollback_file in rollback_file_list:
+                    shutil.copy(os.path.join(source_rollback_dir, rollback_file),
+                                rollback_dir)
 
         script_path = self.render_package_script()
         returncode, output = execute_cmd.execute_cmd('sh ' + script_path +
@@ -611,7 +603,7 @@ class Package(db.Model):
         attachments = [package_path] + logs
 
         send_email(recipients, mailtheme, 'apis/v2/mail/vcs/package.html',
-                   attachments)
+                  attachments)
 
         return '已发布更新包: ' + self.name + '\n\n' + output.decode('utf-8')
 

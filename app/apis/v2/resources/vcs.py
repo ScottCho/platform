@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from flask import g
@@ -13,26 +14,13 @@ from app.apis.v2.schemas.vcs import BaselineSchema, PackageSchema
 from app.models.auth import Project
 from app.models.version import Baseline, Package
 
+from app.utils.mypath import dir_remake
 from . import BaseResourceDetail
 
 
 # Create resource managers
 class BaselineList(ResourceList):
     decorators = (auth_required, )
-
-    # 如果登录用户为管理员则显示所有结果，否则只显示参与的项目的基线
-    # def query(self, view_kwargs):
-    #     if g.current_user.role_id == 1:
-    #         query_ = self.session.query(Baseline).order_by(Baseline.id.desc())
-    #     else:
-    #         projects = g.current_user.projects
-    #         apps = []
-    #         for project in projects:
-    #             apps += project.apps
-    #         app_ids = [app.id for app in apps]
-    #         query_ = self.session.query(Baseline).filter(
-    #             Baseline.app_id.in_(app_ids)).order_by(Baseline.id.desc())
-    #     return query_
 
     # 返回当前用户登录的项目相关结果
     def query(self, view_kwargs):
@@ -241,6 +229,8 @@ class BaselineUpdate(ResourceDetail):
         db.session.commit()
         message = '*****开始更新基线*****\n'
         try:
+            update_dir = os.path.join(obj.app.project.target_dir, str(obj.id))
+            dir_remake(update_dir)
             if obj.sqlno or obj.pckno:
                 message += obj.update_db()
             if obj.versionno:

@@ -11,6 +11,7 @@
         3. 初始化数据库
         mysql> create database platform character set 'utf8' collate 'utf8_bin';
         mysql> create user 'scott'@'%' identified by 'tiger';
+        mysql> GRANT ALL ON frogprod.* TO 'scott'@'%';
         flask db init
         flask db migrate
         flask db upgrade

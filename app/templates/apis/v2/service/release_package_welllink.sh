@@ -7,8 +7,8 @@ count=1
 for sql in $(find .   -maxdepth 1 -type f  -name '*ALL.sql');do
    basesql=$(basename ${sql})
    new="${count}-${basesql}"
-   sed  -i 's#/update/WLINK/LOG_[1-9]*#C:/DB#g' ${basesql}
-   sed  -i 's#/update/WLINK/DB_[1-9]*#C:/DB#g' ${basesql}
+   sed  -i "s#{{ target_dir }}LOG_[1-9]*#C:/DB#g" ${basesql}
+   sed  -i "s#{{ target_dir }}DB_[1-9]*#C:/DB#g" ${basesql}
    mv ${sql} ${new}
    let count++
 done

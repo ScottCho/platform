@@ -6,7 +6,7 @@
 # alias = INS
 # deploy_host = 192.168.0.12
 # deploy_dir = /wls/webapps/8002
-# target_dir    merge： /update/WINGLUNG  single： /update/WINGLUNG
+# target_dir = /update/WINGLUNG/
 
 cd {{ jenkins_job_dir }}
 find {{ jenkins_job_dir }} -maxdepth 1 -name *jar -print0|xargs -0 rm -rf
@@ -45,13 +45,10 @@ scp  "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  {{ username }}@{{ deploy_host }}:
 scp  "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}"  {{ username }}@{{ deploy_host }}:{{ deploy_dir }}
 
 
-{% if flag == 1 %}
-mv "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  "{{ target_dir }}"APP_${baseline_id}
-mv "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}" "{{ target_dir }}"APP_${baseline_id}
-{% elif flag == 0 %}
-mv "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  "{{ target_dir }}"APP_SIT
-mv "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}" "{{ target_dir }}"APP_SIT 
-{% endif %}
+
+mv "{{ jenkins_job_dir }}"/"${PACKAGE_JAR}"  "{{ target_dir }}"${baseline_id}/APP
+mv "{{ jenkins_job_dir }}"/"${PACKAGE_MD5}" "{{ target_dir }}"${baseline_id}/APP 
+
 
 
 echo ssh {{ username }}@{{ deploy_host }} "sh {{ deploy_dir }}/update.sh"

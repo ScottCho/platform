@@ -8,7 +8,7 @@ cd {{ target_dir }}${1}/EXECUTE_CODE
 for sql in $(find .   -maxdepth 1 -type f  -name '*ALL.sql');do
     basesql=$(basename ${sql})
     new="$(echo $basesql|awk -F '[_.]' '{print $2}')_$(echo $basesql|awk -F '[_.]' '{print $4}')_$(echo $basesql|awk -F '[_.]' '{print $1}'|tr 'A-Z' 'a-z')_$(echo $basesql|awk -F '[_.]' '{print $3}').$(echo $basesql|awk -F '[_.]' '{print $5}')"
-    sed -i "s#{{ target_dir }}DB#/prog_update/${1}#g" ${basesql}
+    sed  -i "s#{{ target_dir }}[0-9]\+/DB#/prog_update/${1}#g" ${basesql}
     sed -i '1d' ${basesql}
     sed -i '$d' ${basesql}
     mv ${sql} ${new}
