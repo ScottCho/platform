@@ -189,13 +189,13 @@ def ack():
 @socketio.on('connect event', namespace='/task')
 def handle_my_custom_event(json):
     print('received json: ' + str(json))
-    emit('event2', str(json), namespace='/task', callback=ack)
+    emit('event2', str(json), namespace='/task')
 
 
 @flask_app.route('/task')
 def start_background_task():
     # remote_socket_shell()
-    socket_shell('ping -c5 qq.com')
+    socket_shell('sqlplus wluser/demo123@192.168.0.21:1521/winglungsit @/update/WINGLUNG/2799/DB/WLUSER_20200511_01_ALL.sql',room=1)
     return 'Started'
 
 
@@ -204,6 +204,35 @@ def start_background_task():
 def socket():
     return render_template('apis/v2/socketio.html')
 
+from flask_socketio import join_room, leave_room, close_room, emit, send
+
+@socketio.on('join', namespace='/task')
+def on_join(data):
+    room = str(data['room'])
+    join_room(room)
+    print('join room: '+room)
+    emit(room + ' has entered the room.', room=room)
+
+@socketio.on('leave', namespace='/task')
+def on_leave(data):
+    room = data['room']
+    leave_room(room)
+    emit(room + ' has left the room.', room=room)
+
+
+@socketio.on('close', namespace='/task')
+def on_close(data):
+    room = data['room']
+    print('close room: '+room)
+    close_room(room)
+
+
+
+@flask_app.route('/testio')
+@socketio.on('event2', namespace='/task')
+def testio():
+    socketio.emit('event2',  '开始了', namespace='/task')
+    return 'start'
 
 ### 测试文件上传
 from flask import Flask, flash, request, redirect, url_for

@@ -4,6 +4,7 @@ import subprocess
 import paramiko
 
 from app import socketio
+from flask import current_app
 
 
 # 传入命令和交互的内容，execute_cmd('python','print("hello")')
@@ -22,24 +23,30 @@ def execute_cmd(cmd, *content):
     return p.returncode, stdout
 
 
+
+
 # 执行的结果通过socket-io发送到前端
-@socketio.on('event2', namespace='/task')
-def socket_shell(cmd):
+@socketio.on('baseline', namespace='/task')
+def socket_shell(cmd, room, log='/tmp/frog.log'):
     p = subprocess.Popen(cmd,
                          shell=True,
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
-    while True:
-        line = p.stdout.readline().strip()
-        line = line.decode(encoding='utf-8')
-        print('line=' + line)
-        socketio.emit('event2', line, namespace='/task')
-        if not line:
-            break
+    socketio.emit('baseline', '开始更新DB....', namespace='/task', room=room)
+    with open(log, 'a') as f:                
+        while True:
+            line = p.stdout.readline()
+            if line:
+                line = line.decode(encoding='utf-8')
+                # socketio.sleep(1)
+                socketio.emit('baseline', line, namespace='/task', room=room)
+                f.write(line)
+            else:
+                break
 
 
-#利用paramiko调用ssh在远程机器执行命令
+# 利用paramiko调用ssh在远程机器执行命令
 def remote_execute_command(hostname,
                            command,
                            port=22,

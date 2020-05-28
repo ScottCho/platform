@@ -2,8 +2,8 @@
 <html>
     <head>
         <title>Index page</title>
-        <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
-        <script type="text/javascript" src="//cdn.socket.io/socket.io-1.4.5.js"></script>
+        <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+        <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 	<script type="text/javascript" charset="utf-8">
 	   $(document).ready(function(){
 		namespace = '/task';
@@ -13,15 +13,16 @@
 			        socket.emit('connect event', {data: 'I\'m connected!'});
 			    });
 
-		 socket.on('event2', function(msg) {
+		socket.on('event2', function(msg) {
 	                     console.log('Received: ' + msg);
 	                     $('#log').append(msg + '<br>');
 	                 })
                 
-                $('#background').on('click', function() {
-		   $.get("{{ url_for('start_background_task') }}");
-		});
-          });
+        $('#background').on('click', function() {
+		        $.get("{{ url_for('start_background_task') }}");
+		    });
+        });
+
         </script>
 
         <style>

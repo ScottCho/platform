@@ -22,7 +22,7 @@ from app.localemail import send_email
 from app.models.service import App
 from app.utils import execute_cmd, fnmatch_file, switch_char
 from app.utils.jenkins import build_with_parameters, get_jenkins_job
-from app.utils.svn import diff_summary_files
+from app.utils.svn import diff_summary_files, version_merge
 from app.utils.trans_path import trans_java
 from app.utils.mypath import dir_remake
 
@@ -129,21 +129,11 @@ class Baseline(db.Model):
                 fw.write('"' + line + '"' + '\n')
 
         # 判断前一次是否构建成功
-        job = get_jenkins_job(jenkins_job_name)
-        jenkins_last_build = job.get_last_build().is_good()
-        message += '开始构建程序.....' + jenkins_job_name + '\n'
-        if jenkins_last_build:
-            message += '该系统上一次构建结果： 成功\n'
-        else:
-            message += '该系统上一次构建结果： 失败\n'
-
-        jenkins_build_number = job.get_next_build_number()
-        message += 'jenkins构建日志请查： '+job.url + \
-            str(jenkins_build_number)+'/console'+'\n'
-        print(message)
+        get_jenkins_job(jenkins_job_name, str(g.current_user.id))
 
         # 建立jar包存放目录
-        jar_dir = os.path.join(self.app.project.target_dir,str(self.id),'APP')
+        jar_dir = os.path.join(self.app.project.target_dir, str(self.id),
+                               'APP')
         dir_remake(jar_dir)
 
         # 判断是否存在打包脚本，不存在则创建
@@ -151,7 +141,9 @@ class Baseline(db.Model):
 
         # 触发jenkins构建
         print('触发jenkins job: ' + jenkins_job_name)
-        build_with_parameters(jenkins_job_name, baseline_id=self.id)
+        build_with_parameters(jenkins_job_name,
+                              str(g.current_user.id),
+                              baseline_id=self.id)
         return message
 
     def update_db(self, flag=0, num='01'):
@@ -290,7 +282,7 @@ class Baseline(db.Model):
         start_content = 'spool '+log_dir+'/' + \
             os.path.basename(DB_SCRIPT).replace(
                 '.sql', '.log')+'\n'+'set define off'+'\n'
-        end_content = 'commit;\nspool off'
+        end_content = 'commit;\nspool off\nexit'
         with open(DB_SCRIPT, 'r') as rf:
             content = rf.read().replace(start_content,
                                         '').replace(end_content, '')
@@ -304,15 +296,20 @@ class Baseline(db.Model):
         update_content = '@' + DB_SCRIPT
         current_app.logger.info('开始更新' + DB_SCRIPT)
         returncode, output = execute_cmd.execute_cmd(cmd, update_content)
-        returncode, output = execute_cmd.execute_cmd(cmd, update_content)
+        # returncode, output = execute_cmd.execute_cmd(cmd, update_content)
+
         if returncode != 0:
             message += 'sqlplus中执行db脚本失败,请检查！！！' + output.decode('utf-8')
             current_app.logger.error(message)
-
         else:
             output = output.decode('utf-8')
             current_app.logger.info(output)
-            message += output
+        #     message += outputg.current_user
+        logfile = os.path.join(target_dir, str(self.id), 'log.txt')
+        print(g.current_user.id)
+        execute_cmd.socket_shell(cmd + ' ' + update_content,
+                                 str(g.current_user.id),
+                                 log=logfile)
         return message
 
     # 发送基线更新邮件
@@ -398,18 +395,71 @@ class Package(db.Model):
         sql_dir = os.path.join(db_dir, 'SQL')
         pck_dir = os.path.join(db_dir, 'PCK')
         rollback_dir = os.path.join(db_dir, 'ROLLBACK')
-     
 
         # 如果target_dir下存在更新包，则删除重建
         if os.path.exists(package_dir):
             shutil.rmtree(package_dir)
         os.mkdir(package_dir)
-        
+
         os.mkdir(app_dir)
         os.mkdir(db_dir)
         os.mkdir(sql_dir)
         os.mkdir(pck_dir)
         os.mkdir(rollback_dir)
+
+    # def package_merge(self):
+    #     '''
+    #     合并更新包里面的应用版本到SVN
+    #     '''
+    #     merge_blineno = self.merge_blineno
+    #     merge_msg = '开始合并基线....\n'
+    #     print('开始合并基线....')
+    #     for blineno in merge_blineno.split(','):
+    #         baseline = Baseline.query.get_or_404(blineno)
+    #         app = baseline.app
+    #         # 基线版本按照版本号从小到大合并
+    #         version_list = []
+    #         if baseline.versionno:
+    #             version_list = sorted(baseline.versionno.split(','))
+    #         source_dir = app.source_dir
+    #         workspace = app.jenkins_job_dir
+    #         if version_list:
+    #             for version in version_list:
+    #                 # 更新SVN中的Jenkins中的源码目录
+    #                 workcopy = svn.local.LocalClient(workspace)
+    #                 try:
+    #                     workcopy.update()
+    #                 except SvnException:
+    #                     merge_msg = 'SVN 工作目录更新异常'
+    #                 # 合并,一个一个的版本合并提交，出现异常回滚
+    #                 message = f'Merged revision {version} from {source_dir}\n'
+    #                 current_app.logger.info(message)
+
+    #                 merge_msg += message
+    #                 try:
+    #                     merge_result = workcopy.run_command(
+    #                         'merge',
+    #                         [app.source_dir, workspace, '-c', version])
+    #                     if len(merge_result
+    #                            ) > 2 and 'conflicts' in merge_result[3]:
+    #                         merge_msg += '合并' + version + '出现冲突\n'
+    #                         current_app.logger.error(merge_msg)
+    #                         workcopy.run_command('revert', ['-R', workspace])
+    #                     else:
+    #                         # 提交
+    #                         workcopy.commit(message)
+    #                         merge_msg += '合并成功.\n'
+    #                 except Exception:
+    #                     merge_msg += '合并出现错误，请检查\n'
+    #                     current_app.logger.error(merge_msg)
+    #                     workcopy.run_command('revert', ['-R', workspace])
+    #         else:
+    #             merge_msg = '没有代码需要合并\n'
+    #     # 更新包状态变成已合并
+    #     self.status_id = 209
+    #     db.session.add(self)
+    #     db.session.commit()
+    #     return merge_msg
 
     def package_merge(self):
         '''
@@ -429,36 +479,11 @@ class Package(db.Model):
             workspace = app.jenkins_job_dir
             if version_list:
                 for version in version_list:
-                    # 更新SVN中的Jenkins中的源码目录
-                    workcopy = svn.local.LocalClient(workspace)
-                    try:
-                        workcopy.update()
-                    except SvnException:
-                        merge_msg = 'SVN 工作目录更新异常'
-                    # 合并,一个一个的版本合并提交，出现异常回滚
-                    message = f'Merged revision {version} from {source_dir}\n'
-                    current_app.logger.info(message)
-
-                    merge_msg += message
-                    try:
-                        merge_result = workcopy.run_command(
-                            'merge',
-                            [app.source_dir, workspace, '-c', version])
-                        if len(merge_result
-                               ) > 2 and 'conflicts' in merge_result[3]:
-                            merge_msg += '合并' + version + '出现冲突\n'
-                            current_app.logger.error(merge_msg)
-                            workcopy.run_command('revert', ['-R', workspace])
-                        else:
-                            # 提交
-                            workcopy.commit(message)
-                            merge_msg += '合并成功.\n'
-                    except Exception:
-                        merge_msg += '合并出现错误，请检查\n'
-                        current_app.logger.error(merge_msg)
-                        workcopy.run_command('revert', ['-R', workspace])
+                    version_merge(workspace, source_dir, version,
+                                  str(g.current_user.id))
             else:
                 merge_msg = '没有代码需要合并\n'
+                print(merge_msg)
         # 更新包状态变成已合并
         self.status_id = 209
         db.session.add(self)
@@ -484,7 +509,9 @@ class Package(db.Model):
             merge_baseline = Baseline.query.filter_by(id=nu).one()
             print('更新合并基线：' + nu)
             try:
-                update_dir = os.path.join(merge_baseline.app.project.target_dir, str(merge_baseline.id))
+                update_dir = os.path.join(
+                    merge_baseline.app.project.target_dir,
+                    str(merge_baseline.id))
                 dir_remake(update_dir)
                 if merge_baseline.sqlno or merge_baseline.pckno:
                     deploy_msg += merge_baseline.update_db(flag=1,
@@ -554,7 +581,7 @@ class Package(db.Model):
                 app_md5_list = os.listdir(source_app_dir)
                 for file in app_md5_list:
                     shutil.move(os.path.join(source_app_dir, file), app_dir)
-                
+
             # 移动数据库文件到更新包目录中
             if os.path.exists(source_db_dir):
                 sql_file_list = os.listdir(source_sql_dir)
@@ -570,8 +597,9 @@ class Package(db.Model):
                     shutil.copy(os.path.join(source_pck_dir, pck_file),
                                 pck_dir)
                 for rollback_file in rollback_file_list:
-                    shutil.copy(os.path.join(source_rollback_dir, rollback_file),
-                                rollback_dir)
+                    shutil.copy(
+                        os.path.join(source_rollback_dir, rollback_file),
+                        rollback_dir)
 
         script_path = self.render_package_script()
         returncode, output = execute_cmd.execute_cmd('sh ' + script_path +
@@ -603,7 +631,7 @@ class Package(db.Model):
         attachments = [package_path] + logs
 
         send_email(recipients, mailtheme, 'apis/v2/mail/vcs/package.html',
-                  attachments)
+                   attachments)
 
         return '已发布更新包: ' + self.name + '\n\n' + output.decode('utf-8')
 
