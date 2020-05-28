@@ -53,9 +53,10 @@ def build_with_parameters(job_name, room, **kw):
     global url, username, password, token
     kw.update({'token': token})
     build_url = url + '/job/' + job_name + '/buildWithParameters'
+    
+    r = requests.post(build_url, data=kw)
     socketio.emit('baseline',
-                  '开始更新应用...',
+                  '***正在更新'+ job_name + '***',
                   namespace='/task',
                   room=room)
-    r = requests.post(build_url, data=kw)
     return r.ok
