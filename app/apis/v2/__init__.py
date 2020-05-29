@@ -3,21 +3,37 @@ from flask import Blueprint
 from flask_rest_jsonapi import Api
 
 from app import flask_app
+
 from .permission import permission_manager
 
+
 api_v2 = Blueprint('api_v2', __name__)
-# from app.apis.v2 import resources
-# api = Api(flask_app,decorators=(auth_required,))
 api = Api(flask_app)
 api.init_app(flask_app)
-from .resources import auth, cmdb, service, vcs, issues, stat
+
 
 # 权限控制
-from .resources.baseconfig import StatusList, StatusDetail
-from .resources.auth import ProjectList, ProjectDetail, UserList, UserDetail, RoleList, RoleDetail
-from .resources.cmdb import ServerList, ServerDetail, CredenceList, CredenceDetail, AgreementList, AgreementDetail
-from .resources.service import DatabaseList, DatabaseDetail, SchemaList, SchemaDetail, EnvList, EnvDetail, SubsystemList, SubsystemDetail, AppList, AppDetail
-from .resources.vcs import BaselineList, BaselineDetail
+from .resources import auth, cmdb, issues, service, stat, vcs
+from .resources.auth import (ProjectDetail, ProjectList, RoleDetail, RoleList,
+                             UserDetail, UserList)
+from .resources.baseconfig import StatusDetail, StatusList
+from .resources.cmdb import (AgreementDetail, AgreementList, CredenceDetail,
+                             CredenceList, ServerDetail, ServerList)
+from .resources.issues import (IssueBugDetail, IssueBugList,
+                               IssueCategoryDetail, IssueCategoryList,
+                               IssueModuleDetail, IssueModuleList,
+                               IssuePriorityDetail, IssuePriorityList,
+                               IssueReproducibilityDetail,
+                               IssueReproducibilityList,
+                               IssueRequirementDetail, IssueRequirementList,
+                               IssueSeverityDetail, IssueSeverityList,
+                               IssueSourceDetail, IssueSourceList,
+                               IssueTaskDetail, IssueTaskList, UploadIssueAPI)
+from .resources.service import (AppDetail, AppList, DatabaseDetail,
+                                DatabaseList, EnvDetail, EnvList, SchemaDetail,
+                                SchemaList, SubsystemDetail, SubsystemList)
+from .resources.vcs import (BaselineDetail, BaselineList,
+                            PackageDetail, PackageList)
 
 # 注册后才可以进行权限控制
 api.resource_registry = [
@@ -25,6 +41,17 @@ api.resource_registry = [
     ServerList, ServerDetail, CredenceList, CredenceDetail, AgreementList,
     AgreementDetail, DatabaseList, DatabaseDetail, SchemaList, SchemaDetail,
     EnvList, EnvDetail, SubsystemList, SubsystemDetail, AppList, AppDetail,
-    BaselineList, BaselineDetail, StatusList, StatusDetail
+    BaselineList, BaselineDetail, StatusList, StatusDetail,
+    PackageDetail, PackageList,
+    IssueBugDetail, IssueBugList,
+    IssueCategoryDetail, IssueCategoryList,
+    IssueModuleDetail, IssueModuleList,
+    IssuePriorityDetail, IssuePriorityList,
+    IssueReproducibilityDetail,
+    IssueReproducibilityList,
+    IssueRequirementDetail, IssueRequirementList,
+    IssueSeverityDetail, IssueSeverityList,
+    IssueSourceDetail, IssueSourceList,
+    IssueTaskDetail, IssueTaskList, UploadIssueAPI
 ]
 api.permission_manager(permission_manager)

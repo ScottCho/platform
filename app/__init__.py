@@ -227,13 +227,6 @@ def on_close(data):
     close_room(room)
 
 
-
-@flask_app.route('/testio')
-@socketio.on('event2', namespace='/task')
-def testio():
-    socketio.emit('event2',  '开始了', namespace='/task')
-    return 'start'
-
 ### 测试文件上传
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename

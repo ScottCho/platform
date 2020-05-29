@@ -295,22 +295,25 @@ class Baseline(db.Model):
         current_app.logger.info(cmd)
         update_content = '@' + DB_SCRIPT
         current_app.logger.info('开始更新' + DB_SCRIPT)
-        returncode, output = execute_cmd.execute_cmd(cmd, update_content)
+        # returncode, output = execute_cmd.execute_cmd(cmd, update_content)
         # returncode, output = execute_cmd.execute_cmd(cmd, update_content)
 
-        if returncode != 0:
-            message += 'sqlplus中执行db脚本失败,请检查！！！' + output.decode('utf-8')
-            current_app.logger.error(message)
-        else:
-            output = output.decode('utf-8')
-            current_app.logger.info(output)
+        # if returncode != 0:
+        #     message += 'sqlplus中执行db脚本失败,请检查！！！' + output.decode('utf-8')
+        #     current_app.logger.error(message)
+        # else:
+        #     output = output.decode('utf-8')
+        #     current_app.logger.info(output)
         #     message += outputg.current_user
         logfile = os.path.join(target_dir, str(self.id), 'log.txt')
         print(g.current_user.id)
         execute_cmd.socket_shell(cmd + ' ' + update_content,
                                  str(g.current_user.id),
                                  log=logfile)
-        return message
+        execute_cmd.socket_shell(cmd + ' ' + update_content,
+                                 str(g.current_user.id),
+                                 log=logfile)
+
 
     # 发送基线更新邮件
     def send_baseline_email(self):

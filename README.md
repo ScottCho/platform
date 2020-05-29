@@ -35,7 +35,8 @@
 
         5. 启动实例
         pipenv run gunicorn app:flask_app -b 0.0.0.0:5555 -w 3 -D -p /tmp/app5555.pid --log-file /tmp/app5555.log -t 500
-        gunicorn --worker-class eventlet -w 1 app:flask_app -b 0.0.0.0:5000  -D -p /tmp/app5000.pid --log-file /tmp/app5000.log -t 500
+       
+       pipenv run  gunicorn --worker-class eventlet -w 1 app:flask_app -b 0.0.0.0:5555  -D -p /tmp/app5555.pid --log-file /tmp/app5555.log -t 500
 
         6. 启动celery
         调试： celery -A app.celery worker -l info

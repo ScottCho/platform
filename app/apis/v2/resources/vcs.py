@@ -227,21 +227,18 @@ class BaselineUpdate(ResourceDetail):
         obj.status_id = 203
         db.session.add(obj)
         db.session.commit()
-        message = '*****开始更新基线*****\n'
         try:
             update_dir = os.path.join(obj.app.project.target_dir, str(obj.id))
             dir_remake(update_dir)
             if obj.sqlno or obj.pckno:
-                message += obj.update_db()
+                obj.update_db()
             if obj.versionno:
-                message += obj.update_app()
+                obj.update_app()
         except Exception as e:
             return api_abort(400, detail=str(e))
         else:
             # 发送邮件
             obj.send_baseline_email()
-            # 更新结果返回
-            result.update({'detail': message})
         return result
 
     schema = BaselineSchema
