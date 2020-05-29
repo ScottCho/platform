@@ -162,8 +162,7 @@ class PackageMerge(ResourceDetail):
     def after_get(self, result):
         package = self._data_layer.get_object({'id': result['data']['id']})
         detail = package.package_merge()
-        print(detail)
-        result.update({'detail': detail})
+        # result.update({'detail': detail})
         return result
 
     schema = PackageSchema

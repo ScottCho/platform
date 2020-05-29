@@ -16,7 +16,6 @@ import urllib
 import svn.local
 import svn.remote
 from flask import current_app, g, render_template, send_from_directory
-from svn.exception import SvnException
 
 from app.localemail import send_email
 from app.models.service import App
@@ -97,7 +96,6 @@ class Baseline(db.Model):
         '''
         message = '*****开始更新应用*****\n'
         jenkins_job_name = self.app.jenkins_job_name
-
         version_list = self.versionno.split(',')
         compile_file_list = []  # 构建文件集
         for version in version_list:
@@ -314,7 +312,6 @@ class Baseline(db.Model):
                                  str(g.current_user.id),
                                  log=logfile)
 
-
     # 发送基线更新邮件
     def send_baseline_email(self):
         # 基线邮件主题
@@ -472,7 +469,7 @@ class Package(db.Model):
         merge_msg = '开始合并基线....\n'
         print('开始合并基线....')
         for blineno in merge_blineno.split(','):
-            baseline = Baseline.query.get_or_404(blineno)
+            baseline = Baseline.query.get(blineno)
             app = baseline.app
             # 基线版本按照版本号从小到大合并
             version_list = []
@@ -484,9 +481,6 @@ class Package(db.Model):
                 for version in version_list:
                     version_merge(workspace, source_dir, version,
                                   str(g.current_user.id))
-            else:
-                merge_msg = '没有代码需要合并\n'
-                print(merge_msg)
         # 更新包状态变成已合并
         self.status_id = 209
         db.session.add(self)
