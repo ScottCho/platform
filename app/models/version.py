@@ -96,6 +96,10 @@ class Baseline(db.Model):
         '''
         message = '*****开始更新应用*****\n'
         jenkins_job_name = self.app.jenkins_job_name
+        log = open(
+            os.path.join(self.app.project.target_dir, str(self.id), 'log.txt'),
+            'a')
+        log.write(f'{g.current_user.username}更新基线{self.id}应用\n')
         version_list = self.versionno.split(',')
         compile_file_list = []  # 构建文件集
         for version in version_list:
@@ -108,7 +112,8 @@ class Baseline(db.Model):
                 trans_java(self.app.subsystem.en_name, self.app.source_dir,
                            urllib.request.unquote(f)) for f in source_files
             ]
-
+            log.write(f'版本{version}变更文件有:\n')
+            [log.write(line + '\n') for line in compile_file_list]
         # 删除原有相同基线序号的变更文本
         old_file_list = glob.glob(
             os.path.join(self.app.jenkins_job_dir, '/') + '*_' + str(self.id) +
@@ -122,12 +127,13 @@ class Baseline(db.Model):
             self.app.jenkins_job_dir, self.app.subsystem.en_name + '_' +
             datetime.utcnow().strftime("%Y%m%d") + '_' + str(self.id) + '.txt')
         print('本次基线的增量文本：' + compile_file_path)
+        log.write(f'本次基线的增量文本：{compile_file_path}\n')
         with open(compile_file_path, 'w') as fw:
             for line in compile_file_list:
                 fw.write('"' + line + '"' + '\n')
 
         # 判断前一次是否构建成功
-        get_jenkins_job(jenkins_job_name, str(g.current_user.id))
+        console_url = get_jenkins_job(jenkins_job_name, str(g.current_user.id))
 
         # 建立jar包存放目录
         jar_dir = os.path.join(self.app.project.target_dir, str(self.id),
@@ -142,6 +148,8 @@ class Baseline(db.Model):
         build_with_parameters(jenkins_job_name,
                               str(g.current_user.id),
                               baseline_id=self.id)
+        log.write(f'触发jenkins job: {console_url}\n')
+        log.close()
         return message
 
     def update_db(self, flag=0, num='01'):
@@ -467,20 +475,28 @@ class Package(db.Model):
         '''
         merge_blineno = self.merge_blineno
         merge_msg = '开始合并基线....\n'
-        print('开始合并基线....')
+        print(merge_msg)
         for blineno in merge_blineno.split(','):
             baseline = Baseline.query.get(blineno)
             app = baseline.app
+            target_dir = os.path.join(baseline.app.project.target_dir,
+                                      str(baseline.id))
+            if not os.path.exists(target_dir):
+                os.mkdir(target_dir)
+            log = open(os.path.join(target_dir, 'log.txt'), 'a')
             # 基线版本按照版本号从小到大合并
             version_list = []
             if baseline.versionno:
                 version_list = sorted(baseline.versionno.split(','))
+            log.write(f'基线{baseline.id}需要合并的版本：{str(version_list)}\n')
             source_dir = app.source_dir
             workspace = app.jenkins_job_dir
             if version_list:
                 for version in version_list:
-                    version_merge(workspace, source_dir, version,
-                                  str(g.current_user.id))
+                    log.write(f'=====合并版本{version}=====\n')
+                    merge_msg += version_merge(workspace, source_dir, version)
+                    log.write(f'版本{version}合并完成\n')
+            log.close()
         # 更新包状态变成已合并
         self.status_id = 209
         db.session.add(self)
@@ -509,7 +525,8 @@ class Package(db.Model):
                 update_dir = os.path.join(
                     merge_baseline.app.project.target_dir,
                     str(merge_baseline.id))
-                dir_remake(update_dir)
+                dir_remake(os.path.join(update_dir, 'APP'))
+                dir_remake(os.path.join(update_dir, 'DB'))
                 if merge_baseline.sqlno or merge_baseline.pckno:
                     deploy_msg += merge_baseline.update_db(flag=1,
                                                            num=package_count)

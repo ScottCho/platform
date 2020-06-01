@@ -45,6 +45,25 @@ def socket_shell(cmd, room, log='/tmp/frog.log'):
             else:
                 break
 
+# 执行的结果通过socket-io发送到前端
+@socketio.on('event2', namespace='/task')
+def socket_shellzz(cmd,  log='/tmp/frog.log'):
+    p = subprocess.Popen(cmd,
+                         shell=True,
+                         stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT)
+    socketio.emit('event2', '开始更新DB....', namespace='/task')
+    with open(log, 'a') as f:                
+        while True:
+            line = p.stdout.readline()
+            if line:
+                line = line.decode(encoding='utf-8')
+                # socketio.sleep(1)
+                socketio.emit('event2', line, namespace='/task')
+                f.write(line)
+            else:
+                break
 
 # 利用paramiko调用ssh在远程机器执行命令
 def remote_execute_command(hostname,

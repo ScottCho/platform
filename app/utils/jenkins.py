@@ -36,6 +36,7 @@ def get_jenkins_job(job_name, room):
                   'Jenkins控制台： ' + console_url,
                   namespace='/task',
                   room=room)
+    return console_url
 
 
 # request触发Jenkins远程构建

@@ -162,7 +162,7 @@ class PackageMerge(ResourceDetail):
     def after_get(self, result):
         package = self._data_layer.get_object({'id': result['data']['id']})
         detail = package.package_merge()
-        # result.update({'detail': detail})
+        result.update({'detail': detail})
         return result
 
     schema = PackageSchema
@@ -237,7 +237,8 @@ class BaselineUpdate(ResourceDetail):
             return api_abort(400, detail=str(e))
         else:
             # 发送邮件
-            obj.send_baseline_email()
+            pass
+            # obj.send_baseline_email()
         return result
 
     schema = BaselineSchema
