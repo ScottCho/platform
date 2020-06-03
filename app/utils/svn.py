@@ -27,10 +27,10 @@ def version_merge(workspace, svn_source, version, room):
     '''
     合并更新包里面的应用版本到SVN
     '''
-    message = f'Merged revision {version} from {svn_source}\n'
-    print(message)
-    # socketio.emit('baseline', message, namespace='/task', broadcast=True)
-    socketio.emit('baseline', message, namespace='/task', room=room)
+    merge_msg = f'Merged revision {version} from {svn_source}\n'
+    print(merge_msg)
+    # socketio.emit('baseline', merge_msg, namespace='/task', broadcast=True)
+    socketio.emit('baseline', merge_msg, namespace='/task', room=room)
     socketio.sleep(3)
     # 更新SVN中的Jenkins中的源码目录
     try:
@@ -46,7 +46,7 @@ def version_merge(workspace, svn_source, version, room):
             workcopy.run_command('revert', ['-R', workspace])
         else:
             # 提交
-            workcopy.commit(message+'\n'+commit_log)
+            workcopy.commit(merge_msg+'\n'+commit_log)
             merge_msg = f'提交版本{version}\n'
             print(merge_msg)
             socketio.emit('baseline', merge_msg, namespace='/task', room=room)
