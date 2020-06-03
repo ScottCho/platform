@@ -540,9 +540,12 @@ class Package(db.Model):
                     deploy_msg += merge_baseline.update_db(flag=1,
                                                            num=package_count)
                     print('deploy_msg: ' + deploy_msg)
+                    print(f'{nu}基线DB更新完成')
                 if merge_baseline.versionno:
+                    print(f'{nu}基线更新应用')
                     deploy_msg += merge_baseline.update_app(flag=1,
                                                             num=package_count)
+                    print(f'{nu}基线更新应用完成')
                     print('deploy_msg: ' + deploy_msg)
             except Exception as e:
                 print(e)
