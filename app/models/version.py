@@ -320,6 +320,7 @@ class Baseline(db.Model):
         execute_cmd.socket_shell(cmd + ' ' + update_content,
                                  str(g.current_user.id),
                                  log=logfile)
+        return '更新完成'
 
     # 发送基线更新邮件
     def send_baseline_email(self):
@@ -537,12 +538,14 @@ class Package(db.Model):
                 dir_remake(os.path.join(update_dir, 'APP'))
                 dir_remake(os.path.join(update_dir, 'DB'))
                 if merge_baseline.sqlno or merge_baseline.pckno:
+                    print(f'{nu}基线DB开始更新')
                     deploy_msg += merge_baseline.update_db(flag=1,
                                                            num=package_count)
-                    print('deploy_msg: ' + deploy_msg)
                     print(f'{nu}基线DB更新完成')
+                    print('deploy_msg: ' + deploy_msg)
+                    
                 if merge_baseline.versionno:
-                    print(f'{nu}基线更新应用')
+                    print(f'{nu}基线开始更新应用')
                     deploy_msg += merge_baseline.update_app(flag=1,
                                                             num=package_count)
                     print(f'{nu}基线更新应用完成')
