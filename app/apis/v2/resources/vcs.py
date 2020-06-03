@@ -237,8 +237,8 @@ class BaselineUpdate(ResourceDetail):
             return api_abort(400, detail=str(e))
         else:
             # 发送邮件
-            pass
-            # obj.send_baseline_email()
+            # pass
+            obj.send_baseline_email()
         return result
 
     schema = BaselineSchema

@@ -22,12 +22,15 @@ def diff_summary_files(svn_source_dir, start_version, end_version):
     return source_files
 
 
-def version_merge(workspace, svn_source, version):
+@socketio.on('baseline', namespace='/task')
+def version_merge(workspace, svn_source, version, room):
     '''
     合并更新包里面的应用版本到SVN
     '''
-    merge_msg = f'Merged revision {version} from {svn_source}\n'
-    print(merge_msg)
+    message = f'Merged revision {version} from {svn_source}\n'
+    print(message)
+    socketio.emit('baseline', message, namespace='/task', broadcast=True)
+    socketio.sleep(3)
     # 更新SVN中的Jenkins中的源码目录
     try:
         workcopy = svn.local.LocalClient(workspace)
@@ -36,21 +39,58 @@ def version_merge(workspace, svn_source, version):
         commit_log = '\n'.join(source_log[3:5])
         merge_result = workcopy.run_command('merge', [svn_source, workspace, '-c', version])
         if len(merge_result) > 2 and 'conflicts' in merge_result[3]:
-            merge_msg += f'合并版本{version}出现冲突,还原至合并之前\n'
+            merge_msg = '合并' + version + '出现冲突,还原至合并之前\n'
             print(merge_msg)
+            socketio.emit('baseline', merge_msg, namespace='/task', room=room)
             workcopy.run_command('revert', ['-R', workspace])
         else:
             # 提交
-            workcopy.commit(merge_msg+'\n'+commit_log)
+            workcopy.commit(message+'\n'+commit_log)
             merge_msg = f'提交版本{version}\n'
             print(merge_msg)
+            socketio.emit('baseline', merge_msg, namespace='/task', broadcast=True)
     except OSError:
-        merge_msg += f'不存在工作目录{workspace}\n'
+        socketio.emit('baseline', '不存在工作目录', namespace='/task', room=room)
     except SvnException:
-        merge_msg += f'SVN 工作目录更新异常{workspace}\n'
+        socketio.emit('baseline', 'SVN 工作目录更新异常\n', namespace='/task', room=room)
     except Exception as e:
         print(e)
         merge_msg = '合并出现错误，请检查\n'
         print(merge_msg)
+        socketio.emit('baseline', merge_msg, namespace='/task', room=room)
         workcopy.run_command('revert', ['-R', workspace])
     return merge_msg
+
+
+# def version_merge(workspace, svn_source, version):
+#     '''
+#     合并更新包里面的应用版本到SVN
+#     '''
+#     merge_msg = f'Merged revision {version} from {svn_source}\n'
+#     print(merge_msg)
+#     # 更新SVN中的Jenkins中的源码目录
+#     try:
+#         workcopy = svn.local.LocalClient(workspace)
+#         workcopy.update()
+#         source_log = workcopy.run_command('log', [svn_source, '-c', version])
+#         commit_log = '\n'.join(source_log[3:5])
+#         merge_result = workcopy.run_command('merge', [svn_source, workspace, '-c', version])
+#         if len(merge_result) > 2 and 'conflicts' in merge_result[3]:
+#             merge_msg += f'合并版本{version}出现冲突,还原至合并之前\n'
+#             print(merge_msg)
+#             workcopy.run_command('revert', ['-R', workspace])
+#         else:
+#             # 提交
+#             workcopy.commit(merge_msg+'\n'+commit_log)
+#             merge_msg += f'提交版本{version}\n'
+#             print(merge_msg)
+#     except OSError:
+#         merge_msg += f'不存在工作目录{workspace}\n'
+#     except SvnException:
+#         merge_msg += f'SVN 工作目录更新异常{workspace}\n'
+#     except Exception as e:
+#         print(e)
+#         merge_msg += '合并出现错误，请检查\n'
+#         print(merge_msg)
+#         workcopy.run_command('revert', ['-R', workspace])
+#     return merge_msg

@@ -2,7 +2,7 @@
 
 import os
 import logging
-from flask import Flask, render_template, g
+from flask import Flask, render_template, g, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_mail import Mail
@@ -51,7 +51,7 @@ flask_app.logger.setLevel(logging.INFO)
 # 提供跨域支持
 CORS(flask_app)
 # 初始化SocketIO
-socketio = SocketIO(flask_app)
+socketio = SocketIO(flask_app, ping_timeout=300)
 
 #初始化celery
 celery = make_celery(flask_app)
@@ -189,7 +189,7 @@ def ack():
 @socketio.on('connect event', namespace='/task')
 def handle_my_custom_event(json):
     print('received json: ' + str(json))
-    emit('event2', str(json), namespace='/task')
+    # emit('baseline', str(json)+request.remote_addr, namespace='/task')
 
 
 @flask_app.route('/task')
@@ -197,7 +197,7 @@ def start_background_task():
     # remote_socket_shell()
     print('开始')
     from app.utils.execute_cmd import socket_shellzz
-    socket_shellzz('sqlplus wluser/demo123@192.168.0.21:1521/winglungsit @/update/WINGLUNG/2799/DB/WLUSER_20200511_01_ALL.sql')
+    socket_shellzz('sh /tmp/a.sh')
     return 'Started'
 
 

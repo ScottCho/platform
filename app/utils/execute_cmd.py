@@ -53,10 +53,11 @@ def socket_shellzz(cmd,  log='/tmp/frog.log'):
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
-    socketio.emit('event2', '开始更新DB....', namespace='/task')
+    socketio.emit('event2', '开始执行命令....'+cmd, namespace='/task')
     with open(log, 'a') as f:                
         while True:
             line = p.stdout.readline()
+            print(line)
             if line:
                 line = line.decode(encoding='utf-8')
                 # socketio.sleep(1)

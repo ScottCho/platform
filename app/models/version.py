@@ -494,7 +494,15 @@ class Package(db.Model):
             if version_list:
                 for version in version_list:
                     log.write(f'=====合并版本{version}=====\n')
-                    merge_msg += version_merge(workspace, source_dir, version)
+                    merge_msg += version_merge(workspace, source_dir, version,
+                                  str(g.current_user.id))
+                    # 异步
+                    # from app import socketio
+                    # from threading import Lock
+                    # thread_lock = Lock()
+                    # with thread_lock:
+                    #     thread = socketio.start_background_task(version_merge, workspace, source_dir, version,
+                    #                     str(g.current_user.id))              
                     log.write(f'版本{version}合并完成\n')
             log.close()
         # 更新包状态变成已合并

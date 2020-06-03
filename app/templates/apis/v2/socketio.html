@@ -13,7 +13,7 @@
 			        socket.emit('connect event', {data: 'I\'m connected!'});
 			    });
 
-		socket.on('event2', function(msg) {
+		socket.on('baseline',function(msg) {
 	                     console.log('Received: ' + msg);
 	                     $('#log').append(msg + '<br>');
 	                 })

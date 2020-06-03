@@ -1,4 +1,5 @@
 import logging
+from threading import Thread
 
 from flask import jsonify, g
 from flask.views import MethodView
@@ -20,7 +21,7 @@ from . import BaseResourceDetail
 # Create resource managers
 class DatabaseList(ResourceList):
     decorators = (auth_required, )
-    
+
     # 返回当前用户登录的项目相关结果
     def query(self, view_kwargs):
         current_project_id = g.current_project.id if g.current_project else None
@@ -145,14 +146,13 @@ class AppManageAPI(MethodView):
                 env, action, subsystem)
             print(command)
             try:
-                result = remote_shell(ip,
-                                      command,
-                                      username=username,
-                                      password=password)
+                thread = Thread(target=remote_shell,
+                                args=(ip, command, username, password))
+                thread.start()
             except Exception as e:
                 return api_abort(400, str(e))
             else:
-                return jsonify(data=[{'status': 200, 'detail': result}])
+                return jsonify(data=[{'status': 200, 'detail': '已发送命令'}])
         else:
             return api_abort(404, 'app不存在')
 
@@ -173,14 +173,13 @@ class DatabaseManageAPI(MethodView):
             logging.info('*' * 8 + 'execute command ' + command +
                          ' on oracle' + '@' + ip + '*' * 8)
             try:
-                result = remote_shell(ip,
-                                      command,
-                                      username=username,
-                                      password=password)
+                thread = Thread(target=remote_shell,
+                                args=(ip, command, username, password))
+                thread.start()
             except Exception as e:
                 return api_abort(400, str(e))
             else:
-                return jsonify(data=[{'status': 200, 'detail': result}])
+                return jsonify(data=[{'status': 200, 'detail': '已发送命令'}])
         else:
             return api_abort(404, '数据库实例不存在')
 
