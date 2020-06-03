@@ -95,6 +95,7 @@ class Baseline(db.Model):
         num: 项目当天发布更新包的次数
         '''
         message = '*****开始更新应用*****\n'
+        print(message)
         jenkins_job_name = self.app.jenkins_job_name
         log = open(
             os.path.join(self.app.project.target_dir, str(self.id), 'log.txt'),
