@@ -29,7 +29,8 @@ def version_merge(workspace, svn_source, version, room):
     '''
     message = f'Merged revision {version} from {svn_source}\n'
     print(message)
-    socketio.emit('baseline', message, namespace='/task', broadcast=True)
+    # socketio.emit('baseline', message, namespace='/task', broadcast=True)
+    socketio.emit('baseline', message, namespace='/task', room=room)
     socketio.sleep(3)
     # 更新SVN中的Jenkins中的源码目录
     try:
@@ -48,7 +49,7 @@ def version_merge(workspace, svn_source, version, room):
             workcopy.commit(message+'\n'+commit_log)
             merge_msg = f'提交版本{version}\n'
             print(merge_msg)
-            socketio.emit('baseline', merge_msg, namespace='/task', broadcast=True)
+            socketio.emit('baseline', merge_msg, namespace='/task', room=room)
     except OSError:
         socketio.emit('baseline', '不存在工作目录', namespace='/task', room=room)
     except SvnException:
