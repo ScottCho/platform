@@ -141,29 +141,39 @@ class IssueRequirement(db.Model):
 
     # 上传处理
     @staticmethod
-    def upload_issue(csv_reader):
-        for row in csv_reader:
-            number = row['编号']
-            summary = row['需求名称']
-            description = row['需求描述']
-            manhour = row['预计工时']
-            status_name = row['当前状态']
-            status_id = Status.query.filter_by(name=status_name).one().id
-            assignee_name = row['指派给']
-            assignee_id = None
-            if assignee_name:
-                assignee_id = User.query.filter_by(
-                    username=assignee_name).first().id
-            priority_id = row['优先级'] if row['优先级'] != '' else None
-            requirement = IssueRequirement(number=number,
-                                           summary=summary,
-                                           description=description,
-                                           manhour=manhour,
-                                           status_id=status_id,
-                                           assignee_id=assignee_id,
-                                           project_id=g.current_project.id,
-                                           priority_id=priority_id)
-            db.session.add(requirement)
+    def upload_issue(csv_reader, issue_source):
+        project_id = g.current_project.id
+        if issue_source == 'ZenTao':
+            for row in csv_reader:
+                number = row['编号']
+                summary = row['需求名称']
+                description = row['需求描述']
+                manhour = row['预计工时']
+                status_name = row['当前状态']
+                status_id = Status.query.filter_by(name=status_name).one().id
+                assignee_name = row['指派给']
+                assignee_id = None
+                if assignee_name:
+                    assignee_id = User.query.filter_by(
+                        username=assignee_name).first().id
+                priority_id = row['优先级'] if row['优先级'] != '' else None
+                requirement = IssueRequirement(number=number,
+                                               summary=summary,
+                                               description=description,
+                                               manhour=manhour,
+                                               status_id=status_id,
+                                               assignee_id=assignee_id,
+                                               project_id=project_id,
+                                               priority_id=priority_id)
+                db.session.add(requirement)
+        elif issue_source == 'Mantis':
+            for row in csv_reader:
+                number = row['\ufeff编号']
+                summary = row['摘要']
+                requirement = IssueRequirement(number=number,
+                                               summary=summary,
+                                               project_id=project_id)
+                db.session.add(requirement)
         db.session.commit()
 
 
@@ -213,33 +223,43 @@ class IssueBug(db.Model):
 
     # 上传处理
     @staticmethod
-    def upload_issue(csv_reader):
-        for row in csv_reader:
-            number = row['Bug编号']
-            summary = row['Bug标题']
-            description = row['重现步骤']
-            startdate = row['指派日期'] if row['指派日期'] != '0000-00-00' else None
-            enddate = row['解决日期'] if row['解决日期'] != '0000-00-00' else None
-            status_name = row['Bug状态']
-            status_id = Status.query.filter_by(name=status_name,
-                                               attribute='issue').one().id
-            assignee_name = row['指派给']
-            assignee_id = None
-            if assignee_name and assignee_name != 'Closed':
-                print('指派给' * 5 + assignee_name)
-                assignee_id = User.query.filter_by(
-                    username=assignee_name).one().id
-            priority_id = row['优先级'] if row['优先级'] != '' else None
-            bug = IssueBug(number=number,
-                           summary=summary,
-                           description=description,
-                           startdate=startdate,
-                           enddate=enddate,
-                           status_id=status_id,
-                           assignee_id=assignee_id,
-                           project_id=g.current_project.id,
-                           priority_id=priority_id)
-            db.session.add(bug)
+    def upload_issue(csv_reader, issue_source):
+        project_id = g.current_project.id
+        if issue_source == 'ZenTao':
+            for row in csv_reader:
+                number = row['Bug编号']
+                summary = row['Bug标题']
+                description = row['重现步骤']
+                startdate = row['指派日期'] if row['指派日期'] != '0000-00-00' else None
+                enddate = row['解决日期'] if row['解决日期'] != '0000-00-00' else None
+                status_name = row['Bug状态']
+                status_id = Status.query.filter_by(name=status_name,
+                                                   attribute='issue').one().id
+                assignee_name = row['指派给']
+                assignee_id = None
+                if assignee_name and assignee_name != 'Closed':
+                    print('指派给' * 5 + assignee_name)
+                    assignee_id = User.query.filter_by(
+                        username=assignee_name).one().id
+                priority_id = row['优先级'] if row['优先级'] != '' else None
+                bug = IssueBug(number=number,
+                               summary=summary,
+                               description=description,
+                               startdate=startdate,
+                               enddate=enddate,
+                               status_id=status_id,
+                               assignee_id=assignee_id,
+                               project_id=project_id,
+                               priority_id=priority_id)
+                db.session.add(bug)
+        elif issue_source == 'Mantis':
+            for row in csv_reader:
+                number = row['\ufeff编号']
+                summary = row['摘要']
+                bug = IssueBug(number=number,
+                               summary=summary,
+                               project_id=project_id)
+                db.session.add(bug)
         db.session.commit()
 
 
@@ -277,41 +297,52 @@ class IssueTask(db.Model):
 
     # 上传处理
     @staticmethod
-    def upload_issue(csv_reader):
-        for row in csv_reader:
-            number = row['编号']
-            summary = row['任务名称']
-            description = row['任务描述']
-            startdate = row['实际开始'] if row['实际开始'] != '0000-00-00' else None
-            enddate = row['完成时间'] if row['完成时间'] != '0000-00-00' else None
-            deadline = row['截止日期'] if row['截止日期'] != '0000-00-00' else None
-            manhour = row['最初预计']
-            status_name = row['任务状态']
-            status_id = Status.query.filter_by(name=status_name).one().id
-            requirement_summary = row['相关需求']
-            requirement_id = None
-            if requirement_summary:
-                org_requirement_id = requirement_summary.split('#')[-1].strip(
-                    ')')
-                requirement_id = IssueRequirement.query.filter_by(
-                    number=org_requirement_id).one().id
-            assignee_name = row['指派给']
-            assignee_id = None
-            if assignee_name:
-                assignee_id = User.query.filter_by(
-                    username=assignee_name).one().id
-            priority_id = row['优先级'] if row['优先级'] != '' else None
-            itask = IssueTask(number=number,
-                              summary=summary,
-                              description=description,
-                              startdate=startdate,
-                              enddate=enddate,
-                              deadline=deadline,
-                              manhour=manhour,
-                              status_id=status_id,
-                              requirement_id=requirement_id,
-                              assignee_id=assignee_id,
-                              priority_id=priority_id,
-                              project_id=g.current_project.id)
-            db.session.add(itask)
+    def upload_issue(csv_reader, issue_source):
+        project_id = g.current_project.id
+        if issue_source == 'ZenTao':
+            for row in csv_reader:
+                number = row['编号']
+                summary = row['任务名称']
+                description = row['任务描述']
+                startdate = row['实际开始'] if row['实际开始'] != '0000-00-00' else None
+                enddate = row['完成时间'] if row['完成时间'] != '0000-00-00' else None
+                deadline = row['截止日期'] if row['截止日期'] != '0000-00-00' else None
+                manhour = row['最初预计']
+                status_name = row['任务状态']
+                status_id = Status.query.filter_by(name=status_name).one().id
+                requirement_summary = row['相关需求']
+                requirement_id = None
+                if requirement_summary:
+                    org_requirement_id = requirement_summary.split(
+                        '#')[-1].strip(')')
+                    requirement_id = IssueRequirement.query.filter_by(
+                        number=org_requirement_id).one().id
+                assignee_name = row['指派给']
+                assignee_id = None
+                if assignee_name:
+                    assignee_id = User.query.filter_by(
+                        username=assignee_name).one().id
+                priority_id = row['优先级'] if row['优先级'] != '' else None
+                itask = IssueTask(number=number,
+                                  summary=summary,
+                                  description=description,
+                                  startdate=startdate,
+                                  enddate=enddate,
+                                  deadline=deadline,
+                                  manhour=manhour,
+                                  status_id=status_id,
+                                  requirement_id=requirement_id,
+                                  assignee_id=assignee_id,
+                                  priority_id=priority_id,
+                                  project_id=project_id)
+                db.session.add(itask)
+        elif issue_source == 'Mantis':
+            for row in csv_reader:
+                print(row)
+                number = row['\ufeff编号']
+                summary = row['摘要']
+                itask = IssueTask(number=number,
+                                  summary=summary,
+                                  project_id=project_id)
+                db.session.add(itask)
         db.session.commit()

@@ -160,7 +160,7 @@ class IssueRequirementList(ResourceList):
 
     decorators = (auth_required, )
 
-     # 返回当前用户登录的项目相关结果
+    # 返回当前用户登录的项目相关结果
     def query(self, view_kwargs):
         current_project_id = g.current_project.id if g.current_project else None
         query_ = self.session.query(IssueRequirement).filter_by(
@@ -297,7 +297,7 @@ class UploadIssueAPI(MethodView):
         issue = request.args.get('issue')  # issue为bug requirement task
         # if user does not select file, browser also
         # submit an empty part without filename
-        issue_source =''
+        issue_source = ''
         filename = file.filename
         if filename == '':
             return api_abort(400, 'No selected file')
@@ -310,15 +310,16 @@ class UploadIssueAPI(MethodView):
             with open(file_path, newline='') as csvfile:
                 csv_reader = csv.DictReader(csvfile)
                 if issue == 'issue_bug':
-                    IssueBug.upload_issue(csv_reader)
+                    IssueBug.upload_issue(csv_reader, issue_source)
                 elif issue == 'issue_requirement':
-                    IssueRequirement.upload_issue(csv_reader)
+                    IssueRequirement.upload_issue(csv_reader, issue_source)
                 elif issue == 'issue_task':
-                    IssueTask.upload_issue(csv_reader)
+                    IssueTask.upload_issue(csv_reader, issue_source)
             redis_cli.lpush(
                 'frog_list',
                 g.current_user.username + '导入了issues')
             return jsonify(data=[{'status': 200, 'detail': '导入成功'}])
+
 
 
 # Create endpoints

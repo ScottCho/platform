@@ -51,7 +51,7 @@ default = {
         'issue_severity_list': {'post': False,  'get': True},
         'issue_source_detail': {'patch': False, 'get': True, 'delete': False},
         'issue_source_list': {'post': False,  'get': True},
-        'issue_upload': {'post': False},
+        'api_v2.issue_upload': {'post': False},
         'status_detail':{'patch': False, 'get': True, 'delete': False},
         'status_list': {'post': False,  'get': True},
         'tag_detail': {'patch': False, 'get': True, 'delete': False},
@@ -74,6 +74,8 @@ default = {
         'link_list': {'get': True},
         'software_detail': {'patch': False, 'get': False, 'delete': False},
         'software_list': {'post': False, 'get': False},
+        'baseline_log_view': {'get': True},
+        'package_log_view': {'get': True},
 }
 
 # 发布与更新基线
@@ -179,7 +181,7 @@ issue_management = {
     'status_detail':{'patch': True, 'get': True, 'delete': True},
     'tag_detail':{'patch': True, 'get': True, 'delete': True},
     'tag_list':{'post': True,  'get': True},
-    'issue_upload': {'post': True},  
+    'api_v2.issue_upload': {'post': True}  
 }
 
 Permission = {

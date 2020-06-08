@@ -9,6 +9,7 @@ for sql in $(find .   -maxdepth 1 -type f  -name '*ALL.sql');do
    new="${count}-${basesql}"
    sed  -i "s#{{ target_dir }}[0-9]\+/LOG#C:/DB#g" ${basesql}
    sed  -i "s#{{ target_dir }}[0-9]\+/DB*#C:/DB#g" ${basesql}
+   sed -i '$d' ${basesql}
    mv ${sql} ${new}
    let count++
 done

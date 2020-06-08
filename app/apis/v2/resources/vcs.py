@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from flask import g
+from flask import g, current_app
 from flask.views import MethodView
 from flask_rest_jsonapi import (ResourceDetail, ResourceList,
                                 ResourceRelationship)
@@ -22,7 +22,7 @@ from . import BaseResourceDetail
 class BaselineList(ResourceList):
     decorators = (auth_required, )
 
-    # 返回当前用户登录的项目相关结果
+    # 返回当前用户登录的项目相关基线结果
     def query(self, view_kwargs):
         app_ids = []
         if g.current_project:
@@ -93,7 +93,7 @@ class PackageList(ResourceList):
             根据提供的项目、日期、和次数生成更新包的名字  WellLink_20200423_01
         """
         bdate = data['rlsdate']
-        package_count = data.get('package_count'.zfill(2), '01')
+        package_count = data.get('package_count', '01')
         project_id = data.get('project_id')
         project_name = Project.query.get(project_id).name
         bdate = data.get('rlsdate',
@@ -108,6 +108,8 @@ class PackageList(ResourceList):
         并添加合并基线
         """
         obj = self._data_layer.get_object({'id': result[0]['data']['id']})
+        # 重建更新包
+        obj.create_package_dir()
         # 提交更新包后的处理
         merge_blineno = obj.package_after_post()
         obj.merge_blineno = merge_blineno
@@ -161,8 +163,13 @@ class PackageMerge(ResourceDetail):
 
     def after_get(self, result):
         package = self._data_layer.get_object({'id': result['data']['id']})
-        detail = package.package_merge()
-        result.update({'detail': detail})
+        try:
+            detail = package.package_merge()
+            result.update({'detail': detail})
+        except Exception as e:
+            detail = '更新包合并失败: '+str(e)
+            current_app.logger.error(str(e))
+            return api_abort(400, detail=str(e))
         return result
 
     schema = PackageSchema
@@ -177,8 +184,11 @@ class PackageDeploy(ResourceDetail):
 
     def after_get(self, result):
         package = self._data_layer.get_object({'id': result['data']['id']})
-        detail = package.package_deploy()
-        result.update({'detail': detail})
+        try:
+            detail = package.package_deploy()
+            result.update({'detail': detail})
+        except Exception as e:
+            return api_abort(400, detail='部署失败: '+str(e))
         return result
 
     schema = PackageSchema
@@ -187,17 +197,21 @@ class PackageDeploy(ResourceDetail):
 
 class PackageRelease(ResourceDetail):
     '''
-    基线打包
+    更新包发布
     '''
     decorators = (auth_required, )
 
     def after_get(self, result):
         package = self._data_layer.get_object({'id': result['data']['id']})
         detail = ''
-        if package.status_id == 211:
-            detail = '更新包状态为已交付，请重新编辑后再发布'
-        else:
-            detail = package.package_release()
+        try:
+            if package.status_id == 211:
+                detail = '更新包状态为已交付，请重新编辑后再发布'
+            else:
+                detail = package.package_release()
+        except Exception as e:
+            detail = '更新包发布失败: '+str(e)
+            current_app.logger.error(str(e))
         result.update({'detail': detail})
         return result
 
@@ -244,6 +258,56 @@ class BaselineUpdate(ResourceDetail):
     schema = BaselineSchema
     data_layer = {'session': db.session, 'model': Baseline}
 
+
+class PackageDownloadAPI(MethodView):
+    '''
+    更新包下载
+    '''
+    def get(self, package_id):
+        package = Package.query.get(package_id)
+        return package.package_download()
+
+
+class BaselineLogView(ResourceDetail):
+    '''
+    基线日志查看
+    '''
+    decorators = (auth_required, )
+
+    def after_get(self, result):
+        try:
+            obj = self._data_layer.get_object({'id': result['data']['id']})
+            log = obj.log_view()
+        except Exception as e:
+            print(e)
+            return api_abort(400, detail=f'获取不到基线{str(obj.id)}的日志,{str(e)}')
+        else:
+            result.update({'detail': log})
+        return result
+
+    schema = BaselineSchema
+    data_layer = {'session': db.session, 'model': Baseline}
+
+
+class PackageLogView(ResourceDetail):
+    '''
+    更新包日志查看
+    '''
+    decorators = (auth_required, )
+
+    def after_get(self, result):
+        try:
+            obj = self._data_layer.get_object({'id': result['data']['id']})
+            log = obj.log_view()
+        except Exception as e:
+            print(e)
+            return api_abort(400, detail=f'获取不到更新包{str(obj.id)}的日志,{str(e)}')
+        else:
+            result.update({'detail': log})
+        return result
+
+    schema = PackageSchema
+    data_layer = {'session': db.session, 'model': Package}
 
 # Create endpoints
 # 基线
@@ -297,6 +361,22 @@ api.route(PackageRelease, 'package_release', '/api/packages/release/<int:id>')
 api.route(BaselineUpdate,
           'baseline_update',
           '/api/baseline/update/<id>',
+          url_rule_options={'methods': [
+              'GET',
+          ]})
+
+# 查看基线日志
+api.route(BaselineLogView,
+          'baseline_log_view',
+          '/api/baselines/logview/<id>',
+          url_rule_options={'methods': [
+              'GET',
+          ]})
+
+# 查看更新包日志
+api.route(PackageLogView,
+          'package_log_view',
+          '/api/packages/logview/<id>',
           url_rule_options={'methods': [
               'GET',
           ]})

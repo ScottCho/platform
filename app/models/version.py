@@ -10,20 +10,21 @@
 import glob
 import os
 import shutil
-from datetime import datetime
 import urllib
+from datetime import datetime
 
 import svn.local
 import svn.remote
 from flask import current_app, g, render_template, send_from_directory
 
+from app.apis.v2.errors import api_abort
 from app.localemail import send_email
 from app.models.service import App
 from app.utils import execute_cmd, fnmatch_file, switch_char
 from app.utils.jenkins import build_with_parameters, get_jenkins_job
+from app.utils.mypath import dir_remake
 from app.utils.svn import diff_summary_files, version_merge
 from app.utils.trans_path import trans_java
-from app.utils.mypath import dir_remake
 
 from .. import db
 
@@ -94,92 +95,110 @@ class Baseline(db.Model):
         flag=0:单条基线更新，flag=1： 合并基线更新
         num: 项目当天发布更新包的次数
         '''
-        message = '*****开始更新应用*****\n'
-        print(message)
-        jenkins_job_name = self.app.jenkins_job_name
-        log = open(
-            os.path.join(self.app.project.target_dir, str(self.id), 'log.txt'),
-            'a')
-        log.write(f'{g.current_user.username}更新基线{self.id}应用\n')
-        version_list = self.versionno.split(',')
-        compile_file_list = []  # 构建文件集
-        for version in version_list:
-            # SVN源代码的变更集
-            source_files = diff_summary_files(self.app.source_dir,
-                                              int(version) - 1, int(version))
+        try:
+            message = '*****开始更新应用*****\n'
+            print(message)
+            jenkins_job_name = self.app.jenkins_job_name
+            if flag == 1:
+                log = open(
+                    os.path.join(self.app.project.target_dir,
+                                 self.package.name, 'log.txt'), 'a')
+            else:
+                log = open(
+                    os.path.join(self.app.project.target_dir, str(self.id),
+                                 'log.txt'), 'a')
+            log.write(f'{g.current_user.username}更新基线{self.id}应用\n')
+            version_list = self.versionno.split(',')
+            compile_file_list = []  # 构建文件集
+            for version in version_list:
+                # SVN源代码的变更集
+                source_files = diff_summary_files(self.app.source_dir,
+                                                  int(version) - 1,
+                                                  int(version))
 
-            # 构建后的变更集
-            compile_file_list += [
-                trans_java(self.app.subsystem.en_name, self.app.source_dir,
-                           urllib.request.unquote(f)) for f in source_files
-            ]
-            log.write(f'版本{version}变更文件有:\n')
-            [log.write(line + '\n') for line in compile_file_list]
-        # 删除原有相同基线序号的变更文本
-        old_file_list = glob.glob(
-            os.path.join(self.app.jenkins_job_dir, '/') + '*_' + str(self.id) +
-            '.txt')
-        if old_file_list:
-            for old_file in old_file_list:
-                os.remove(old_file)
+                # 构建后的变更集
+                compile_file_list += [
+                    trans_java(self.app.subsystem.en_name, self.app.source_dir,
+                               urllib.request.unquote(f)) for f in source_files
+                ]
+                log.write(f'版本{version}变更文件有:\n')
+                [log.write(line + '\n') for line in compile_file_list]
+            # 删除原有相同基线序号的变更文本
+            old_file_list = glob.glob(
+                os.path.join(self.app.jenkins_job_dir, '/') + '*_' +
+                str(self.id) + '.txt')
+            if old_file_list:
+                for old_file in old_file_list:
+                    os.remove(old_file)
 
-        # 变更文件写入到变更文本
-        compile_file_path = os.path.join(
-            self.app.jenkins_job_dir, self.app.subsystem.en_name + '_' +
-            datetime.utcnow().strftime("%Y%m%d") + '_' + str(self.id) + '.txt')
-        print('本次基线的增量文本：' + compile_file_path)
-        log.write(f'本次基线的增量文本：{compile_file_path}\n')
-        with open(compile_file_path, 'w') as fw:
-            for line in compile_file_list:
-                fw.write('"' + line + '"' + '\n')
+            # 变更文件写入到变更文本
+            compile_file_path = os.path.join(
+                self.app.jenkins_job_dir, self.app.subsystem.en_name + '_' +
+                datetime.utcnow().strftime("%Y%m%d") + '_' + str(self.id) +
+                '.txt')
+            print('本次基线的增量文本：' + compile_file_path)
+            log.write(f'本次基线的增量文本：{compile_file_path}\n')
+            with open(compile_file_path, 'w') as fw:
+                for line in compile_file_list:
+                    fw.write('"' + line + '"' + '\n')
 
-        # 判断前一次是否构建成功
-        console_url = get_jenkins_job(jenkins_job_name, str(g.current_user.id))
+            # 判断前一次是否构建成功
+            console_url = get_jenkins_job(jenkins_job_name,
+                                          str(g.current_user.id))
 
-        # 建立jar包存放目录
-        jar_dir = os.path.join(self.app.project.target_dir, str(self.id),
-                               'APP')
-        dir_remake(jar_dir)
+            # 建立jar包存放目录
+            jar_dir = os.path.join(self.app.project.target_dir, str(self.id),
+                                   'APP')
+            dir_remake(jar_dir)
 
-        # 判断是否存在打包脚本，不存在则创建
-        self.render_package_script(flag=flag)
+            # 判断是否存在打包脚本，不存在则创建
+            self.render_package_script(flag=flag)
 
-        # 触发jenkins构建
-        print('触发jenkins job: ' + jenkins_job_name)
-        build_with_parameters(jenkins_job_name,
-                              str(g.current_user.id),
-                              baseline_id=self.id)
-        log.write(f'触发jenkins job: {console_url}\n')
-        log.close()
-        return message
+            # 触发jenkins构建
+            print('触发jenkins job: ' + jenkins_job_name)
+            build_with_parameters(jenkins_job_name,
+                                  str(g.current_user.id),
+                                  baseline_id=self.id)
+            log.write(f'触发jenkins job: {console_url}\n')
+        except Exception as e:
+            current_app.logger.error(str(e))
+            raise
+        else:
+            return message
+        finally:
+            log.close()
 
     def update_db(self, flag=0, num='01'):
         '''
         DB更新
         '''
-        print('DB更新')
-        db_username = self.app.schema.username
-        db_password = self.app.schema.password
-        db_host = self.app.schema.instance.server.ip
-        db_port = self.app.schema.instance.port
-        db_instance = self.app.schema.instance.instance
-        source_dbdir = self.app.project.source_dir
-        source_sqldir = os.path.join(source_dbdir, '01-sql')
-        source_pckdir = os.path.join(source_dbdir, '02-pck')
-        source_rollbackdir = os.path.join(source_dbdir, '03-rollbackup')
-        target_dir = self.app.project.target_dir
-        if flag == 1:
-            # pck从puat文件中读取
-            source_pckdir = os.path.join(source_dbdir, '02-pck', 'puat')
-        base_dir = os.path.join(target_dir, str(self.id), 'DB')
-        log_dir = os.path.join(target_dir, str(self.id), 'LOG')
-        target_sqldir = os.path.join(base_dir, 'SQL')
-        target_pckdir = os.path.join(base_dir, 'PCK')
-        target_rollbackdir = os.path.join(base_dir, 'ROLLBACK')
-
-        # 建立DB和日志的目录，如果存在则删除重建
-        # 目录名字为DB_{baseline_id},LOG_{baseline_id}
         try:
+            print('DB更新')
+            db_username = self.app.schema.username
+            db_password = self.app.schema.password
+            db_host = self.app.schema.instance.server.ip
+            db_port = self.app.schema.instance.port
+            db_instance = self.app.schema.instance.instance
+            source_dbdir = self.app.project.source_dir
+            source_sqldir = os.path.join(source_dbdir, '01-sql')
+            source_pckdir = os.path.join(source_dbdir, '02-pck')
+            source_rollbackdir = os.path.join(source_dbdir, '03-rollbackup')
+            target_dir = self.app.project.target_dir
+            if flag == 1:
+                # pck从puat文件中读取
+                source_pckdir = os.path.join(source_dbdir, '02-pck', 'puat')
+                logfile = os.path.join(target_dir, self.package.name,
+                                       'log.txt')
+            else:
+                logfile = os.path.join(target_dir, str(self.id), 'log.txt')
+            base_dir = os.path.join(target_dir, str(self.id), 'DB')
+            log_dir = os.path.join(target_dir, str(self.id), 'LOG')
+            target_sqldir = os.path.join(base_dir, 'SQL')
+            target_pckdir = os.path.join(base_dir, 'PCK')
+            target_rollbackdir = os.path.join(base_dir, 'ROLLBACK')
+
+            # 建立DB和日志的目录，如果存在则删除重建
+            # 目录名字为DB_{baseline_id},LOG_{baseline_id}
             if os.path.exists(base_dir):
                 shutil.rmtree(base_dir)
             os.makedirs(target_sqldir)
@@ -188,139 +207,135 @@ class Baseline(db.Model):
             if os.path.exists(log_dir):
                 shutil.rmtree(log_dir)
             os.mkdir(log_dir)
-        except OSError:
-            pass
 
-        # 更新SVN中的DB
-        source_dir = self.app.project.source_dir
-        r = svn.local.LocalClient(source_dir)
-        r.update()
-        print('svn update ' + source_dir)
+            # 更新SVN中的DB
+            source_dir = self.app.project.source_dir
+            r = svn.local.LocalClient(source_dir)
+            r.update()
+            print('svn update ' + source_dir)
 
-        # ALL脚本路径
-        # /update/PICCHK/DB_2001/HXUSER_20180409_01_ALL.sql
-        print('num: ' + num)
-        DB_SCRIPT = os.path.join(
-            base_dir,
-            db_username.upper() + '_' + self.created.strftime("%Y%m%d") + '_' +
-            num + '_ALL.sql')
-        print('基线DB ALL脚本：' + DB_SCRIPT)
-        # 回滚ALL脚本路径
-        # /update/PICCHK/DB_2001/ROLLBACK/YLPROD_20191122_ALL_ROLLBACK_01.sql
-        ROLLBACK_SCRIPT = os.path.join(
-            target_rollbackdir,
-            db_username.upper() + '_' + self.created.strftime("%Y%m%d") + '_' +
-            'ALL_ROLLBACK_' + num + '.sql')
+            # ALL脚本路径
+            # /update/PICCHK/DB_2001/HXUSER_20180409_01_ALL.sql
+            print('num: ' + num)
+            DB_SCRIPT = os.path.join(
+                base_dir,
+                db_username.upper() + '_' + self.created.strftime("%Y%m%d") +
+                '_' + num + '_ALL.sql')
+            print('基线DB ALL脚本：' + DB_SCRIPT)
+            # 回滚ALL脚本路径
+            # /update/PICCHK/DB_2001/ROLLBACK/YLPROD_20191122_ALL_ROLLBACK_01.sql
+            ROLLBACK_SCRIPT = os.path.join(
+                target_rollbackdir,
+                db_username.upper() + '_' + self.created.strftime("%Y%m%d") +
+                '_' + 'ALL_ROLLBACK_' + num + '.sql')
 
-        # 将sql文件复制到DB_{baseline_id},并将路径加到ALL.sql
-        if self.sqlno:
-            for sql in self.sqlno.split(','):
-                # 找出匹配的SQL路径，/SVN/../423_HZJ_JSUSER_20180326.sql
-                sqlfile = glob.glob(source_sqldir + '/' + sql + '_*')
-                # 判断匹配的SQL是否唯一
-                if len(sqlfile) == 0:
-                    current_app.logger.error(sql + '号sql文件不存在')
-                    raise Exception(sql + '号sql文件不存在!')
-                elif len(sqlfile) == 1:
-                    sqlfile = sqlfile[0]
-                    shutil.copy(sqlfile, target_sqldir)
-                    with open(DB_SCRIPT, 'a') as sqlf:
-                        sqlf.write('prompt ' + os.path.join(
-                            target_sqldir, os.path.basename(sqlfile)) + '\n')
-                        sqlf.write('@' + os.path.join(
-                            target_sqldir, os.path.basename(sqlfile)) + '\n')
-                else:
-                    current_app.logger.error('存在多个相同的sql文件')
-                    raise Exception(sql + '存在多个相同的sql文件!')
+            # 将sql文件复制到DB_{baseline_id},并将路径加到ALL.sql
+            if self.sqlno:
+                for sql in self.sqlno.split(','):
+                    # 找出匹配的SQL路径，/SVN/../423_HZJ_JSUSER_20180326.sql
+                    sqlfile = glob.glob(source_sqldir + '/' + sql + '_*')
+                    # 判断匹配的SQL是否唯一
+                    if len(sqlfile) == 0:
+                        raise Exception(sql + '号sql文件不存在!')
+                    elif len(sqlfile) == 1:
+                        sqlfile = sqlfile[0]
+                        shutil.copy(sqlfile, target_sqldir)
+                        with open(DB_SCRIPT, 'a') as sqlf:
+                            sqlf.write('prompt ' + os.path.join(
+                                target_sqldir, os.path.basename(sqlfile)) +
+                                       '\n')
+                            sqlf.write('@' + os.path.join(
+                                target_sqldir, os.path.basename(sqlfile)) +
+                                       '\n')
+                    else:
+                        raise Exception(sql + '存在多个相同的sql文件!')
 
-        # 将pck文件复制到base_dir,并将路径加到ALL.sql
-        if self.pckno:
-            for pck in self.pckno.split(','):
-                pckfile = glob.glob(source_pckdir + '/' + pck + '_*')
-                if len(pckfile) == 0:
-                    current_app.logger.error(pck + '号pck文件不存在')
-                    raise Exception(pck + '号pck文件不存在')
-                elif len(pckfile) == 1:
-                    shutil.copy(pckfile[0], target_pckdir)
-                    with open(DB_SCRIPT, 'a') as pckf:
-                        pckf.write('prompt ' + os.path.join(
-                            target_pckdir, os.path.basename(pckfile[0])) +
-                                   '\n')
-                        pckf.write('@' + os.path.join(
-                            target_pckdir, os.path.basename(pckfile[0])) +
-                                   '\n')
-                else:
-                    current_app.logger.error('更新DB失败,存在多个' + pck + '号文件')
-                    raise Exception('更新DB失败,存在多个' + pck + '号文件')
+            # 将pck文件复制到base_dir,并将路径加到ALL.sql
+            if self.pckno:
+                for pck in self.pckno.split(','):
+                    pckfile = glob.glob(source_pckdir + '/' + pck + '_*')
+                    if len(pckfile) == 0:
+                        current_app.logger.error(pck + '号pck文件不存在')
+                        raise Exception(pck + '号pck文件不存在')
+                    elif len(pckfile) == 1:
+                        shutil.copy(pckfile[0], target_pckdir)
+                        with open(DB_SCRIPT, 'a') as pckf:
+                            pckf.write('prompt ' + os.path.join(
+                                target_pckdir, os.path.basename(pckfile[0])) +
+                                       '\n')
+                            pckf.write('@' + os.path.join(
+                                target_pckdir, os.path.basename(pckfile[0])) +
+                                       '\n')
+                    else:
+                        raise Exception('更新DB失败,存在多个' + pck + '号文件')
 
-        # 将rollback文件复制到base_dir,并将路径加到ALL.sql
-        if self.rollbackno:
-            for nu in self.rollbackno.split(','):
-                rollbackfile = glob.glob(source_rollbackdir + '/' + nu + '_*')
-                if len(rollbackfile) == 0:
-                    current_app.logger.error(nu + '号rollback文件不存在')
-                    raise Exception(nu + '号rollback文件不存在')
-                elif len(rollbackfile) == 1:
-                    shutil.copy(rollbackfile[0], target_rollbackdir)
-                    with open(ROLLBACK_SCRIPT, 'a') as rollbackf:
-                        rollbackf.write(
-                            'prompt ' +
-                            os.path.join(target_rollbackdir,
-                                         os.path.basename(rollbackfile[0])) +
-                            '\n')
-                        rollbackf.write(
-                            '@' +
-                            os.path.join(target_rollbackdir,
-                                         os.path.basename(rollbackfile[0])) +
-                            '\n')
-                else:
-                    current_app.logger.error('更新DB失败，存在多个rollback' + nu +
-                                             '号文件')
-                    raise Exception('更新DB失败，存在多个rollback' + nu + '号文件')
+            # 将rollback文件复制到base_dir,并将路径加到ALL.sql
+            if self.rollbackno:
+                for nu in self.rollbackno.split(','):
+                    rollbackfile = glob.glob(source_rollbackdir + '/' + nu +
+                                             '_*')
+                    if len(rollbackfile) == 0:
+                        current_app.logger.error(nu + '号rollback文件不存在')
+                        raise Exception(nu + '号rollback文件不存在')
+                    elif len(rollbackfile) == 1:
+                        shutil.copy(rollbackfile[0], target_rollbackdir)
+                        with open(ROLLBACK_SCRIPT, 'a') as rollbackf:
+                            rollbackf.write('prompt ' + os.path.join(
+                                target_rollbackdir,
+                                os.path.basename(rollbackfile[0])) + '\n')
+                            rollbackf.write('@' + os.path.join(
+                                target_rollbackdir,
+                                os.path.basename(rollbackfile[0])) + '\n')
+                    else:
+                        raise Exception('更新DB失败，存在多个rollback' + nu + '号文件')
 
-        # 将base_dir中的文件统一为utf-8
-        if switch_char.switch_char(
-                fnmatch_file.find_specific_files(base_dir)) is False:
-            return '请检查DB文件的字符集是否为utf-8无BOM'
+            # 将base_dir中的文件统一为utf-8
+            if switch_char.switch_char(
+                    fnmatch_file.find_specific_files(base_dir)) is False:
+                return '请检查DB文件的字符集是否为utf-8无BOM'
 
-        # 处理ALL*脚本，并执行两次
-        message = '\n开始更新DB....\n'
-        print(message)
-        start_content = 'spool '+log_dir+'/' + \
-            os.path.basename(DB_SCRIPT).replace(
-                '.sql', '.log')+'\n'+'set define off'+'\n'
-        end_content = 'commit;\nspool off\nexit'
-        with open(DB_SCRIPT, 'r') as rf:
-            content = rf.read().replace(start_content,
-                                        '').replace(end_content, '')
-        with open(DB_SCRIPT, 'w') as wf:
-            wf.write(start_content + content)
-        with open(DB_SCRIPT, 'a') as wf:
-            wf.write(end_content)
-        cmd = 'sqlplus {}/{}@{}:{}/{}'.format(db_username, db_password,
-                                              db_host, db_port, db_instance)
-        current_app.logger.info(cmd)
-        update_content = '@' + DB_SCRIPT
-        current_app.logger.info('开始更新' + DB_SCRIPT)
-        # returncode, output = execute_cmd.execute_cmd(cmd, update_content)
-        # returncode, output = execute_cmd.execute_cmd(cmd, update_content)
+            # 处理ALL*脚本，并执行两次
+            message = '\n开始更新DB....\n'
+            print(message)
+            start_content = 'spool '+log_dir+'/' + \
+                os.path.basename(DB_SCRIPT).replace(
+                    '.sql', '.log')+'\n'+'set define off'+'\n'
+            end_content = 'commit;\nspool off\nexit'
+            with open(DB_SCRIPT, 'r') as rf:
+                content = rf.read().replace(start_content,
+                                            '').replace(end_content, '')
+            with open(DB_SCRIPT, 'w') as wf:
+                wf.write(start_content + content)
+            with open(DB_SCRIPT, 'a') as wf:
+                wf.write(end_content)
+            cmd = 'sqlplus {}/{}@{}:{}/{}'.format(db_username, db_password,
+                                                  db_host, db_port,
+                                                  db_instance)
+            current_app.logger.info(cmd)
+            update_content = '@' + DB_SCRIPT
+            current_app.logger.info('开始更新' + DB_SCRIPT)
+            # returncode, output = execute_cmd.execute_cmd(cmd, update_content)
+            # returncode, output = execute_cmd.execute_cmd(cmd, update_content)
 
-        # if returncode != 0:
-        #     message += 'sqlplus中执行db脚本失败,请检查！！！' + output.decode('utf-8')
-        #     current_app.logger.error(message)
-        # else:
-        #     output = output.decode('utf-8')
-        #     current_app.logger.info(output)
-        #     message += outputg.current_user
-        logfile = os.path.join(target_dir, str(self.id), 'log.txt')
-        print(g.current_user.id)
-        execute_cmd.socket_shell(cmd + ' ' + update_content,
-                                 str(g.current_user.id),
-                                 log=logfile)
-        execute_cmd.socket_shell(cmd + ' ' + update_content,
-                                 str(g.current_user.id),
-                                 log=logfile)
-        return '更新完成'
+            # if returncode != 0:
+            #     message += 'sqlplus中执行db脚本失败,请检查！！！' + output.decode('utf-8')
+            #     current_app.logger.error(message)
+            # else:
+            #     output = output.decode('utf-8')
+            #     current_app.logger.info(output)
+            #     message += outputg.current_user
+            print(g.current_user.id)
+            execute_cmd.socket_shell(cmd + ' ' + update_content,
+                                     str(g.current_user.id),
+                                     log=logfile)
+            execute_cmd.socket_shell(cmd + ' ' + update_content,
+                                     str(g.current_user.id),
+                                     log=logfile)
+        except Exception as e:
+            current_app.logger.error(str(e))
+            raise
+        else:
+            return '更新完成'
 
     # 发送基线更新邮件
     def send_baseline_email(self):
@@ -350,6 +365,14 @@ class Baseline(db.Model):
                    'apis/v2/mail/vcs/baseline.html',
                    attachments,
                    baseline=self)
+
+    def log_view(self):
+        log_path = os.path.join(self.app.project.target_dir, str(self.id),
+                                'log.txt')
+        log = open(log_path, 'r')
+        content = log.read()
+        log.close()
+        return content
 
 
 # 更新包表
@@ -395,27 +418,25 @@ class Package(db.Model):
 
     def create_package_dir(self):
         '''
-        在target_dir下创建空目录的更新包及LOG目录
+        在target_dir下创建空目录的更新包
         '''
 
         target_dir = self.project.target_dir
         package_dir = os.path.join(target_dir, self.name)
-        app_dir = os.path.join(package_dir, 'APP')
-        db_dir = os.path.join(package_dir, 'DB')
-        sql_dir = os.path.join(db_dir, 'SQL')
-        pck_dir = os.path.join(db_dir, 'PCK')
-        rollback_dir = os.path.join(db_dir, 'ROLLBACK')
+        # app_dir = os.path.join(package_dir, 'APP')
+        # db_dir = os.path.join(package_dir, 'DB')
+        # sql_dir = os.path.join(db_dir, 'SQL')
+        # pck_dir = os.path.join(db_dir, 'PCK')
+        # rollback_dir = os.path.join(db_dir, 'ROLLBACK')
 
         # 如果target_dir下存在更新包，则删除重建
-        if os.path.exists(package_dir):
-            shutil.rmtree(package_dir)
-        os.mkdir(package_dir)
+        dir_remake(package_dir)
 
-        os.mkdir(app_dir)
-        os.mkdir(db_dir)
-        os.mkdir(sql_dir)
-        os.mkdir(pck_dir)
-        os.mkdir(rollback_dir)
+        # os.mkdir(app_dir)
+        # os.mkdir(db_dir)
+        # os.mkdir(sql_dir)
+        # os.mkdir(pck_dir)
+        # os.mkdir(rollback_dir)
 
     # def package_merge(self):
     #     '''
@@ -475,42 +496,46 @@ class Package(db.Model):
         '''
         合并更新包里面的应用版本到SVN
         '''
-        merge_blineno = self.merge_blineno
         merge_msg = '开始合并基线....\n'
-        print(merge_msg)
-        for blineno in merge_blineno.split(','):
-            baseline = Baseline.query.get(blineno)
-            app = baseline.app
-            target_dir = os.path.join(baseline.app.project.target_dir,
-                                      str(baseline.id))
-            if not os.path.exists(target_dir):
-                os.mkdir(target_dir)
-            log = open(os.path.join(target_dir, 'log.txt'), 'a')
-            # 基线版本按照版本号从小到大合并
-            version_list = []
-            if baseline.versionno:
-                version_list = sorted(baseline.versionno.split(','))
-            log.write(f'基线{baseline.id}需要合并的版本：{str(version_list)}\n')
-            source_dir = app.source_dir
-            workspace = app.jenkins_job_dir
-            if version_list:
-                for version in version_list:
-                    log.write(f'=====合并版本{version}=====\n')
-                    merge_msg += version_merge(workspace, source_dir, version,
-                                  str(g.current_user.id))
-                    # 异步
-                    # from app import socketio
-                    # from threading import Lock
-                    # thread_lock = Lock()
-                    # with thread_lock:
-                    #     thread = socketio.start_background_task(version_merge, workspace, source_dir, version,
-                    #                     str(g.current_user.id))              
-                    log.write(f'版本{version}合并完成\n')
+        current_app.logger.info(merge_msg)
+        try:
+            merge_blineno = self.merge_blineno
+            print(merge_msg)
+            for blineno in merge_blineno.split(','):
+                baseline = Baseline.query.get(blineno)
+                app = baseline.app
+                target_dir = os.path.join(baseline.app.project.target_dir,
+                                          str(baseline.id))
+                if not os.path.exists(target_dir):
+                    os.mkdir(target_dir)
+                log = open(
+                    os.path.join(self.project.target_dir, self.name,
+                                 'log.txt'), 'a')
+                print(os.path.join(target_dir, self.name, 'log.txt'))
+                # 基线版本按照版本号从小到大合并
+                version_list = []
+                if baseline.versionno:
+                    version_list = sorted(baseline.versionno.split(','))
+                log.write(f'基线{baseline.id}需要合并的版本：{str(version_list)}\n')
+                source_dir = app.source_dir
+                workspace = app.jenkins_job_dir
+                if version_list:
+                    for version in version_list:
+                        log.write(f'=====合并版本{version}=====\n')
+                        merge_msg += version_merge(workspace, source_dir,
+                                                   version)
+                        log.write(f'版本{version}合并完成\n')
+        except Exception as e:
+            merge_msg = '合并出现异常：' + str(e)
+            current_app.logger.error(merge_msg)
+            return api_abort(400, detail=merge_msg)
+        else:
+            # 更新包状态变成已合并
+            self.status_id = 209
+            db.session.add(self)
+            db.session.commit()
+        finally:
             log.close()
-        # 更新包状态变成已合并
-        self.status_id = 209
-        db.session.add(self)
-        db.session.commit()
         return merge_msg
 
     def package_deploy(self):
@@ -525,25 +550,23 @@ class Package(db.Model):
             db.session.add(baseline)
             db.session.commit()
         deploy_msg = '开始部署更新包: ' + self.name
-        print(deploy_msg)
+        current_app.logger.info(deploy_msg)
         merge_blineno = self.merge_blineno.split(',')
-        print(merge_blineno)
         for nu in merge_blineno:
             merge_baseline = Baseline.query.filter_by(id=nu).one()
-            print('更新合并基线：' + nu)
+            current_app.logger.info('更新合并基线：' + nu)
             try:
                 update_dir = os.path.join(
                     merge_baseline.app.project.target_dir,
                     str(merge_baseline.id))
-                dir_remake(os.path.join(update_dir, 'APP'))
-                dir_remake(os.path.join(update_dir, 'DB'))
+                dir_remake(update_dir)
                 if merge_baseline.sqlno or merge_baseline.pckno:
                     print(f'{nu}基线DB开始更新')
                     deploy_msg += merge_baseline.update_db(flag=1,
                                                            num=package_count)
                     print(f'{nu}基线DB更新完成')
                     print('deploy_msg: ' + deploy_msg)
-                    
+
                 if merge_baseline.versionno:
                     print(f'{nu}基线开始更新应用')
                     deploy_msg += merge_baseline.update_app(flag=1,
@@ -551,8 +574,9 @@ class Package(db.Model):
                     print(f'{nu}基线更新应用完成')
                     print('deploy_msg: ' + deploy_msg)
             except Exception as e:
-                print(e)
-                return '更新出现问题，请联系管理员'
+                deploy_msg = '更新出现问题，请联系管理员: ' + str(e)
+                current_app.logger.error(deploy_msg)
+                raise
         # 将状态改为: 已部署210
         self.status_id = 210
         db.session.add(self)
@@ -563,21 +587,12 @@ class Package(db.Model):
         '''
         更新包发布
         '''
-        # 重建更新包
-        self.create_package_dir()
         # 更新包中的基线状态修改为 '213 已打包'
         baselines = self.baselines
         for baseline in baselines:
             baseline.status_id = 213
             db.session.add(baseline)
             db.session.commit()
-
-        # 删除合并基线
-        # merge_blineno = self.merge_blineno
-        # for nu in merge_blineno.split(','):
-        #     merge_baseline = Baseline.query.get(nu)
-        #     db.session.delete(merge_baseline)
-        #     db.session.commit()
 
         target_dir = self.project.target_dir  # /update/WINGLUNG
         package_dir = os.path.join(
@@ -590,6 +605,11 @@ class Package(db.Model):
         rollback_dir = os.path.join(db_dir, 'ROLLBACK')
         sql_dir = os.path.join(db_dir, 'SQL')
         pck_dir = os.path.join(db_dir, 'PCK')
+        dir_remake(app_dir)
+        dir_remake(db_dir)
+        dir_remake(sql_dir)
+        dir_remake(pck_dir)
+        dir_remake(rollback_dir)
 
         merge_blineno = self.merge_blineno
         logs = []  # DB 日志文件
@@ -678,6 +698,13 @@ class Package(db.Model):
         return send_from_directory(package_dir,
                                    package_name,
                                    as_attachment=True)
+
+    def log_view(self):
+        log_path = os.path.join(self.project.target_dir, self.name, 'log.txt')
+        log = open(log_path, 'r')
+        content = log.read()
+        log.close()
+        return content
 
     def package_after_post(self):
         """Hook to make custom work after post method

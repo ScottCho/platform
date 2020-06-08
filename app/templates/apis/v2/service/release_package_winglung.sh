@@ -17,7 +17,7 @@ done
 cd {{ target_dir }}${1}/EXECUTE_CODE/ROLLBACK
 for sql in $(find .   -maxdepth 1 -type f  -name '*ALL_ROLLBACK_01.sql');do
     basesql=$(basename ${sql})
-    sed -i "s#{{ target_dir }}DB#/prog_update/${1}#g" ${basesql}
+    sed  -i "s#{{ target_dir }}[0-9]\+/DB#/prog_update/${1}#g" ${basesql}
 done
 
 cd {{ target_dir }}${1}

@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_mail import Mail
 from celery import Celery, platforms
-from config import config
+from config import config, mail_handler, handler
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS, cross_origin
 import redis
@@ -46,7 +46,10 @@ ENV = os.getenv('FLASK_CONFIG') or 'default'
 flask_app = Flask(__name__, instance_relative_config=True)
 flask_app.config.from_object(config[ENV])
 config[ENV].init_app(flask_app)
-flask_app.logger.setLevel(logging.INFO)
+# flask_app.logger.setLevel(logging.INFO)
+if not flask_app.debug:
+    flask_app.logger.addHandler(mail_handler)
+flask_app.logger.addHandler(handler)
 
 # 提供跨域支持
 CORS(flask_app)
@@ -185,11 +188,14 @@ def ack():
     print('message was received!')
 
 
-#处理接收到的客户端信息
-@socketio.on('connect event', namespace='/task')
-def handle_my_custom_event(json):
-    print('received json: ' + str(json))
-    # emit('baseline', str(json)+request.remote_addr, namespace='/task')
+@socketio.on('connect')
+def test_connect():
+    print({'data': 'Connected'})
+    emit('my response', {'data': 'Connected'})
+
+@socketio.on('disconnect')
+def test_disconnect():
+    print('Client disconnected')
 
 
 @flask_app.route('/task')

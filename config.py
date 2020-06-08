@@ -1,6 +1,10 @@
 #!/usr/bin/python
-#-*- coding: UTF-8 -*-
+# -*- coding: UTF-8 -*-
+
+import logging
 import os
+from logging.handlers import SMTPHandler
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -31,6 +35,8 @@ class Config:
     @staticmethod
     def init_app(app):
         pass
+
+
 # 开发环境
 
 
@@ -41,12 +47,14 @@ class DevelopmentConfig(Config):
         'sqlite:///'+os.path.join(basedir, 'platform_dev.sqlite')
     SQLALCHEMY_ECHO = True
 
+
 # 测试环境
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'platform_test.sqlite')
     WTF_CSRF_ENABLED = False
+
 
 # 生产环境
 class ProductionConfig(Config):
@@ -60,3 +68,26 @@ config = {
     'testing': TestingConfig,
     'default': DevelopmentConfig
 }
+
+mail_handler = SMTPHandler(
+    (os.getenv('MAIL_SERVER'), os.getenv('MAIL_PORT')),
+    os.getenv('MAIL_DEFAULT_SENDER'), [os.getenv('ADMIN_EMAIL')],
+    'Frog Application Error',
+    secure=(),
+    credentials=(os.getenv('MAIL_USERNAME'), os.getenv('MAIL_PASSWORD')))
+mail_handler.setLevel(logging.ERROR)
+mail_handler.setFormatter(
+    logging.Formatter(
+        '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'))
+
+# 将信息记录到日志文件
+handler = logging.handlers.TimedRotatingFileHandler('/var/log/frog/app.log',
+                                                    when='D',
+                                                    interval=1,
+                                                    backupCount=5,
+                                                    encoding='UTF-8')
+handler.setLevel(logging.DEBUG)
+logging_format = logging.Formatter(
+    '%(asctime)s - %(levelname)s -%(pathname)s - %(funcName)s - %(lineno)s - %(message)s'
+)
+handler.setFormatter(logging_format)
