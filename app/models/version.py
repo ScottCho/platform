@@ -216,18 +216,17 @@ class Baseline(db.Model):
 
             # ALL脚本路径
             # /update/PICCHK/DB_2001/HXUSER_20180409_01_ALL.sql
-            print('num: ' + num)
             DB_SCRIPT = os.path.join(
                 base_dir,
                 db_username.upper() + '_' + self.created.strftime("%Y%m%d") +
-                '_' + num + '_ALL.sql')
+                '_' + str(self.id) + '_ALL.sql')
             print('基线DB ALL脚本：' + DB_SCRIPT)
             # 回滚ALL脚本路径
             # /update/PICCHK/DB_2001/ROLLBACK/YLPROD_20191122_ALL_ROLLBACK_01.sql
             ROLLBACK_SCRIPT = os.path.join(
                 target_rollbackdir,
                 db_username.upper() + '_' + self.created.strftime("%Y%m%d") +
-                '_' + 'ALL_ROLLBACK_' + num + '.sql')
+                '_' + 'ALL_ROLLBACK_' + str(self.id) + '.sql')
 
             # 将sql文件复制到DB_{baseline_id},并将路径加到ALL.sql
             if self.sqlno:
@@ -296,7 +295,7 @@ class Baseline(db.Model):
 
             # 处理ALL*脚本，并执行两次
             message = '\n开始更新DB....\n'
-            print(message)
+            current_app.logger.info(message)
             start_content = 'spool '+log_dir+'/' + \
                 os.path.basename(DB_SCRIPT).replace(
                     '.sql', '.log')+'\n'+'set define off'+'\n'
@@ -397,7 +396,7 @@ class Package(db.Model):
     def render_package_script(self):
         '''
         发布更新包执行的脚本
-        脚本路径: project.target_dir+'/release_package_'+project.name.lower()+'.sh' 
+        脚本路径: project.target_dir+'/release_package_'+project.name.lower()+'.sh'
         shell脚本参数： 更新包的名字： self.name
         '''
 
@@ -423,74 +422,8 @@ class Package(db.Model):
 
         target_dir = self.project.target_dir
         package_dir = os.path.join(target_dir, self.name)
-        # app_dir = os.path.join(package_dir, 'APP')
-        # db_dir = os.path.join(package_dir, 'DB')
-        # sql_dir = os.path.join(db_dir, 'SQL')
-        # pck_dir = os.path.join(db_dir, 'PCK')
-        # rollback_dir = os.path.join(db_dir, 'ROLLBACK')
-
         # 如果target_dir下存在更新包，则删除重建
         dir_remake(package_dir)
-
-        # os.mkdir(app_dir)
-        # os.mkdir(db_dir)
-        # os.mkdir(sql_dir)
-        # os.mkdir(pck_dir)
-        # os.mkdir(rollback_dir)
-
-    # def package_merge(self):
-    #     '''
-    #     合并更新包里面的应用版本到SVN
-    #     '''
-    #     merge_blineno = self.merge_blineno
-    #     merge_msg = '开始合并基线....\n'
-    #     print('开始合并基线....')
-    #     for blineno in merge_blineno.split(','):
-    #         baseline = Baseline.query.get_or_404(blineno)
-    #         app = baseline.app
-    #         # 基线版本按照版本号从小到大合并
-    #         version_list = []
-    #         if baseline.versionno:
-    #             version_list = sorted(baseline.versionno.split(','))
-    #         source_dir = app.source_dir
-    #         workspace = app.jenkins_job_dir
-    #         if version_list:
-    #             for version in version_list:
-    #                 # 更新SVN中的Jenkins中的源码目录
-    #                 workcopy = svn.local.LocalClient(workspace)
-    #                 try:
-    #                     workcopy.update()
-    #                 except SvnException:
-    #                     merge_msg = 'SVN 工作目录更新异常'
-    #                 # 合并,一个一个的版本合并提交，出现异常回滚
-    #                 message = f'Merged revision {version} from {source_dir}\n'
-    #                 current_app.logger.info(message)
-
-    #                 merge_msg += message
-    #                 try:
-    #                     merge_result = workcopy.run_command(
-    #                         'merge',
-    #                         [app.source_dir, workspace, '-c', version])
-    #                     if len(merge_result
-    #                            ) > 2 and 'conflicts' in merge_result[3]:
-    #                         merge_msg += '合并' + version + '出现冲突\n'
-    #                         current_app.logger.error(merge_msg)
-    #                         workcopy.run_command('revert', ['-R', workspace])
-    #                     else:
-    #                         # 提交
-    #                         workcopy.commit(message)
-    #                         merge_msg += '合并成功.\n'
-    #                 except Exception:
-    #                     merge_msg += '合并出现错误，请检查\n'
-    #                     current_app.logger.error(merge_msg)
-    #                     workcopy.run_command('revert', ['-R', workspace])
-    #         else:
-    #             merge_msg = '没有代码需要合并\n'
-    #     # 更新包状态变成已合并
-    #     self.status_id = 209
-    #     db.session.add(self)
-    #     db.session.commit()
-    #     return merge_msg
 
     def package_merge(self):
         '''
@@ -679,8 +612,9 @@ class Package(db.Model):
         # 邮件的附件为更新包及日志
         attachments = [package_path] + logs
 
-        send_email(recipients, mailtheme, 'apis/v2/mail/vcs/package.html',
-                   attachments)
+        if not current_app.debug:
+            send_email(recipients, mailtheme, 'apis/v2/mail/vcs/package.html',
+                    attachments)
 
         return '已发布更新包: ' + self.name + '\n\n' + output.decode('utf-8')
 

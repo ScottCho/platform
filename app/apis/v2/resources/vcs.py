@@ -98,7 +98,7 @@ class PackageList(ResourceList):
         project_name = Project.query.get(project_id).name
         bdate = data.get('rlsdate',
                          datetime.now().strftime("%Y%m%d")).replace(
-                             '-', '')  # 2020-03-31
+                             '-', '')
         name = "{}_{}_{}".format(project_name, bdate, package_count)
         data['name'] = name  # 更新包名字
 
@@ -135,11 +135,24 @@ class PackageDetail(BaseResourceDetail):
     decorators = (auth_required, )
 
     def before_patch(self, args, kwargs, data=None):
-        """Hook to make custom work before patch method"""
-        obj = self._data_layer.get_object({'id': kwargs['id']})
-        obj.status_id = 216
-        merge_blineno = obj.package_after_post()
-        data['merge_blineno'] = merge_blineno
+        """Hook to make custom work before patch method
+           将更新包的状态改为重新录入，并且重建目录
+        """
+        try:
+            obj = self._data_layer.get_object({'id': kwargs['id']})
+            # 重建更新包
+            obj.create_package_dir()
+            merge_blineno = obj.package_after_post()
+            data['merge_blineno'] = merge_blineno
+            data['status_id'] = 216
+            rlsdate = data['rlsdate'].split()[0].replace('-','')
+            package_count = data['package_count']
+            name = f'{g.current_project.name}_{rlsdate}_{package_count}'
+            data['name'] = name
+        except Exception as e:
+            current_app.logger.error('更新包编辑失败：\n'+str(e))
+            return api_abort(400, detail='更新包编辑失败：\n'+str(e))
+
 
     def after_patch(self, result):
         """Hook to make custom work after patch method"""
@@ -251,8 +264,8 @@ class BaselineUpdate(ResourceDetail):
             return api_abort(400, detail=str(e))
         else:
             # 发送邮件
-            # pass
-            obj.send_baseline_email()
+            if not current_app.debug:
+                obj.send_baseline_email()
         return result
 
     schema = BaselineSchema
@@ -309,9 +322,9 @@ class PackageLogView(ResourceDetail):
     schema = PackageSchema
     data_layer = {'session': db.session, 'model': Package}
 
+
 # Create endpoints
 # 基线
-
 api.route(BaselineList, 'baseline_list', '/api/baselines')
 api.route(BaselineDetail, 'baseline_detail', '/api/baselines/<id>')
 api.route(BaselineRelationship, 'baseline_developer',
