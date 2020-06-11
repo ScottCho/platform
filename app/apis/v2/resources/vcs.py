@@ -180,7 +180,7 @@ class PackageMerge(ResourceDetail):
             detail = package.package_merge()
             result.update({'detail': detail})
         except Exception as e:
-            detail = '更新包合并失败: '+str(e)
+            detail = '更新包基线合并失败: '+str(e)
             current_app.logger.error(str(e))
             return api_abort(400, detail=str(e))
         return result
