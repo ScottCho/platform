@@ -30,7 +30,7 @@ for jar in $(find .   -maxdepth 1 -type f  -name '*.jar');do
 done
 
 cd {{ target_dir }}
-zip -r  "$1".zip $1
+zip -r  "$1".zip $1 -x $1/log.txt
 cp "$1".zip {{ source_dir }}05-packages
 cd {{ source_dir }}05-packages
 /usr/bin/svn add "$1".zip

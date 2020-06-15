@@ -21,7 +21,7 @@ for sql in $(find .   -maxdepth 1 -type f  -name '*ALL_ROLLBACK_01.sql');do
 done
 
 cd {{ target_dir }}${1}
-tar -cvf "$1".tar *
+tar -cvf "$1".tar * --exclude=log.txt
 md5sum "$1".tar >"$1".md5
 7za  -psinosoft a "$1".7z  "$1".tar "$1".md5
 cp "$1".7z {{ source_dir }}05-packages
