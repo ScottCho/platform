@@ -1,7 +1,7 @@
 import logging
 from threading import Thread
 
-from flask import jsonify, g
+from flask import jsonify, g, current_app
 from flask.views import MethodView
 from flask_rest_jsonapi import ResourceList, ResourceRelationship
 from app import db
@@ -184,6 +184,25 @@ class DatabaseManageAPI(MethodView):
             return api_abort(404, '数据库实例不存在')
 
 
+# 应用全量发布
+class AppReleaseDetail(BaseResourceDetail):
+    decorators = (auth_required, )
+
+    def after_get(self, result):
+        try:
+            obj = self._data_layer.get_object({'id': result['data']['id']})
+            console_url = obj.full_release()
+        except Exception as e:
+            current_app.logger.error(str(e))
+            return api_abort(400, detail=f'应用{str(obj.id)}更新失败,{str(e)}')
+        else:
+            result.update({'detail': console_url})
+        return result
+
+    schema = AppSchema
+    data_layer = {'session': db.session, 'model': App}
+
+
 # Create endpoints
 api.route(DatabaseList, 'database_list', '/api/databases')
 api.route(DatabaseDetail, 'database_detail', '/api/databases/<id>')
@@ -199,6 +218,12 @@ api.route(SubsystemList, 'subsystem_list', '/api/subsystems')
 api.route(SubsystemDetail, 'subsystem_detail', '/api/subsystems/<int:id>')
 api.route(AppList, 'app_list', '/api/apps')
 api.route(AppDetail, 'app_detail', '/api/apps/<id>')
+api.route(AppReleaseDetail,
+          'app_release',
+          '/api/apps/release/<id>',
+          url_rule_options={'methods': [
+              'GET',
+          ]})
 api.route(AppRelationship, 'app_project',
           '/api/apps/<int:id>/relationships/project')
 api.route(AppRelationship, 'app_env', '/api/apps/<int:id>/relationships/env')

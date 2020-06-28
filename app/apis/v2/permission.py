@@ -27,6 +27,7 @@ default = {
         'agreement_detail': {'patch': False, 'get': False, 'delete': False},
         'app_list': {'post': False,  'get': True},
         'app_detail': {'patch': False, 'get': True, 'delete': False},
+        'app_release': {'get': False},
         'server_list': {'post': False,  'get': False},
         'server_detail': {'patch': False, 'get': False, 'delete': False},
         'role_list': {'post': False,  'get': True},
@@ -91,12 +92,17 @@ baseline_management = {
 }
 
 # 更新包发布
-package_management = {
+package_release = {
         'package_list': {'post': True,  'get': True},
-        'package_detail': {'get': True, 'delete':False},
+        'package_detail': {'get': True, 'delete': False},
         'package_merge': {'get': True},
         'package_deploy': {'get': True},
         'package_release': {'get': True}
+}
+
+# 更新包管理
+package_management = {
+    'package_detail': {'get': True, 'delete': True}
 }
 
 # 项目管理
@@ -140,6 +146,7 @@ service_management = {
     'database_detail': {'patch': True, 'get': True, 'delete': True},
     'app_list': {'post': True,  'get': True},
     'app_detail': {'patch': True, 'get': True, 'delete': True},
+    'app_release': {'get': True},
     'api_v2.app_manage': {'get': True},
     'api_v2.database_manage': {'get': True}
 }
@@ -188,10 +195,11 @@ Permission = {
 
     # 管理员
     'Administrator': ChainMap(
-                             baseline_management, package_management, \
-                             project_management, user_management, \
-                             role_management, cmdb, \
-                             service_management, issue_management, \
+                             baseline_management, 
+                             package_management, package_release,
+                             project_management, user_management,
+                             role_management, cmdb,
+                             service_management, issue_management,
                              software_management, default
                              ),
 
@@ -203,12 +211,12 @@ Permission = {
     'Manager': ChainMap(issue_management, default),
     # 协管员
     'Moderator': ChainMap(
-                            package_management, baseline_update, \
+                            package_release, baseline_update, \
                             service_management, issue_management, default
                         ),
     # 运维
     'Operator': ChainMap(
-                          cmdb, service_management, package_management, \
+                          cmdb, service_management, package_release, \
                           software_management, default),                    
     # 匿名用户
     'Anonymous': ChainMap(default)

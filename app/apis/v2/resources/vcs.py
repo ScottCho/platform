@@ -145,14 +145,13 @@ class PackageDetail(BaseResourceDetail):
             merge_blineno = obj.package_after_post()
             data['merge_blineno'] = merge_blineno
             data['status_id'] = 216
-            rlsdate = data['rlsdate'].split()[0].replace('-','')
+            rlsdate = data['rlsdate'].split()[0].replace('-', '')
             package_count = data['package_count']
             name = f'{g.current_project.name}_{rlsdate}_{package_count}'
             data['name'] = name
         except Exception as e:
             current_app.logger.error('更新包编辑失败：\n'+str(e))
             return api_abort(400, detail='更新包编辑失败：\n'+str(e))
-
 
     def after_patch(self, result):
         """Hook to make custom work after patch method"""

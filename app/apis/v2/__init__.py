@@ -29,7 +29,7 @@ from .resources.issues import (IssueBugDetail, IssueBugList,
                                IssueSeverityDetail, IssueSeverityList,
                                IssueSourceDetail, IssueSourceList,
                                IssueTaskDetail, IssueTaskList, UploadIssueAPI)
-from .resources.service import (AppDetail, AppList, DatabaseDetail,
+from .resources.service import (AppDetail, AppList, DatabaseDetail, AppReleaseDetail, 
                                 DatabaseList, EnvDetail, EnvList, SchemaDetail,
                                 SchemaList, SubsystemDetail, SubsystemList)
 from .resources.vcs import (BaselineDetail, BaselineList,
@@ -41,7 +41,7 @@ api.resource_registry = [
     ServerList, ServerDetail, CredenceList, CredenceDetail, AgreementList,
     AgreementDetail, DatabaseList, DatabaseDetail, SchemaList, SchemaDetail,
     EnvList, EnvDetail, SubsystemList, SubsystemDetail, AppList, AppDetail,
-    BaselineList, BaselineDetail, StatusList, StatusDetail,
+    BaselineList, BaselineDetail, StatusList, StatusDetail, AppReleaseDetail,
     PackageDetail, PackageList,
     IssueBugDetail, IssueBugList,
     IssueCategoryDetail, IssueCategoryList,

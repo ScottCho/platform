@@ -3,7 +3,9 @@
 # FILE: /Code/githup/platform/app/models/service.py
 # DATE: 2020/04/29 Wed
 
+from flask import g
 from app.utils.encryp_decrypt import decrypt, encrypt
+from app.utils.jenkins import build_by_token, get_jenkins_job
 from .. import db
 
 
@@ -59,18 +61,25 @@ class App(db.Model):
     env = db.relationship('Env', back_populates='apps')
     subsystem_id = db.Column(db.Integer, db.ForeignKey('subsystems.id'))
     subsystem = db.relationship('Subsystem')
-    baselines = db.relationship('app.models.version.Baseline', back_populates='app')
+    baselines = db.relationship('app.models.version.Baseline',
+                                back_populates='app')
     server_id = db.Column(db.Integer, db.ForeignKey('servers.id'))
     server = db.relationship('Server')
     schema_id = db.Column(db.Integer, db.ForeignKey('db_schemas.id'))
     schema = db.relationship('Schema')
     credence_id = db.Column(db.Integer, db.ForeignKey('credences.id'))
     credence = db.relationship('Credence', back_populates='apps')
-    port = db.Column(db.String(16))     # 应用访问端口
-    deploy_dir = db.Column(db.String(256))   # 部署目录
-    jenkins_job_name = db.Column(db.String(256))    # jenkin job的名字
-    alias = db.Column(db.String(32))   # 项目别名
-    context = db.Column(db.String(64))   # 应用访问的上下文
+    port = db.Column(db.String(16))  # 应用访问端口
+    deploy_dir = db.Column(db.String(256))  # 部署目录
+    jenkins_job_name = db.Column(db.String(256))  # jenkin job的名字
+    alias = db.Column(db.String(32))  # 项目别名
+    context = db.Column(db.String(64))  # 应用访问的上下文
+
+    def full_release(self):
+        build_by_token(self.jenkins_job_name)
+        console_url = get_jenkins_job(self.jenkins_job_name,
+                                      str(g.current_user.id))
+        return console_url
 
 
 class Subsystem(db.Model):

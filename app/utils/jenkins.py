@@ -57,7 +57,7 @@ def build_with_parameters(job_name, room, **kw):
     
     r = requests.post(build_url, data=kw)
     socketio.emit('baseline',
-                  '***正在更新'+ job_name + '***',
+                  '***正在更新' + job_name + '***',
                   namespace='/task',
                   room=room)
     return r.ok

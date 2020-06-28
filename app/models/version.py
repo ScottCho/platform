@@ -449,15 +449,16 @@ class Package(db.Model):
                 version_list = []
                 if baseline.versionno:
                     version_list = sorted(baseline.versionno.split(','))
-                log.write(f'基线{baseline.id}需要合并的版本：{str(version_list)}\n')
                 source_dir = app.source_dir
                 workspace = app.jenkins_job_dir
+                log.write(f'基线{baseline.id}需要合并的版本：{str(version_list)}\n\n')
                 if version_list:
                     for version in version_list:
-                        log.write(f'=====合并版本{version}=====\n')
+                        log.write(f'*****合并版本{version}*****\n')
                         merge_msg += version_merge(workspace, source_dir,
                                                    version)
                         log.write(f'版本{version}合并完成\n')
+                    log.write(f'\n基线{baseline.id}的版本合并完成\n')
         except Exception as e:
             merge_msg = '合并出现异常：' + str(e)
             current_app.logger.error(merge_msg)
