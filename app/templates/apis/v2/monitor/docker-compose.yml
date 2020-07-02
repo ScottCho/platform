@@ -1,6 +1,6 @@
 version: "3.2"
 
-# init
+# Init
 # mkdir /etc/alertmanager
 # mkdir /etc/prometheus 
 
@@ -28,14 +28,7 @@ services:
     ports:
     - 9090:9090
     links:
-    - node_exporter:node_exporter
     - alertmanager:alertmanager
-    restart: always
-
-  node_exporter:
-    image: prom/node-exporter
-    ports:
-    - 9100:9100  
     restart: always
 
   alertmanager:

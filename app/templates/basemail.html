@@ -45,7 +45,10 @@
         padding: 0;
       }
     }
-
+    .content{
+      padding-bottom: 20px;
+      min-height: 180px;
+    }
     @media only screen and (max-width:480px) {
       #brand-title {
         display: block;
@@ -75,7 +78,7 @@
                 </td>
               </tr>
               <tr>
-                <td style="padding: 0 20px;background-color: #fefefe">
+                <td style="padding: 0 20px;background-color: #fefefe" class="tdcontent">
                   <!-- content内容 -->
                   <div class="content">
                     {% block content %}{% endblock %}
