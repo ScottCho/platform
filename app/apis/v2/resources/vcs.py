@@ -149,6 +149,7 @@ class PackageDetail(BaseResourceDetail):
             package_count = data['package_count']
             name = f'{g.current_project.name}_{rlsdate}_{package_count}'
             data['name'] = name
+            print(obj.baselines)
         except Exception as e:
             current_app.logger.error('更新包编辑失败：\n'+str(e))
             return api_abort(400, detail='更新包编辑失败：\n'+str(e))
@@ -158,6 +159,13 @@ class PackageDetail(BaseResourceDetail):
         redis_cli.lpush(
             'frog_list',
             g.current_user.username + '重新发布' + g.current_project.name + '更新包')
+        package_id = result['data']['id']
+        merge_blineno = result['data']['attributes']['merge_blineno']
+        for nu in merge_blineno.split(','):
+            bl = Baseline.query.get(nu)
+            bl.package_id = package_id
+            db.session.add(bl)
+        db.session.commit()
         return result
 
     schema = PackageSchema

@@ -99,14 +99,13 @@ class Baseline(db.Model):
             message = '*****开始更新应用*****\n'
             print(message)
             jenkins_job_name = self.app.jenkins_job_name
+            log = open(
+                    os.path.join(self.app.project.target_dir, str(self.id),
+                                 'log.txt'), 'a')
             if flag == 1:
                 log = open(
                     os.path.join(self.app.project.target_dir,
                                  self.package.name, 'log.txt'), 'a')
-            else:
-                log = open(
-                    os.path.join(self.app.project.target_dir, str(self.id),
-                                 'log.txt'), 'a')
             log.write(f'{g.current_user.username}更新基线{self.id}应用\n')
             version_list = self.versionno.split(',')
             compile_file_list = []  # 构建文件集
