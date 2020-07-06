@@ -34,6 +34,7 @@ from .resources.service import (AppDetail, AppList, DatabaseDetail, AppReleaseDe
                                 SchemaList, SubsystemDetail, SubsystemList)
 from .resources.vcs import (BaselineDetail, BaselineList,
                             PackageDetail, PackageList)
+from .resources.account import svn_user_create
 
 # 注册后才可以进行权限控制
 api.resource_registry = [

@@ -324,6 +324,8 @@ api.route(ProjectRelationship, 'project_users',
           '/api/projects/<int:id>/relationships/users')
 api.route(ProjectRelationship, 'project_apps',
           '/api/projects/<int:id>/relationships/apps')
+api.route(ProjectRelationship, 'project_databases',
+          '/api/projects/<int:id>/relationships/databases')
 # 用户
 api.route(UserList, 'user_list', '/api/users')
 api.route(UserDetail, 'user_detail', '/api/users/<id>')

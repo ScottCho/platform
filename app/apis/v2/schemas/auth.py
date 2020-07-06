@@ -34,6 +34,14 @@ class ProjectSchema(Schema):
                         schema='AppSchema',
                         type_='app')
 
+    databases = Relationship(self_view='project_databases',
+                             self_view_kwargs={'id': '<id>'},
+                             related_view='database_list',
+                             related_view_kwargs={'id': '<id>'},
+                             many=True,
+                             schema='DatabaseSchema',
+                             type_='database')
+
 
 # 用户
 class UserSchema(Schema):

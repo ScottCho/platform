@@ -12,12 +12,12 @@ import os
 import shutil
 import urllib
 from datetime import datetime
+from threading import Thread
 
 import svn.local
 import svn.remote
 from flask import current_app, g, render_template, send_from_directory
 
-from app.apis.v2.errors import api_abort
 from app.localemail import send_email
 from app.models.service import App
 from app.utils import execute_cmd, fnmatch_file, switch_char
@@ -323,7 +323,6 @@ class Baseline(db.Model):
             #     output = output.decode('utf-8')
             #     current_app.logger.info(output)
             #     message += outputg.current_user
-            print(g.current_user.id)
             execute_cmd.socket_shell(cmd + ' ' + update_content,
                                      str(g.current_user.id),
                                      log=logfile)
@@ -429,11 +428,9 @@ class Package(db.Model):
         '''
         合并更新包里面的应用版本到SVN
         '''
-        merge_msg = '开始合并基线....\n'
-        current_app.logger.info(merge_msg)
+        merge_msg = ''
         try:
             merge_blineno = self.merge_blineno
-            print(merge_msg)
             for blineno in merge_blineno.split(','):
                 baseline = Baseline.query.get(blineno)
                 app = baseline.app
@@ -444,25 +441,20 @@ class Package(db.Model):
                 log = open(
                     os.path.join(self.project.target_dir, self.name,
                                  'log.txt'), 'a')
-                print(os.path.join(target_dir, self.name, 'log.txt'))
                 # 基线版本按照版本号从小到大合并
                 version_list = []
                 if baseline.versionno:
                     version_list = sorted(baseline.versionno.split(','))
                 source_dir = app.source_dir
                 workspace = app.jenkins_job_dir
-                log.write(f'基线{baseline.id}需要合并的版本：{str(version_list)}\n\n')
+                log.write(f'\n>>>>基线{baseline.id}需要合并的版本：{str(version_list)}\n\n')
                 if version_list:
-                    for version in version_list:
-                        log.write(f'*****合并版本{version}*****\n')
-                        merge_msg += version_merge(workspace, source_dir,
-                                                   version)
-                        log.write(f'版本{version}合并完成\n')
-                    log.write(f'\n基线{baseline.id}的版本合并完成\n')
+                    merge_msg = version_merge(workspace, source_dir,
+                                              version_list, log)
         except Exception as e:
             merge_msg = '合并出现异常：' + str(e)
             current_app.logger.error(merge_msg)
-            return api_abort(400, detail=merge_msg)
+            raise Exception(merge_msg)
         else:
             # 更新包状态变成已合并
             self.status_id = 209
@@ -615,7 +607,7 @@ class Package(db.Model):
 
         if not current_app.debug:
             send_email(recipients, mailtheme, 'apis/v2/mail/vcs/package.html',
-                    attachments)
+                       attachments)
 
         return '已发布更新包: ' + self.name + '\n\n' + output.decode('utf-8')
 

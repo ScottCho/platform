@@ -23,6 +23,7 @@ class Database(db.Model):
     credence = db.relationship('Credence', back_populates='databases')
     server_id = db.Column(db.Integer, db.ForeignKey('servers.id'))
     server = db.relationship('Server')
+    project = db.relationship('Project', back_populates='databases')
 
 
 # 数据库的Schema

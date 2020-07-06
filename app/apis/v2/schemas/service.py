@@ -30,6 +30,12 @@ class DatabaseSchema(Schema):
                            schema='SchemaSchema',
                            type_='schema')
 
+    project = Relationship(self_view='database_project',
+                           self_view_kwargs={'id': '<id>'},
+                           related_view='project_detail',
+                           related_view_kwargs={'id': '<project_id>'},
+                           schema='ProjectSchema',
+                           type_='project')
 
 class SchemaSchema(Schema):
     class Meta:
@@ -44,6 +50,8 @@ class SchemaSchema(Schema):
     instance_id = fields.Integer()
     instance_name = fields.Function(
         lambda obj: "{}".format(obj.instance.instance))
+    hostname = fields.Function(
+        lambda obj: "{}".format(obj.instance.server.hostname))
     instance = Relationship(self_view='schema_database',
                             self_view_kwargs={'id': '<id>'},
                             related_view='database_detail',

@@ -16,7 +16,6 @@ from pyecharts.charts import Bar
 
 from app import db, redis_cli
 from app.apis.v2 import api_v2
-from app.apis.v2.auth import auth_required
 
 
 def bar_base() -> Bar:

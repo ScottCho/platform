@@ -54,8 +54,29 @@ class DatabaseRelationship(ResourceRelationship):
 
 class SchemaList(ResourceList):
     decorators = (auth_required, )
+
+    # 返回当前用户登录的项目数据库用户
+    def query(self, view_kwargs):
+        instance_ids = []
+        if g.current_project:
+            current_project = g.current_project
+            instances = current_project.databases
+            instance_ids = [instance.id for instance in instances]
+        else:
+            instance_ids = []
+        query_ = self.session.query(DBSchema).filter(
+            DBSchema.instance_id.in_(instance_ids)).order_by(
+                DBSchema.id.desc())
+        return query_
+
     schema = SchemaSchema
-    data_layer = {'session': db.session, 'model': DBSchema}
+    data_layer = {
+        'session': db.session,
+        'model': DBSchema,
+        'methods': {
+            'query': query
+        }
+    }
 
 
 class SchemaDetail(BaseResourceDetail):
@@ -208,8 +229,11 @@ api.route(DatabaseList, 'database_list', '/api/databases')
 api.route(DatabaseDetail, 'database_detail', '/api/databases/<id>')
 api.route(DatabaseRelationship, 'database_schemas',
           '/api/databases/<int:id>/relationships/schemas')
+api.route(AppRelationship, 'database_project',
+          '/api/databases/<int:id>/relationships/project')
+
 api.route(SchemaList, 'schema_list', '/api/schemas')
-api.route(SchemaDetail, 'schema_detail', '/api/schemas/<int:id>')
+api.route(SchemaDetail, 'schema_detail', '/api/schemas/<id>')
 api.route(SchemaRelationship, 'schema_database',
           '/api/schemas/<int:id>/relationships/databases')
 api.route(EnvList, 'env_list', '/api/envs')

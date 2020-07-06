@@ -153,6 +153,7 @@ class Project(db.Model):
     target_dir = db.Column(db.String(80))
     switch = db.Column(db.Boolean, default=True)
     apps = db.relationship('App', back_populates='project')
+    databases = db.relationship('Database', back_populates='project')
     users = db.relationship('User',
                             secondary='group',
                             back_populates='projects')
