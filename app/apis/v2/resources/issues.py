@@ -10,15 +10,13 @@ from flask_rest_jsonapi import ResourceList, ResourceRelationship
 from app import db, redis_cli
 from app.apis.v2 import api, api_v2
 from app.apis.v2.auth import auth_required
-from app.apis.v2.errors import api_abort
+from app.apis.v2.message import api_abort
 from app.apis.v2.schemas.issues import (IssueBugSchema, IssueCategorySchema,
                                         IssueModuleSchema, IssuePrioritySchema,
                                         IssueReproducibilitySchema,
                                         IssueRequirementSchema,
                                         IssueSeveritySchema, IssueSourceSchema,
                                         IssueTaskSchema)
-from app.models.auth import User
-from app.models.baseconfig import Status
 from app.models.issues import (IssueBug, IssueCategory, IssueModule,
                                IssuePriority, IssueReproducibility,
                                IssueRequirement, IssueSeverity, IssueSource,
@@ -164,8 +162,19 @@ class IssueRequirementList(ResourceList):
     def query(self, view_kwargs):
         current_project_id = g.current_project.id if g.current_project else None
         query_ = self.session.query(IssueRequirement).filter_by(
-                project_id=current_project_id).order_by(IssueRequirement.id.desc())
+            project_id=current_project_id).order_by(IssueRequirement.id.desc())
         return query_
+
+    def before_post(self, args, kwargs, data=None):
+        """Hook to make custom work before post method"""
+        file = request.files['file']
+        if file:
+            filename = file.filename
+            filename = secure_filename(filename)
+            file_path = os.path.join(flask_app.config['UPLOAD_FOLDER'],
+                                     'issue', 'attachments', filename)
+            file.save(file_path)
+            data['attachments'] = filename
 
     def after_post(self, result):
         """提交后，将动态提交到redis中"""
@@ -206,7 +215,7 @@ class IssueTaskList(ResourceList):
     def query(self, view_kwargs):
         current_project_id = g.current_project.id if g.current_project else None
         query_ = self.session.query(IssueTask).filter_by(
-                project_id=current_project_id).order_by(IssueTask.id.desc())
+            project_id=current_project_id).order_by(IssueTask.id.desc())
         return query_
 
     def after_post(self, result):
@@ -248,7 +257,7 @@ class IssueBugList(ResourceList):
     def query(self, view_kwargs):
         current_project_id = g.current_project.id if g.current_project else None
         query_ = self.session.query(IssueBug).filter_by(
-                project_id=current_project_id).order_by(IssueBug.id.desc())
+            project_id=current_project_id).order_by(IssueBug.id.desc())
         return query_
 
     def after_post(self, result):
@@ -305,7 +314,7 @@ class UploadIssueAPI(MethodView):
             issue_source = filename.split('_')[0]
             filename = secure_filename(filename)
             file_path = os.path.join(flask_app.config['UPLOAD_FOLDER'],
-                                     filename)
+                                     'issue', 'csvs', filename)
             file.save(file_path)
             with open(file_path, newline='') as csvfile:
                 csv_reader = csv.DictReader(csvfile)
@@ -315,11 +324,8 @@ class UploadIssueAPI(MethodView):
                     IssueRequirement.upload_issue(csv_reader, issue_source)
                 elif issue == 'issue_task':
                     IssueTask.upload_issue(csv_reader, issue_source)
-            redis_cli.lpush(
-                'frog_list',
-                g.current_user.username + '导入了issues')
+            redis_cli.lpush('frog_list', g.current_user.username + '导入了issues')
             return jsonify(data=[{'status': 200, 'detail': '导入成功'}])
-
 
 
 # Create endpoints

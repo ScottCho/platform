@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import logging
 from flask import Flask, render_template, g, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -56,11 +55,11 @@ CORS(flask_app)
 # 初始化SocketIO
 socketio = SocketIO(flask_app, ping_timeout=300)
 
-#初始化celery
+# 初始化celery
 celery = make_celery(flask_app)
 
 
-#初始化数据库
+# 初始化数据库
 db.init_app(flask_app)
 migrate.init_app(flask_app, db)
 mail.init_app(flask_app)

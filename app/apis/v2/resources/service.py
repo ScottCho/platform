@@ -7,7 +7,7 @@ from flask_rest_jsonapi import ResourceList, ResourceRelationship
 from app import db
 from app.apis.v2 import api, api_v2
 from app.apis.v2.auth import auth_required
-from app.apis.v2.errors import api_abort
+from app.apis.v2.message import api_abort
 from app.apis.v2.schemas.service import (AppSchema, DatabaseSchema, EnvSchema,
                                          SchemaSchema, SubsystemSchema)
 from app.models.service import App, Database, Env

@@ -30,7 +30,7 @@ class Config:
     CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND')
 
     # 上传路径
-    UPLOAD_FOLDER = '/data/frog/issue'
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER')
 
     @staticmethod
     def init_app(app):

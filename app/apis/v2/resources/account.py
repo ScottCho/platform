@@ -1,7 +1,7 @@
 from flask import request, jsonify
 
 from app.apis.v2 import api_v2
-from app.apis.v2.errors import api_abort
+from app.apis.v2.message import api_abort
 from app.utils.execute_cmd import remote_execute_command
 
 

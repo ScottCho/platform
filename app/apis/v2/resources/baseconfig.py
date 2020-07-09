@@ -5,7 +5,7 @@ from flask_rest_jsonapi import ResourceList, ResourceRelationship
 from app import db
 from app.apis.v2 import api
 from app.apis.v2.auth import auth_required
-from app.apis.v2.errors import api_abort
+from app.apis.v2.message import api_abort
 from app.apis.v2.schemas.baseconfig import (BgtaskSchema, SoftwareSchema,
                                             StatusSchema, TagSchema)
 from app.models.baseconfig import BgTask, Software, Status, Tag

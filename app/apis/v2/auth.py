@@ -6,7 +6,7 @@ from flask import current_app, g, request
 from itsdangerous import BadSignature, SignatureExpired
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
-from app.apis.v2.errors import api_abort, invalid_token, token_missing
+from app.apis.v2.message import api_abort, invalid_token, token_missing
 from app.models.auth import User
 
 

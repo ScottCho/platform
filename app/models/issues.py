@@ -112,6 +112,7 @@ class IssueRequirement(db.Model):
     deadline = db.Column(db.DateTime(), default=datetime.now)  # 解决期限
     manhour = db.Column(db.String(64))  # 工时
     sign = db.Column(db.Boolean, default=False)  # 是否签字，默认为否
+    attachments = db.Column(db.String(256))  # 附件
 
     status_id = db.Column(db.Integer, db.ForeignKey('status.id'),
                           default=101)  # 需求状态
@@ -190,6 +191,7 @@ class IssueBug(db.Model):
     enddate = db.Column(db.DateTime())  # 结束日期
     deadline = db.Column(db.DateTime())  # 解决期限
     manhour = db.Column(db.String(64))  # 工时
+    attachments = db.Column(db.String(256))  # 附件
     status_id = db.Column(db.Integer, db.ForeignKey('status.id'),
                           default=101)  # bug状态
     status = db.relationship('Status', back_populates='bugs')
@@ -275,6 +277,7 @@ class IssueTask(db.Model):
     enddate = db.Column(db.DateTime())  # 结束日期
     deadline = db.Column(db.DateTime())  # 解决期限
     manhour = db.Column(db.String(64))  # 工时
+    attachments = db.Column(db.String(256))  # 附件
 
     project_id = db.Column(db.Integer,
                            db.ForeignKey('projects.id'),

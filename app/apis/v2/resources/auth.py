@@ -13,7 +13,7 @@ from marshmallow_jsonapi.exceptions import IncorrectTypeError
 from app import db, redis_cli
 from app.apis.v2 import api, api_v2
 from app.apis.v2.auth import auth_required, generate_token, get_token
-from app.apis.v2.errors import api_abort
+from app.apis.v2.message import api_abort
 from app.apis.v2.schemas.auth import ProjectSchema, RoleSchema, UserSchema
 from app.localemail import send_email
 from app.models.auth import Project, Role, User
@@ -194,8 +194,8 @@ class ProjectDetail(BaseResourceDetail):
             # key = g.current_user.email.split('@')[0] + ':project'
             # redis_cli.set(key, obj.id)
             key = f'user:{g.current_user.id}'
-            value = {'project_id':obj.id}
-            redis_cli.hmset(key,value)
+            value = {'project_id': obj.id}
+            redis_cli.hmset(key, value)
         return result
 
     schema = ProjectSchema

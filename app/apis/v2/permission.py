@@ -81,6 +81,7 @@ default = {
 
 # 发布与更新基线
 baseline_update = {
+    'app_release': {'get': True},
     'baseline_list': {'post': True,  'get': True},
     'baseline_detail': {'patch': True, 'get': True, 'delete': False}
 }
@@ -107,7 +108,7 @@ package_management = {
 
 # 项目管理
 project_management = {
-    'project_list': {'post': True,'get': True},
+    'project_list': {'post': True, 'get': True},
     'project_detail': {'patch': True, 'get': True, 'delete': True}
 }
 
@@ -195,7 +196,7 @@ Permission = {
 
     # 管理员
     'Administrator': ChainMap(
-                             baseline_management, 
+                             baseline_management,
                              package_management, package_release,
                              project_management, user_management,
                              role_management, cmdb,

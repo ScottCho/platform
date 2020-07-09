@@ -12,7 +12,6 @@ import os
 import shutil
 import urllib
 from datetime import datetime
-from threading import Thread
 
 import svn.local
 import svn.remote

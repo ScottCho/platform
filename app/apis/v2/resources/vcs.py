@@ -9,7 +9,7 @@ from flask_rest_jsonapi import (ResourceDetail, ResourceList,
 from app import db, redis_cli
 from app.apis.v2 import api, api_v2
 from app.apis.v2.auth import auth_required
-from app.apis.v2.errors import api_abort
+from app.apis.v2.message import api_abort
 from app.apis.v2.schemas.vcs import BaselineSchema, PackageSchema
 from app.models.auth import Project
 from app.models.version import Baseline, Package
