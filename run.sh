@@ -1,0 +1,1 @@
+pipenv run  gunicorn --worker-class eventlet -w 1 app:flask_app -b 0.0.0.0:5009  -D -p /var/log/frog/frog.pid --log-file /var/log/frog/frog.log -t 500

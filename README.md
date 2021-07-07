@@ -11,6 +11,7 @@
         3. 初始化数据库
         mysql> create database platform character set 'utf8' collate 'utf8_bin';
         mysql> create user 'scott'@'%' identified by 'tiger';
+        mysql> GRANT ALL ON frogprod.* TO 'scott'@'%';
         flask db init
         flask db migrate
         flask db upgrade
@@ -33,7 +34,9 @@
         CELERY_RESULT_BACKEND=redis://xxxx:6379
 
         5. 启动实例
-        gunicorn app:flask_app -b 0.0.0.0:5000 -w 3 -D -p /tmp/app5000.pid --log-file /tmp/app5000.log -t 500
+        pipenv run gunicorn app:flask_app -b 0.0.0.0:5555 -w 3 -D -p /tmp/app5555.pid --log-file /tmp/app5555.log -t 500
+       
+       pipenv run  gunicorn --worker-class eventlet -w 1 app:flask_app -b 0.0.0.0:5009  -D -p /var/log/frog/frog.pid --log-file /var/log/frog/frog.log -t 500
 
         6. 启动celery
         调试： celery -A app.celery worker -l info
@@ -41,6 +44,7 @@
         celery multi start w1 -A app.celery  -l info --pidfile=/var/run/celery/%n.pid --logfile=/var/log/celery/%n%I.log
         重启：
         celery multi restart w1 -A app.celery  -l info --pidfile=/var/run/celery/%n.pid --logfile=/var/log/celery/%n%I.log 
+
 
 
         Docker安装

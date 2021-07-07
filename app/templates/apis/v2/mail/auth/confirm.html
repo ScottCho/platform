@@ -1,0 +1,12 @@
+{% extends "basemail.html" %}
+
+{% block content %}
+<p>您好， {{ user.username }},</p>
+<p>欢迎注册 <b>Frog运维平台</b>!</p>
+<p>确认您的账户 <a href="{{ url_for('api_v2.confirm_user', token=token, _external=True) }}">点击这里</a>.</p>
+<p>或者，您可以在浏览器的地址栏中粘贴下面的链接:</p>
+<p>{{ url_for('api_v2.confirm_user', token=token, _external=True) }}</p>
+<p>请妥善管理您的密码。</p>
+<p><b>注意: 请不要回复该邮件。</b></p>
+
+{% endblock content %} 

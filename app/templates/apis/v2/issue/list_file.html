@@ -1,0 +1,14 @@
+<html>
+    <title>List File</title>
+    <h1>List File</h1>
+    <table>
+        {% for file in files %}
+            <tr>
+                <td>
+                {{ file }}
+                <a  href="{{ url_for('uploaded_file',filename=file) }}">下载</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</html>
